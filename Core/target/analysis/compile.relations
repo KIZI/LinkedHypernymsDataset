@@ -1,0 +1,69 @@
+products:
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\ConfGlobal$class.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\ConfGlobal.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\Logger$class.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\Logger.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\TraversableUtils$$anon$1.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\TraversableUtils$$anon$2.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\TraversableUtils$.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\TraversableUtils.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Document.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneDocument.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\Lucene.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneException.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneReader$$anonfun$select$1.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneReader$.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneReader.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter$$anonfun$delete$1.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter$$anonfun$insert$1.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter$$anonfun$update$1.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter$$anonfun$update$2.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter$.class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\target\classes\cz\vse\lhd\core\lucene\LuceneWriter.class
+binary dependencies:
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> C:\Users\venca\.m2\repository\org\scala-lang\scala-library\2.10.3\scala-library-2.10.3.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> C:\Users\venca\.m2\repository\org\scala-lang\scala-library\2.10.3\scala-library-2.10.3.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Document.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-core\4.6.0\lucene-core-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-core\4.6.0\lucene-core-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> C:\Users\venca\.m2\repository\org\scala-lang\scala-library\2.10.3\scala-library-2.10.3.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-analyzers-common\4.6.0\lucene-analyzers-common-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-core\4.6.0\lucene-core-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-queryparser\4.6.0\lucene-queryparser-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\.m2\repository\org\scala-lang\scala-library\2.10.3\scala-library-2.10.3.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Program Files\Java\jdk1.7.0_51\jre\lib\rt.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\.m2\repository\commons-io\commons-io\2.4\commons-io-2.4.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-analyzers-common\4.6.0\lucene-analyzers-common-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\.m2\repository\org\apache\lucene\lucene-core\4.6.0\lucene-core-4.6.0.jar
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\.m2\repository\org\scala-lang\scala-library\2.10.3\scala-library-2.10.3.jar
+source dependencies:
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Document.scala
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala
+external dependencies:
+
+class names:
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> cz.vse.lhd.core.ConfGlobal
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\ConfGlobal.scala -> cz.vse.lhd.core.ConfGlobal$class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> cz.vse.lhd.core.Logger
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\Logger.scala -> cz.vse.lhd.core.Logger$class
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> cz.vse.lhd.core.TraversableUtils
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> cz.vse.lhd.core.TraversableUtils$
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> cz.vse.lhd.core.TraversableUtils$$anon$1
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\TraversableUtils.scala -> cz.vse.lhd.core.TraversableUtils$$anon$2
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Document.scala -> cz.vse.lhd.core.lucene.LuceneDocument
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> cz.vse.lhd.core.lucene.Lucene
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\Lucene.scala -> cz.vse.lhd.core.lucene.LuceneException
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> cz.vse.lhd.core.lucene.LuceneReader
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> cz.vse.lhd.core.lucene.LuceneReader$
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneReader.scala -> cz.vse.lhd.core.lucene.LuceneReader$$anonfun$select$1
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter$
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter$$anonfun$delete$1
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter$$anonfun$insert$1
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter$$anonfun$update$1
+   C:\Users\venca\Documents\NetBeansProjects\LHD2\Core\src\main\scala\scala\cz\vse\lhd\core\lucene\LuceneWriter.scala -> cz.vse.lhd.core.lucene.LuceneWriter$$anonfun$update$2

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!-- $Id: creole.xml 7451 2006-06-15 14:10:50Z milan_dojchinovski $ -->
+<CREOLE-DIRECTORY>
+  <CREOLE>   
+   <!-- creole.xml for SearchPR -->
+    <RESOURCE>
+      <JAR>CorpusBuilderPR.jar</JAR>
+      <NAME>CorpusBuilderPR</NAME>
+      <CLASS>cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2</CLASS>
+      <COMMENT>Builds random Wikipedia corpus.</COMMENT>
+      <PARAMETER NAME="corpusSize" DEFAULT="200" RUNTIME="true" COMMENT="Number of articles">java.lang.Integer</PARAMETER>
+      <PARAMETER NAME="docCountStartOffset" DEFAULT="0" RUNTIME="true" COMMENT="Document titles will start from this offset">java.lang.Integer</PARAMETER>
+      <PARAMETER NAME="lang" DEFAULT="en" RUNTIME="true" COMMENT="Corpus for language (en/de/nl)">java.lang.String</PARAMETER>
+      <PARAMETER NAME="firstSentenceOnly" DEFAULT="true" RUNTIME="true" COMMENT="false if all paragraph should be returned">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="firmArticleTitle" DEFAULT="" RUNTIME="true" COMMENT="Instead of random article, the set URL will be retrieved.">java.lang.String</PARAMETER>
+      <PARAMETER NAME="assignDBpediaTypes" DEFAULT="true" RUNTIME="true" COMMENT="Will create DBpedia url type annnotations on document.">java.lang.Boolean</PARAMETER>
+      <PARAMETER NAME="saveInTriplets" DEFAULT="true" RUNTIME="true" COMMENT="Will resolve hypernym to dbpedia url and save result in triplets.">java.lang.Boolean</PARAMETER>
+      
+      <PARAMETER NAME="specialWikiAPIURL_EN" DEFAULT="http://en.wikipedia.org/wiki/Special" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="specialWikiAPIURL_DE" DEFAULT="http://de.wikipedia.org/wiki/Special" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="specialWikiAPIURL_NL" DEFAULT="http://nl.wikipedia.org/wiki/Special" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="wikiAPIBase_NL" DEFAULT="http://nl.wikipedia.org/w/" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="wikiAPIBase_DE" DEFAULT="http://de.wikipedia.org/w/" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="wikiAPIBase_EN" DEFAULT="http://en.wikipedia.org/w/" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>      
+      <!--/home/tomas/GATE_Developer_7.0/plugins/CorpusBuilderPR/-->
+      <PARAMETER NAME="JAPEPATH_EN" DEFAULT="../data/grammar/en_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
+      <PARAMETER NAME="JAPEPATH_DE" DEFAULT="../data/grammar/de_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
+      <PARAMETER NAME="JAPEPATH_NL" DEFAULT="../data/grammar/nl_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
+      
+      <PARAMETER NAME="taggerBinary_DE" DEFAULT="../utils/gate-7.0-build4195/plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      <PARAMETER NAME="taggerBinary_NL" DEFAULT="../utils/gate-7.0-build4195/plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-dutch-gate" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
+      
+      <PARAMETER NAME="pathToArticleNames" DEFAULT="../data/datasets/labels_en.nt" RUNTIME="true" COMMENT="read article titles from this file, one title per line">java.lang.String</PARAMETER>
+      <PARAMETER NAME="startPosInArticleNameList" DEFAULT="2000000" RUNTIME="true" COMMENT="start from this line number, min value 1 (0 line contains heading), inclusive">java.lang.Integer</PARAMETER>
+      <PARAMETER NAME="endPosInArticleNameList" DEFAULT="2000200" RUNTIME="true" COMMENT="end at this line number, min value 1, inclusive">java.lang.Integer</PARAMETER>
+      
+      <PARAMETER NAME="hypernymLoggingPath" DEFAULT="../data/output/hypoutput.log" RUNTIME="true" COMMENT="output format according to  parram">java.lang.String</PARAMETER>
+      
+      <ICON>corpusbuilder.gif</ICON>
+    </RESOURCE>
+   </CREOLE>
+</CREOLE-DIRECTORY>
