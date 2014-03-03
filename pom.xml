@@ -10,7 +10,7 @@
         <module>HypernymExtractor</module>
         <module>LHDOntologyCleanup</module>
         <module>Core</module>
-        <module>THDyagoDuplicateRemoval</module>
+        <module>LHDyagoDuplicateRemoval</module>
     </modules>
     <dependencies>
         <dependency>
