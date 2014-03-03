@@ -53,6 +53,13 @@
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                             </jvmArgs>
                         </launcher>
+                        <launcher>
+                            <id>run</id>
+                            <mainClass>cz.vse.lhd.hypernymextractor.RunDefaultPipeline</mainClass>
+                            <jvmArgs>
+                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+                            </jvmArgs>
+                        </launcher>
                     </launchers>
                 </configuration>
             </plugin>
