@@ -7,7 +7,7 @@ trait Logger {
   
   val conf : ConfGlobal
   
-  val get = {
+  lazy val get = {
     val logger = java.util.logging.Logger.getGlobal
     logger.setLevel(Level.INFO)
     if (conf.loggingEnabled)
