@@ -1,0 +1,12 @@
+HypernymExtractor/target
+Core/target
+LHDNormalizer/target
+LHDOntologyCleanup/target
+LHDTypeInferrer/target
+target
+utils
+data/**/*.nt
+data/**/*.owl
+**/nb-configuration.xml
+**/nbactions.xml
+.svn

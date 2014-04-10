@@ -10,7 +10,8 @@
         <module>HypernymExtractor</module>
         <module>LHDOntologyCleanup</module>
         <module>Core</module>
-        <module>LHDyagoDuplicateRemoval</module>
+        <module>LHDTypeInferrer</module>
+        <module>LHDNormalizer</module>
     </modules>
     <dependencies>
         <dependency>

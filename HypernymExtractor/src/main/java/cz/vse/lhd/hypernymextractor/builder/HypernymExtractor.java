@@ -1,5 +1,6 @@
 package cz.vse.lhd.hypernymextractor.builder;
 
+import cz.vse.lhd.hypernymextractor.Loader;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -14,12 +15,10 @@ import gate.creole.ResourceInstantiationException;
 import gate.creole.SerialAnalyserController;
 import gate.util.GateException;
 import gate.util.InvalidOffsetException;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +31,7 @@ import java.util.logging.Logger;
 public class HypernymExtractor {
 
     private static HypernymExtractor hypernymExtractor = null;
+    private static Loader loader;
     private SerialAnalyserController pipeline = null;
     private SerialAnalyserController resetPipeline = null;
     private static String hypernymLoggingPath;
@@ -47,8 +47,10 @@ public class HypernymExtractor {
     public static String JAPEPATH;
     private static String taggerBinary_DE;
     private static String taggerBinary_NL;
+    private static PrintWriter dbpediaOutputFile;
+    private static PrintWriter rawOutputFile;
 
-    public static void init(String _lang, String _JAPEPATH, String _hypernymLoggingPath, String _taggerBinary_DE, String _taggerBinary_NL, boolean _saveInTriplets) {
+    public static void init(String _lang, String _JAPEPATH, String _hypernymLoggingPath, String _taggerBinary_DE, String _taggerBinary_NL, boolean _saveInTriplets) throws FileNotFoundException {
         lang = _lang;
         JAPEPATH = _JAPEPATH;
         isInitialized = true;
@@ -56,6 +58,21 @@ public class HypernymExtractor {
         hypernymLoggingPath = _hypernymLoggingPath;
         taggerBinary_DE = _taggerBinary_DE;
         taggerBinary_NL = _taggerBinary_NL;
+        dbpediaOutputFile = new PrintWriter(hypernymLoggingPath + ".dbpedia");
+        rawOutputFile = new PrintWriter(hypernymLoggingPath + ".raw");
+    }
+
+    public static void close() {
+        dbpediaOutputFile.close();
+        rawOutputFile.close();
+    }
+
+    public static void setLoader(Loader loader) {
+        HypernymExtractor.loader = loader;
+    }
+
+    public static Loader getLoader() {
+        return loader;
     }
 
     public static HypernymExtractor getInstance() throws GateException, MalformedURLException {
@@ -86,19 +103,18 @@ public class HypernymExtractor {
             pipeline.setCorpus(corpus);
             pipeline.execute();
             for (Document doc : corpus) {
+                loader.tryPrint();
+                loader = loader.$plus$plus();
                 as_all = doc.getAnnotations();
 
+                //                if (!ann_iter.hasNext()) {
+//                    String articleName = (String) doc.getFeatures().get("article_title");
+//                    Logger.getGlobal().log(Level.WARNING, "Article ''{0}'' no annotation ''h'' found.", articleName);
+//                    //MyLogger.log(articleName + " ;NO Hypernym found");
+//                }
 
                 as_hearst = as_all.get("h");
-                Iterator ann_iter = as_hearst.iterator();
-                if (!ann_iter.hasNext()) {
-                    String articleName = (String) doc.getFeatures().get("article_title");
-                    Logger.getGlobal().log(Level.WARNING, "Article ''{0}'' no annotation ''h'' found.", articleName);
-                    //MyLogger.log(articleName + " ;NO Hypernym found");
-                }
-
-                while (ann_iter.hasNext()) {
-                    Annotation isaAnnot = (gate.Annotation) ann_iter.next();
+                for (Annotation isaAnnot : as_hearst) {
                     Node isaStart = isaAnnot.getStartNode();
                     Node isaEnd = isaAnnot.getEndNode();
                     String hypernym = doc.getContent().getContent(isaStart.getOffset(), isaEnd.getOffset()).toString();
@@ -109,12 +125,12 @@ public class HypernymExtractor {
                         if (hypCand != null && hypCand.length() > 0 && !hypCand.equals("<unknown>")) {
                             hypernym = hypCand;
                         }
-                        if (!hypernym.equals(hypCand)) {
-                            Logger.getGlobal().log(Level.INFO, "Replacing hypernym in text {0} with its DIFFERENT lemma: {1}", new Object[]{hypernym, hypCand});
-                        }
+//                        if (!hypernym.equals(hypCand)) {
+//                            Logger.getGlobal().log(Level.INFO, "Replacing hypernym in text {0} with its DIFFERENT lemma: {1}", new Object[]{hypernym, hypCand});
+//                        }
                     }
 
-                    Logger.getGlobal().log(Level.INFO, "HYPERNYM: {0}", hypernym);
+//                    Logger.getGlobal().log(Level.INFO, "HYPERNYM: {0}", hypernym);
 
                     if (hypernymLoggingPath != null && !"".equals(hypernymLoggingPath)) {
                         String dbPediaURL;
@@ -122,7 +138,7 @@ public class HypernymExtractor {
                             String urlName = (String) doc.getFeatures().get("dbpedia_url");
                             String urlHypernym = DBpediaLinker.getInstance().getLink(hypernym);
                             if (urlHypernym == null) {
-                                Logger.getGlobal().log(Level.WARNING, "Hypernym found and not mapped: {0}", hypernym);
+//                                Logger.getGlobal().log(Level.WARNING, "Hypernym found and not mapped: {0}", hypernym);
                             } else {
                                 saveHypernym(urlName, urlHypernym, true);
                                 doc.getFeatures().put("thdDBpediaType_search", urlName);
@@ -152,43 +168,35 @@ public class HypernymExtractor {
 
     private void saveHypernym(String source, String hypernym, boolean mapToDBpedia) {
 
-        try {
-
+        if (mapToDBpedia == false) {
             StringBuilder content = new StringBuilder();
-            if (mapToDBpedia == false) {
-                content.append(source).append(";").append(hypernym).append("\n");
-            } else {
-                content.append("<");
-                content.append(source);
-                content.append(">");
-                //content.append(" <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ");
-                content.append(" <?> ");
-                content.append("<");
-                content.append(hypernym);
-                content.append(">.\n");
-            }
-
-            String concreteHypernymLoggingPath = hypernymLoggingPath;
-            if (mapToDBpedia) {
-                concreteHypernymLoggingPath = concreteHypernymLoggingPath + ".dbpedia";
-            } else {
-                concreteHypernymLoggingPath = concreteHypernymLoggingPath + ".raw";
-            }
-            File file = new File(concreteHypernymLoggingPath);
-
-            // if file doesnt exists, then create it
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-            BufferedWriter bw = new BufferedWriter(fw);
-            bw.write(content.toString());
-            bw.close();
-
-        } catch (IOException e) {
-            //e.printStackTrace();
+            content.append(source).append(";").append(hypernym);
+            rawOutputFile.println(content);
+        } else {
+            StringBuilder content = new StringBuilder();
+            content.append("<");
+            content.append(source);
+            content.append(">");
+            //content.append(" <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ");
+            content.append(" <?> ");
+            content.append("<");
+            content.append(hypernym);
+            content.append(">.");
+            dbpediaOutputFile.println(content);
         }
+
+//            File file = new File(concreteHypernymLoggingPath);
+//
+//            // if file doesnt exists, then create it
+//            if (!file.exists()) {
+//                file.createNewFile();
+//            }
+//
+//            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+//            new PrintWriter(file)
+//            BufferedWriter bw = new BufferedWriter(fw);
+//            bw.write(content.toString());
+//            bw.close();
 
     }
 

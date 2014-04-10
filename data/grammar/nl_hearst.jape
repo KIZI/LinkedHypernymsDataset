@@ -1,0 +1,214 @@
+Phase:	SimpleHearst
+Input:  Token
+Options: control = appelt
+
+
+Macro: Article
+(
+({Token.category == "det__art"})
+)
+
+Macro: toBeVerb
+(
+({Token.lemma == "zijn"}|{Token.lemma == "wezen|zijn"})
+)
+
+Macro: NotToBeVerb
+(
+({!Token.lemma == "zijn", !Token.lemma == "wezen|zijn"})
+)
+
+
+
+
+Macro: LHSHearstBody_tier1modifiers
+(
+({Token.kind == "number"}|{Token.category == "num__ord"}|{Token.category == "det__indef"}|{Token.category == "adj"}|{Token.category == "prep"}|{Token.category == "adjabbr"}|{Token.string == "."}|{Token.string == "-"}|{Token.category == "conjcoord"}|{Token.category == "conjsubo"})
+)
+
+Macro: LHSHearstBody_tier2modifiers
+(
+({Token.kind == "number"}|{Token.category == "num__ord"}|{Token.category == "adj"}|{Token.category == "adjabbr"}|{Token.string == "."}|{Token.string == "-"})
+)
+
+Macro: LHSHearstBody_tier3modifiers
+(
+({Token.kind == "number"}|{Token.category == "num__ord"}|{Token.category == "nounprop"}|{Token.category == "nouns"}|{Token.category == "."}|{Token.string == "-"}|{Token.category == "adj*kop"}|{Token.string == "&"}|{Token.string == "/"})
+)
+
+Macro: NumbersInBracketes
+(
+({Token.position == "startpunct"})
+({Token.kind == "number"})*
+({Token.position == "endpunct"})
+)
+
+Macro: LHSHearstBody
+(
+(NumbersInBracketes)?
+(LHSHearstBody_tier1modifiers)*
+(NumbersInBracketes)?
+(LHSHearstBody_tier2modifiers)*
+(NumbersInBracketes)?
+(LHSHearstBody_tier3modifiers)*
+(NumbersInBracketes)?
+)
+
+
+Macro: FromToTimePeriod
+(
+({Token.string == "van"})
+({Token.kind == "number"})+
+(
+({Token.string == "tot"})
+({Token.kind == "number"})+
+)
+)
+
+Macro: FirstAdditionaInfoInserted
+(
+(Article)?
+({Token.string == "van"}|{Token.string == "met"}|{Token.lemma == "in"})
+(Article)?
+({Token.kind == "number"}|{Token.category == "adj"}|{Token.category == "adjabbr"}|{Token.category == "adv"}|{Token.string == "."}|{Token.string == "-"})*
+({Token.category == "nounprop"}|{Token.category == "nounsg"}|{Token.string == "."})+
+({Token.category == "verbpapa"})?
+)
+
+
+Macro: SecondAndMoreAdditionaInfoInserted
+(
+(Article)?
+({Token.string == "van"}|{Token.string == "met"}|{Token.lemma == "in"}|{Token.string == "en"})
+(Article)?
+({Token.kind == "number"}|{Token.category == "adj"}|{Token.category == "adjabbr"}|{Token.category == "adv"}|{Token.string == "."}|{Token.string == "-"})*
+({Token.category == "nounprop"}|{Token.category == "nounsg"}|{Token.string == "."})+
+)
+
+Macro: MeaningLessWordsImmediatelyAfterToBe
+(
+({Token.string == "beide"})
+)
+
+Macro: AdditionaGenericInfoInserted
+(
+(FirstAdditionaInfoInserted)
+(NumbersInBracketes)*
+(SecondAndMoreAdditionaInfoInserted)*
+(NumbersInBracketes)*
+)
+
+
+
+Macro: Head
+(
+({Token.category == "nounsg"}|{Token.category == "nounpl"}|{Token.category == "nounprop"})
+)
+
+Macro: NameOf
+(
+({Token.string == "naam"})
+({Token.string == "van"})
+)
+
+Macro: TitleOf
+(
+({Token.string == "titel"})
+({Token.string == "van"})
+)
+
+Macro: SpeciesOf
+(
+({Token.string == "soort"})
+({Token.string == "van"})
+)
+
+Macro: GenusOf
+(
+({Token.string == "geslacht"})
+({Token.string == "van"})
+)
+
+Macro: OneOf
+(
+({Token.string == "een"})
+({Token.string == "van"})
+)
+
+Macro: SeriesOf
+(
+({Token.string == "serie"})
+({Token.string == "van"})
+)
+
+Macro: TypeOf
+(
+({Token.string == "type"})
+)
+
+
+
+Rule: HearstRule_Simple
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+(MeaningLessWordsImmediatelyAfterToBe)?
+)
+(FromToTimePeriod)?
+(AdditionaGenericInfoInserted)?
+(Article):hearstArticle
+((NameOf)(Article)?)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(SeriesOf)?
+(LHSHearstBody)
+//(Article)?
+(Head)
+:hearstPattern
+--> 
+:hearstArticle.harticle = {kind = "isApattern", rule = "HearstRule_Simple"},
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Simple"},
+{ ctx.endPhase(); }
+
+Rule: HearstRule_MissingOrShiftedArticle
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+(MeaningLessWordsImmediatelyAfterToBe)?
+)
+(FromToTimePeriod)?
+(AdditionaGenericInfoInserted)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(SeriesOf)?
+(LHSHearstBody)
+//(Article)?
+(Head)
+:hearstPattern
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_MissingArticle"},
+{ ctx.endPhase(); }
+
+
+Rule: HearstRule_Plural
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+)
+(Article)?
+((OneOf)(Article)?)
+(LHSHearstBody)
+(Head)
+:hearstPattern
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Plural"},
+{ ctx.endPhase(); }
+
+

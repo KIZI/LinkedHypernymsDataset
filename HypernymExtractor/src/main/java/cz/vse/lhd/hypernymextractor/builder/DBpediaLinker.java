@@ -10,9 +10,12 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.*;
+import net.spy.memcached.ConnectionFactoryBuilder;
+import net.spy.memcached.FailureMode;
 import net.spy.memcached.MemcachedClient;
 
 /**
@@ -47,7 +50,7 @@ public class DBpediaLinker {
 
     public static void init(String _APIBase, String _lang, String address, int port) {
         try {
-            memClient = new MemcachedClient(new InetSocketAddress(address, port));
+            memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), Arrays.asList(new InetSocketAddress(address, port)));
         } catch (IOException e) {
             Logger.getGlobal().log(Level.SEVERE, null, "Memcached init failed");
             memClient = null;
@@ -87,7 +90,7 @@ public class DBpediaLinker {
         if (o == null) {
             return null;
         }
-        Logger.getGlobal().log(Level.INFO, "retrieved from cache: {0}", (String) o);
+        //Logger.getGlobal().log(Level.INFO, "retrieved from cache: {0}", (String) o);
         return (String) o;
     }
 
@@ -154,7 +157,7 @@ public class DBpediaLinker {
                     articleTitle = Pattern.compile(" title=\"([^\"]+)\" ", Pattern.MULTILINE);
 
                 }
-                Logger.getGlobal().log(Level.INFO, url.toString());
+                //Logger.getGlobal().log(Level.INFO, url.toString());
                 URLConnection connection = url.openConnection();
                 InputStream is = connection.getInputStream();
                 Reader isr = new InputStreamReader(is, "UTF-8");

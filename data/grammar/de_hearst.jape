@@ -1,0 +1,202 @@
+Phase:	SimpleHearst
+Input:  Token
+Options: control = appelt
+
+
+Macro: Article
+(
+({Token.category == "ART"})
+)
+
+Macro: toBeVerb
+(
+({Token.lemma == "sein"}|{Token.lemma == "bezeichnen"})
+)
+
+
+Macro: NotToBeVerb
+(
+{Token, !Token.lemma == "sein"}
+)
+
+
+
+Macro: LHSHearstBody_tier1modifiers
+(
+({Token.kind == "number"}|{Token.category == "ADJA"}|{Token.category == "APPR"}|{Token.category == "ADJD"}|{Token.string == "."}|{Token.string == "-"}|{Token.category == "KON"}|{Token.category == "KOUS"}|{Token.category == "KOUI"}|{Token.category == "KOKOM"})
+)
+
+Macro: LHSHearstBody_tier2modifiers
+(
+({Token.kind == "number"}|{Token.category == "ADJA"}|{Token.category == "ADJD"}|{Token.string == "."}|{Token.string == "-"})
+)
+
+Macro: LHSHearstBody_tier3modifiers
+(
+({Token.kind == "number"}|{Token.category == "NE"}|{Token.category == "NN"}|{Token.category == "."}|{Token.string == "-"}|{Token.category == "TRUNC"}|{Token.string == "&"}|{Token.string == "/"})
+)
+
+Macro: NumbersInBracketes
+(
+({Token.position == "startpunct"})
+({Token.kind == "number"})*
+({Token.position == "endpunct"})
+)
+
+Macro: LHSHearstBody
+(
+(NumbersInBracketes)?
+(LHSHearstBody_tier1modifiers)*
+(NumbersInBracketes)?
+(LHSHearstBody_tier2modifiers)*
+(NumbersInBracketes)?
+(LHSHearstBody_tier3modifiers)*
+(NumbersInBracketes)?
+)
+
+
+Macro: FromToTimePeriod
+(
+({Token.string == "von"})
+({Token.kind == "number"})+
+(
+({Token.string == "bis"})
+({Token.kind == "number"})+
+)
+)
+
+Macro: FirstAdditionaInfoInserted
+(
+(Article)?
+({Token.string == "von"}|{Token.string == "mit"}|{Token.lemma == "in"})
+(Article)?
+({Token.kind == "number"}|{Token.category == "ADJA"}|{Token.category == "ADJD"}|{Token.category == "ADV"}|{Token.string == "."}|{Token.string == "-"})*
+({Token.category == "NE"}|{Token.category == "NN"}|{Token.string == "."})+
+)
+
+Macro: SecondAndMoreAdditionaInfoInserted
+(
+(Article)?
+({Token.string == "von"}|{Token.string == "mit"}|{Token.lemma == "in"}|{Token.string == "und"})
+(Article)?
+({Token.kind == "number"}|{Token.category == "ADJA"}|{Token.category == "ADJD"}|{Token.category == "ADV"}|{Token.string == "."}|{Token.string == "-"})*
+({Token.category == "NE"}|{Token.category == "NN"}|{Token.string == "."})+
+)
+
+Macro: MeaningLessWordsImmediatelyAfterToBe
+(
+({Token.string == "sowohl"})
+)
+
+Macro: AdditionaGenericInfoInserted
+(
+(FirstAdditionaInfoInserted)
+(NumbersInBracketes)*
+(SecondAndMoreAdditionaInfoInserted)*
+(NumbersInBracketes)*
+)
+
+
+
+Macro: Head
+(
+({Token.category == "NN"}|{Token.category == "NE"})
+)
+
+Macro: NameOf
+(
+({Token.string == "Name"})
+)
+
+Macro: TitleOf
+(
+({Token.string == "Titel"})
+)
+
+Macro: SpeciesOf
+(
+({Token.string == "species"})
+({Token.string == "of"})
+)
+
+Macro: GenusOf
+(
+({Token.string == "genus"})
+({Token.string == "of"})
+)
+
+Macro: OneOf
+(
+({Token.string == "one"})
+({Token.string == "of"})
+)
+
+Macro: TypeOf
+(
+({Token.string == "type"})
+({Token.string == "of"})
+)
+
+
+
+Rule: HearstRule_Simple
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+(MeaningLessWordsImmediatelyAfterToBe)?
+)
+(FromToTimePeriod)?
+(AdditionaGenericInfoInserted)?
+(Article):hearstArticle
+((NameOf)(Article)?)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(LHSHearstBody)
+//(Article)?
+(Head)
+:hearstPattern
+--> 
+:hearstArticle.harticle = {kind = "isApattern", rule = "HearstRule_Simple"},
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Simple"},
+{ ctx.endPhase(); }
+
+Rule: HearstRule_MissingOrShiftedArticle
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+(MeaningLessWordsImmediatelyAfterToBe)?
+)
+(FromToTimePeriod)?
+(AdditionaGenericInfoInserted)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(LHSHearstBody)
+//(Article)?
+(Head)
+:hearstPattern
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_MissingArticle"},
+{ ctx.endPhase(); }
+
+
+Rule: HearstRule_Plural
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+)
+(Article)?
+((OneOf)(Article)?)
+(LHSHearstBody)
+(Head)
+:hearstPattern
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Plural"},
+{ ctx.endPhase(); }
+

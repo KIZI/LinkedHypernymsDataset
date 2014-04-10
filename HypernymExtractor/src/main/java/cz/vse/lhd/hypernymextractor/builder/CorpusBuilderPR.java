@@ -43,6 +43,7 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
     private String hypernymLoggingPath;
     private Integer startPosInArticleNameList;
     private Integer endPosInArticleNameList;
+    private String confFilePath;
 
     public CorpusBuilderPR() {
     }
@@ -91,7 +92,6 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
 //        }
 //        return result;
 //    }
-    
     private String[] readArticleTitles(String path, int start, int end) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(path));
         String line;
@@ -100,9 +100,9 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
         while ((line = br.readLine()) != null) {
             if (counter >= start && counter <= end) {
                 result[counter - start] = line;
-                }
+            }
             counter++;
-                }
+        }
         return result;
     }
 
@@ -439,5 +439,13 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
      */
     public void setTaggerBinary_NL(String taggerDir_NL) {
         this.taggerBinary_NL = taggerDir_NL;
+    }
+
+    public String getConfFilePath() {
+        return confFilePath;
+    }
+
+    public void setConfFilePath(String confFilePath) {
+        this.confFilePath = confFilePath;
     }
 }

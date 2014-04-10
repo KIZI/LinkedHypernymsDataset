@@ -1,0 +1,161 @@
+Phase:	SimpleHearst
+Input:  Token
+Options: control = appelt
+
+
+Macro: Article
+(
+({Token.string == "a"}|{Token.string == "an"}|{Token.string == "the"})
+)
+
+Macro: toBeVerb
+(
+({Token.string == "is"}|{Token.string == "are"}|{Token.string == "were"}|{Token.string == "was"})
+)
+
+
+Macro: NotToBeVerb
+(
+{Token, !Token.string ==~ "is|are|were|was"}
+)
+
+
+
+Macro: LHSHearstBody_tier1modifiers
+(
+({Token.category == "CD"}|{Token.category == "JJ"}|{Token.category == "JJS"}|{Token.category == "."}|{Token.string == "-"}|{Token.category == "CC"}|{Token.orth == "apostrophe"}|{Token.string == ","})
+)
+
+Macro: LHSHearstBody_tier2modifiers
+(
+({Token.category == "CD"}|{Token.category == "JJ"}|{Token.category == "JJS"}|{Token.category == "VBN"}|{Token.category == "VBD"}|{Token.category == "."}|{Token.string == "-"}|{Token.category == "VBG"}|{Token.orth == "apostrophe"})
+)
+
+Macro: LHSHearstBody_tier2modifiers_NP
+(
+({Token.category == "JJ"}|{Token.category == "JJS"})*({Token.category == "NNP"}|{Token.category == "NN"})+({Token.category == "JJ"})+
+)
+
+
+Macro: LHSHearstBody_tier3modifiers
+(
+({Token.category == "CD"}|{Token.category == "NNP"}|{Token.category == "NNS"}|{Token.category == "NN"}|{Token.category == "."}|{Token.string == "-"}|{Token.orth == "apostrophe"})
+)
+
+Macro: LHSHearstBody
+(
+(LHSHearstBody_tier2modifiers_NP)*
+(LHSHearstBody_tier1modifiers)*
+(LHSHearstBody_tier2modifiers)*
+(LHSHearstBody_tier3modifiers)*
+)
+
+
+Macro: Head
+(
+({Token.category == "NN"}|{Token.category == "NNP"}|{Token.category == "NNS"})
+)
+
+Macro: NameOf
+(
+({Token.string == "name"})
+({Token.string == "of"})
+)
+
+Macro: TitleOf
+(
+({Token.string == "title"})
+({Token.string == "of"})
+)
+
+
+Macro: SpeciesOf
+(
+({Token.string == "species"})
+({Token.string == "of"})
+)
+
+Macro: GenusOf
+(
+({Token.string == "genus"})
+({Token.string == "of"})
+)
+
+Macro: OneOf
+(
+({Token.string == "one"})
+({Token.string == "of"})
+)
+
+Macro: TypeOf
+(
+({Token.string == "type"})
+({Token.string == "of"})
+)
+
+Macro: ClassOf
+(
+({Token.string == "class"})
+({Token.string == "of"})
+)
+
+
+Rule: HearstRule_Simple
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+)
+
+(Article):hearstArticle
+((NameOf)(Article)?)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(ClassOf)?
+(LHSHearstBody)
+(Head)
+:hearstPattern
+({Token.category != "JJ"}|(({Token.category == "JJ"})({Token.category == "IN"}|{Token.category == "TO"})))
+--> 
+:hearstArticle.harticle = {kind = "isApattern", rule = "HearstRule_Simple"},
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Simple"},
+{ ctx.endPhase(); }
+
+Rule: HearstRule_GrammarErrorMissingArticle
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+)
+((NameOf)(Article)?)?
+(SpeciesOf)?
+(TitleOf)?
+(GenusOf)?
+(TypeOf)?
+(LHSHearstBody)
+(Head)
+:hearstPattern
+({Token.category != "JJ"}|(({Token.category == "JJ"})({Token.category == "IN"}|{Token.category == "TO"})))
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_MissingArticle"},
+{ ctx.endPhase(); }
+
+
+Rule: HearstRule_Plural
+Priority: 30
+(
+(NotToBeVerb)*
+(toBeVerb)
+)
+(Article)?
+((OneOf)(Article)?)
+(LHSHearstBody)
+(Head)
+:hearstPattern
+({Token.category != "JJ"}|(({Token.category == "JJ"})({Token.category == "IN"}|{Token.category == "TO"})))
+--> 
+:hearstPattern.h = {kind = "isApattern", rule = "HearstRule_Plural"},
+{ ctx.endPhase(); }
+

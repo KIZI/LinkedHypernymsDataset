@@ -402,7 +402,7 @@ public class THDOntologyCleanup {
 
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void run(String[] args) throws Exception {
         // TODO code application logic here
         String basePath = Conf.outputDir();
         String lang = Conf.lang();
@@ -455,7 +455,7 @@ public class THDOntologyCleanup {
 
 
         if (!lang.equals("en")) {
-            String mappingFile = Conf.datasetInterlanguage_linksPath();//.excerpt
+            String mappingFile = Conf.datasetInterlanguage_linksEnPath();//.excerpt
             System.out.println("mappingFile=" + mappingFile);
             mapping = new LanguageMapping(mappingFile, lang);
             enAlignedInputPath = translateTypesInInstanceFile(typesOverridenPath, basePath, mapping, lang);

@@ -3,6 +3,7 @@ package cz.vse.lhd.hypernymextractor.builder
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import cz.vse.lhd.core.lucene.LuceneReader
 import cz.vse.lhd.hypernymextractor.Conf
+import cz.vse.lhd.hypernymextractor.Loader
 import cz.vse.lhd.hypernymextractor.Logger
 import cz.vse.lhd.hypernymextractor.indexbuilder.ArticleDocument
 import gate.Corpus
@@ -11,51 +12,53 @@ import gate.Gate
 import gate.ProcessingResource
 import gate.creole.SerialAnalyserController
 import java.io.ByteArrayInputStream
-import java.util.logging.Level
 import org.apache.lucene.index.Term
 import scala.io.Source
 
 class CorpusBuilderPR2 extends CorpusBuilderPR {
- 
+  
   val pipeline = {
     val pl = Factory.createResource("gate.creole.SerialAnalyserController").asInstanceOf[SerialAnalyserController]
     pl.add(Factory.createResource("gate.creole.tokeniser.DefaultTokeniser", Factory.newFeatureMap).asInstanceOf[ProcessingResource])
     pl.add(Factory.createResource("gate.creole.splitter.RegexSentenceSplitter", Factory.newFeatureMap()).asInstanceOf[ProcessingResource])
     pl
   }
-  lazy val (apiBase, japePath) = Conf.lang match {
-    case "en" => (getWikiAPIBase_EN, getJAPEPATH_EN)
-    case "de" => (getWikiAPIBase_DE, getJAPEPATH_DE)
-    case "nl" => (getWikiAPIBase_NL, getJAPEPATH_NL)
-  } 
   
   override def execute = {
     import scala.collection.JavaConversions._
+    import language.postfixOps
     
     Logger.get.info("== Gate init ==")
     Gate.init
-    HypernymExtractor.init(Conf.lang, japePath, Conf.outputDir + "/hypoutput.log", getTaggerBinary_DE, getTaggerBinary_NL, getSaveInTriplets)
-    if (getSaveInTriplets)
-      DBpediaLinker.init(apiBase, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt)
-        
+    
     Logger.get.info("== Corpus size counting ==")
-    
-    val size = Source.fromFile(Conf.datasetLabelsPath).getLines.size
+    val start = getStartPosInArticleNameList.toInt match {
+      case x if x <= 0 => 0
+      case x => getStartPosInArticleNameList.toInt
+    }
+    val end = getEndPosInArticleNameList.toInt match {
+      case x if x <= 0 => Source.fromFile(Conf.datasetLabelsPath).getLines.size
+      case x => getEndPosInArticleNameList.toInt
+    }
     val step = 500
+    Logger.get.info(s"Start of extraction from $start to $end")
+    Logger.get.info("Total steps: " + (end - start))
     
-    Logger.get.info("Total steps: " + size)
+    HypernymExtractor.init(Conf.lang, Conf.gateJapeGrammar, Conf.outputDir + "/hypoutput.log", Conf.gateDir + "plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate", Conf.gateDir + "plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-dutch-gate", getSaveInTriplets)
+    if (getSaveInTriplets)
+      DBpediaLinker.init(Conf.wikiApi, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt)
+    HypernymExtractor.setLoader(new Loader(end - start))
     
     try {
-      for (offset <- 0 to size by step) {
-        Logger.get.info("== Corpus loading ==")
-        Logger.get.log(Level.INFO, s"Loading from ${offset} until ${offset+step}...")
+      for (offset <- start to end by step) {
+        val endBlock = if (offset + step > end) end else offset + step
         val lr = LuceneReader.apply(Conf.indexDir)
         val wikicorpus = Factory.newCorpus("WikipediaCorpus")
         try {
           Source
           .fromFile(Conf.datasetLabelsPath)
           .getLines
-          .slice(offset, offset + step)
+          .slice(offset, endBlock)
           .map(line => {
               val model = ModelFactory.createDefaultModel
               model.read(new ByteArrayInputStream(line.toString().getBytes()), null, "N-TRIPLE")
@@ -68,22 +71,23 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               }
             }
           )
-          .foldLeft(getStartPosInArticleNameList){
+          .foldLeft(offset){
             case (idx, (Some(stmt), ArticleDocument(ad) :: _)) => {
                 addDocToCorpus(wikicorpus, stmt.getObject.asLiteral.getString, ad, idx)
                 idx + 1
               }
-            case (idx, _) => idx
+            case (idx, _) => {
+                HypernymExtractor.getLoader.tryPrint
+                HypernymExtractor.setLoader(HypernymExtractor.getLoader++)
+                idx
+              }
           }
         } finally {
           lr.close
         }
 
-        if (wikicorpus.isEmpty) {
-          Logger.get.warning("Corpus is empty.")
-        } else {
+        if (!wikicorpus.isEmpty) {
           if (getFirstSentenceOnly) {
-            Logger.get.info("== Sentence splitting ==")
             pipeline.setCorpus(wikicorpus)
             pipeline.execute
             for {
@@ -96,13 +100,13 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
             }
           }
-          Logger.get.info("== Extract hypernym starting ==")
           HypernymExtractor.getInstance().extractHypernyms(wikicorpus);
         }
       }
     } finally {
       if (getSaveInTriplets)
         DBpediaLinker.close
+      HypernymExtractor.close
     }
     
     Logger.get.info("== Done ==")

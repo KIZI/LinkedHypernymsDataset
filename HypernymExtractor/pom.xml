@@ -47,15 +47,22 @@
                 <configuration>
                     <launchers>
                         <launcher>
-                            <id>index</id>
+                            <id>indexer</id>
                             <mainClass>cz.vse.lhd.hypernymextractor.indexbuilder.DatasetIndexBuilder</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                             </jvmArgs>
                         </launcher>
                         <launcher>
-                            <id>run</id>
+                            <id>runner</id>
                             <mainClass>cz.vse.lhd.hypernymextractor.RunDefaultPipeline</mainClass>
+                            <jvmArgs>
+                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+                            </jvmArgs>
+                        </launcher>
+                        <launcher>
+                            <id>stats</id>
+                            <mainClass>cz.vse.lhd.hypernymextractor.Stats</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                             </jvmArgs>
