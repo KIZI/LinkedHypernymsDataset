@@ -8,7 +8,7 @@ LinkedHypernymsDataset extraction framework makes RDF dataset consists of DBpedi
 + Gate 7.0
 + Maven 2
 + Java 7
-+ DBpedia datasets for the set language
++ Downloaded current DBpedia datasets for the set language
   + Mapping-based Types
   + Titles
   + Short Abstracts
@@ -48,3 +48,17 @@ There is a recommended file structure in the root directory:
       | gate-7.0                         // Gate software - binary package
     - global.properties                  // global settings of all modules
     - pom.xml
+
+Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package).
+
+Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads39 to the dataset directory. Datasets must be unzipped; having .nt suffix.
+
+Download **English Inter-Language Links dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the dataset must be unzipped).
+
+Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
+
+Install memcached (Debian: apt-get memcached).
+
+For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified. 
++ tree-tagger-german-gate (for German)
++ tree-tagger-dutch-gate (for Dutch)
