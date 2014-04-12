@@ -98,6 +98,18 @@ Before starting the extraction process, check the HypernymExtractor/module.prope
     gate.dir=../utils/gate-7.0                                              # path to the Gate root directory (binary package)
     gate.plugin.lhd.dir=../HypernymExtractor/target/gateplugin              # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
     gate.jape.grammar=../data/grammar/en_hearst.jape                        # path to the JAPE grammar for the set language
-    wiki.api=http://ner.vse.cz/wiki/                                        # Wiki Search API URL. You can use the EN mirror located on the University of Economics Prague or use original API: 
-    memcached.address=192.168.116.129
-    memcached.port=11211
+    wiki.api=http://ner.vse.cz/wiki/                                        # Wiki Search API URL. You can use the EN mirror located on the University of Economics Prague which is not limited or use original API: http://en.wikipedia.org/w/
+    memcached.address=127.0.0.1                                             # Memcached server address
+    memcached.port=11211                                                    # Memcached server port
+
+After checking the properties go to the HypernymExtractor directory and start the extraction process by these commands:
+
+    mvn scala:run -Dlauncher=indexer -DaddArgs=module.properties
+    mvn scala:run -Dlauncher=runner -DaddArgs=module.properties
+    
+For each command you must set path to the properties file as first argument of the script launcher (-DaddArgs=module.properties). The first command indexes datasets by Lucene; the second one extracts hypernyms for all DBpedia resources and saves results to the output directory. After these steps you can continnue to the next module.
+
+Optionaly: The extraction process can be started in parallel. You can **map** it to more processes by specifying a start pointer and final pointer; then you can **reduce** these pieces to the one result file.
+
+    mvn scala:run -Dlauncher=runner -DaddArgs=module.properties|10000|20000       -- this command handles all resources from 10000 to 20000
+    mvn scala:run -Dlauncher=stats -DaddArgs=module.properties                    -- this command shows number of all resources
