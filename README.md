@@ -62,3 +62,42 @@ Install memcached (Debian: apt-get memcached).
 For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified. 
 + tree-tagger-german-gate (for German)
 + tree-tagger-dutch-gate (for Dutch)
+
+
+##Installation
+
+Go to the root directory and type these Maven commands:
+
+    mvn clean
+    mvn install
+
+After that, check the global.properties file. You have to input the absolute or relative path to key directories; any relative path begins in some used module; therefore the prefix ../ is needed to get into the root directory:
+
+    output.dir=../data/output     # the output directory where all output files will be saved 
+    logging.dir=../data/logs      # the log directory where all log files will be saved
+    logging.enabled=false         # you can enable saving application logs to a file in the logs direcotory (true|false)
+    lang=en                       # a set language (en|de|nl)         
+
+
+##1. HypernymExtractor module
+
+This module only extracts hypernyms from all DBpedia resources and saves them to the temporary file. Any hypernym is derived from a first sentence of a DBpedia resource short abstract and is represented by one word. Subsequently, the hypernym word is mapped to a DBpedia resource based on the first hit returned by Wikipedia Search API. The extraction process uses following Gate plugins:
+
+1. ANNIE English Tokenizer
+2. ANNIE Sentence Splitter
+3. ANNIE Part-of-Speech Tagger OR TreeTagger
+4. ANNIE JAPE Transducer
+
+Before starting the extraction process, check the HypernymExtractor/module.properties file:
+
+    global.properties.file=../global.properties                             # path to the global.properties file
+    index.dir=../data/index                                                 # path to the directory where indexed datasets will be saved by Lucene
+    dataset.short_abstracts.path=../data/datasets/short_abstracts_en.nt     # path to the Short Abstracts dataset for the set language
+    dataset.instance_types.path=../data/datasets/instance_types_en.nt       # path to the Mapping-based Types dataset for the set language
+    dataset.labels.path=../data/datasets/labels_en.nt                       # path to the Titles dataset for the set language
+    gate.dir=../utils/gate-7.0                                              # path to the Gate root directory (binary package)
+    gate.plugin.lhd.dir=../HypernymExtractor/target/gateplugin              # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
+    gate.jape.grammar=../data/grammar/en_hearst.jape                        # path to the JAPE grammar for the set language
+    wiki.api=http://ner.vse.cz/wiki/                                        # Wiki Search API URL. You can use the EN mirror located on the University of Economics Prague or use original API: 
+    memcached.address=192.168.116.129
+    memcached.port=11211
