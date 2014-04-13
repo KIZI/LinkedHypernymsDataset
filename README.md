@@ -113,3 +113,8 @@ Optionaly: The extraction process can be started in parallel. You can **map** it
 
     mvn scala:run -Dlauncher=runner -DaddArgs=module.properties|10000|20000       -- this command handles all resources from 10000 to 20000
     mvn scala:run -Dlauncher=stats -DaddArgs=module.properties                    -- this command shows number of all resources
+
+
+##2. LHDOntologyCleanup module
+
+This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map all these types to DBpedia ontology types. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
