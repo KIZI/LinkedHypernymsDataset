@@ -141,7 +141,7 @@ Before starting the inferring process, check the LHDTypeInferrer/module.properti
     global.properties.file=../global.properties                              # path to the global.properties file
     dataset.instance_types.path=../data/datasets/instance_types_en.nt        # path to the Mapping-based Types dataset
     dataset.ontology.path=../data/datasets/dbpedia_3.9.owl                   # path to the DBpedia Ontology file
-    compressTemporaryFiles=true                                              # if true then all generated temporary files will be zipped to the one file and will be deleted from the output directory (true|false).
+    compressTemporaryFiles=true                                              # if true then all generated temporary files will be zipped to the one file and deleted from the output directory (true|false).
     
 After checking the properties go to the LHDTypeInferrer directory and start the inferring process by these commands (there are required result files of the LHDOntologyCleanup process in the output directory):
 
