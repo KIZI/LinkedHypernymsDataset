@@ -117,4 +117,58 @@ Optionaly: The extraction process can be started in parallel. You can **map** it
 
 ##2. LHDOntologyCleanup module
 
-This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map all these types to DBpedia ontology types. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
+This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map it to DBpedia ontology types. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
+
+Before starting the mapping process, check the LHDOntologyCleanup/module.properties file:
+
+    global.properties.file=../global.properties                                          # path to the global.properties file
+    dataset.instance_types.path=../data/datasets/instance_types_en.nt                    # path to the Mapping-based Types dataset depends on the set language
+    dataset.instance_types.en.path=../data/datasets/instance_types_en.nt                 # path to the English Mapping-based Types dataset
+    dataset.interlanguage_links.en.path=../data/datasets/interlanguage_links_en.nt       # path to the English Inter-Language Links dataset
+    dataset.ontology.path=../data/datasets/dbpedia_3.9.owl                               # path to the DBpedia Ontology file
+    
+After checking the properties go to the LHDOntologyCleanup directory and start the mapping process by these commands (there are required result files of the HypernymExtractor process in the output directory):
+
+    mvn scala:run -DaddArgs=module.properties
+
+
+##3. LHDTypeInferrer module
+
+This is the final step making LHD datasets. LHDTypeInferrer module tries to infer remaining DBpedia ontology types by the STI algorithm (Statistical Type Inference) which weren't mapped within the previous step.
+
+Before starting the inferring process, check the LHDTypeInferrer/module.properties file:
+
+    global.properties.file=../global.properties                              # path to the global.properties file
+    dataset.instance_types.path=../data/datasets/instance_types_en.nt        # path to the Mapping-based Types dataset
+    dataset.ontology.path=../data/datasets/dbpedia_3.9.owl                   # path to the DBpedia Ontology file
+    compressTemporaryFiles=true                                              # if true then all generated temporary files will be zipped to the one file and will be deleted from the output directory (true|false).
+    
+After checking the properties go to the LHDTypeInferrer directory and start the inferring process by these commands (there are required result files of the LHDOntologyCleanup process in the output directory):
+
+    mvn scala:run -DaddArgs=module.properties
+    
+##Results
+
+The final step (LHDTypeInferrer module) made two key files: **LANG.LHDv1.draft.nt** and and **LANG.LHDv2.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true' all temporary files were zipped to the **LANG.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
+
+###LHD 1.0
+
+The dataset contains types of all DBpedia resources represented by a DBpedia ontology type or another DBpedia resource. If any textual match of a DBpedia resource is found in the DBpedia ontology, this DBpedia resource will be mapped to a DBpedia ontology type. For example:
+
+
+    # there isn't any textual match for the Republic resource in the DBpedia ontology 
+    <http://dbpedia.org/resource/Germany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/resource/Republic> .
+    
+    # there is some textual match for the Country resource in the DBpedia ontology. It is mapped! 
+    <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
+    
+    
+###LHD 2.0
+
+In this dataset, all unmapped types are assigned to a DBpedia ontology type by the STI algorithm. The object is never any DBpedia resource, it is always a DBpedia ontology type. For example:
+
+
+    # Inferred DBpedia ontology type
+    <http://dbpedia.org/resource/Germany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Place> .
+    
+    <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
