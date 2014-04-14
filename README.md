@@ -98,7 +98,7 @@ Before starting the extraction process, check the HypernymExtractor/module.prope
     gate.dir=../utils/gate-7.0                                              # path to the Gate root directory (binary package)
     gate.plugin.lhd.dir=../HypernymExtractor/target/gateplugin              # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
     gate.jape.grammar=../data/grammar/en_hearst.jape                        # path to the JAPE grammar for the set language
-    wiki.api=http://ner.vse.cz/wiki/                                        # Wiki Search API URL. You can use the EN mirror located on the University of Economics Prague which is not limited or use original API: http://en.wikipedia.org/w/
+    wiki.api=http://ner.vse.cz/wiki/                                        # Wiki Search API URL. You can use the EN mirror located in the University of Economics Prague which is not limited or use original API: http://en.wikipedia.org/w/
     memcached.address=127.0.0.1                                             # Memcached server address
     memcached.port=11211                                                    # Memcached server port
 
