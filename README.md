@@ -22,30 +22,30 @@ LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpe
 
 There is a recommended file structure in the root directory:
 
-    Core
-    HypernymExtractor
+    | Core
+    | HypernymExtractor
       - module.properties                // settings of the HypernymExtractor module
-    LHDNormalizer
-    LHDOntologyCleanup
+    | LHDNormalizer
+    | LHDOntologyCleanup
       - module.properties                // settings of the LHDOntologyCleanup module
-    LHDTypeInferrer
+    | LHDTypeInferrer
       - module.properties                // settings of the LHDTypeInferrer module
-    data
-      datasets
+    | data
+      | datasets
         - dbpedia_3.9.owl                // DBpedia ontology
         - instance_types_LANG.nt         // DBpedia Mapping-based Types dataset for the set language
         - interlanguage_links_en.nt      // DBpedia Inter-Language Links dataset for English
         - labels_LANG.nt                 // DBpedia Titles dataset for the set language
         - short_abstracts_LANG.nt        // DBpedia Short Abstracts dataset for the set language
-      grammar
+      | grammar
         - de_hearst.jape                 // JAPE grammar for German
         - en_hearst.jape                 // JAPE grammar for English
         - nl_hearst.jape                 // JAPE grammar for Dutch
-      index                            
-      logs
-      output
-    utils
-      gate-7.0                         // Gate software - binary package
+      | index                            
+      | logs
+      | output
+    | utils
+      | gate-7.0                         // Gate software - binary package
     - global.properties                  // global settings of all modules
     - pom.xml
 
