@@ -53,7 +53,7 @@ Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package)
 
 Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads39 to the dataset directory. Datasets must be unzipped; having .nt suffix.
 
-Download **English Inter-Language Links dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the dataset must be unzipped).
+Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
 
 Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
 
