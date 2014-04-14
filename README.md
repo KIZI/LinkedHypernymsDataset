@@ -149,7 +149,7 @@ After checking the properties go to the LHDTypeInferrer directory and start the 
     
 ##Results
 
-The final step (LHDTypeInferrer module) made two key files: **LANG.LHDv1.draft.nt** and and **LANG.LHDv2.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true' all temporary files were zipped to the **LANG.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
+The LHDTypeInferrer module made two key files: **en.LHDv1.draft.nt** and **en.LHDv2.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true', all temporary files were zipped to the **en.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
 
 ###LHD 1.0
 
