@@ -42,7 +42,7 @@
                 <configuration>
                     <launchers>
                         <launcher>
-                            <id>runner</id>
+                            <id>downloader</id>
                             <mainClass>scala.cz.vse.lhd.core.download.Downloader</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
