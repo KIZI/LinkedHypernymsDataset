@@ -77,7 +77,7 @@ After that, check the global.properties file. You have to input the absolute or 
     logging.enabled=false         # you can enable saving application logs to a file in the logs direcotory (true|false)
     lang=en                       # a set language (en|de|nl)         
 
-If there is no downloaded datasets in your local computer you can use the downloader in the Core module. Go to the Core module and type this command (all required datasets will be downloaded to the datasets directory):
+If there are no downloaded datasets in your local computer you can use the downloader in the Core module. Go to the Core module and type this command (all required datasets will be downloaded to the datasets directory):
 
     mvn scala:run -DaddArgs=../global.properties
 
