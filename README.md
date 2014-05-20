@@ -9,7 +9,7 @@ LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpe
 + Maven 2
 + Java 7
 + Downloaded current DBpedia datasets for the set language (it is possible to use a downloader in the Core module).
-  + Mapping-based Types
+  + Mapping-based Types (English and the set language)
   + Titles
   + Short Abstracts
   + Inter-Language Links (only English dataset is required)
@@ -30,6 +30,7 @@ There is a recommended file structure in the root directory:
       - module.properties                // settings of the LHDOntologyCleanup module
     | LHDTypeInferrer
       - module.properties                // settings of the LHDTypeInferrer module
+    | MapReduce
     | data
       | datasets
         - dbpedia_3.9.owl                // DBpedia ontology
@@ -58,7 +59,7 @@ You can download required datasets manually or use a downloader in the Core modu
 + Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
 + Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
 
-For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified. 
+For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory). 
 + tree-tagger-german-gate (for German)
 + tree-tagger-dutch-gate (for Dutch)
 
