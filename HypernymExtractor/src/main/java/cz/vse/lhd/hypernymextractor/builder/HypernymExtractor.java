@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,7 +82,7 @@ public class HypernymExtractor {
             return null;
         }
         if (hypernymExtractor == null) {
-
+            
             Gate.getCreoleRegister().registerDirectories(
                     new File(Gate.getPluginsHome(), "Tagger_Framework").toURL());
 
@@ -224,10 +225,6 @@ public class HypernymExtractor {
                 pipeline.add(sentenceSplitterPR);
                 pipeline.add(posTaggerPR);
             } else if (lang.equals("nl") | lang.equals("de")) {
-
-
-
-
 
                 FeatureMap taggerFeatureMap = Factory.newFeatureMap();
                 taggerFeatureMap.put("debug", "false");

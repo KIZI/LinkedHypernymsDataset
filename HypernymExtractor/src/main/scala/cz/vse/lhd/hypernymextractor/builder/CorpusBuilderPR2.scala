@@ -1,5 +1,6 @@
 package cz.vse.lhd.hypernymextractor.builder
 
+import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import cz.vse.lhd.core.lucene.LuceneReader
 import cz.vse.lhd.hypernymextractor.Conf
@@ -28,6 +29,8 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     import scala.collection.JavaConversions._
     import language.postfixOps
     
+    ARQ.init
+  
     Logger.get.info("== Gate init ==")
     Gate.init
     
@@ -44,7 +47,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     Logger.get.info(s"Start of extraction from $start to $end")
     Logger.get.info("Total steps: " + (end - start))
     
-    HypernymExtractor.init(Conf.lang, Conf.gateJapeGrammar, Conf.outputDir + "/hypoutput.log", Conf.gateDir + "plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate", Conf.gateDir + "plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-dutch-gate", getSaveInTriplets)
+    HypernymExtractor.init(Conf.lang, Conf.gateJapeGrammar, Conf.outputDir + "/hypoutput" + (if (getEndPosInArticleNameList.toInt > 0) s".$start-$end" else "") + ".log", "resources/TreeTagger/tree-tagger-german-gate", "resources/TreeTagger/tree-tagger-dutch-gate", getSaveInTriplets)
     if (getSaveInTriplets)
       DBpediaLinker.init(Conf.wikiApi, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt)
     HypernymExtractor.setLoader(new Loader(end - start))
@@ -97,7 +100,11 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               isaEnd = sa.getEndNode
               if isaStart.getOffset == 0 || isaStart.getOffset == 2
             } {
-              doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
+              try {
+                doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
+              } catch {
+                case exc : gate.util.InvalidOffsetException => Logger.get.info(exc.getMessage)
+              }
             }
           }
           HypernymExtractor.getInstance().extractHypernyms(wikicorpus);

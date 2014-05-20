@@ -20,7 +20,7 @@ object Conf extends ConfGlobal {
     datasetInstance_typesPath,
     wikiApi
   ) = {
-    val prop = buildProp(new FileInputStream(AppConf.args(0)))
+    val prop = buildProp(new FileInputStream(AppConf.args(0).replaceFirst("""^["]""", "")))
     (
       prop.getProperty("global.properties.file"),
       prop.getProperty("gate.dir") /: Dir,

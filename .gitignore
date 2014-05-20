@@ -9,6 +9,7 @@ data/**/*.nt
 data/**/*.owl
 data/**/*.zip
 data/index/*
+data/output/*
 **/nb-configuration.xml
 **/nbactions.xml
 .svn

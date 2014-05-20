@@ -12,7 +12,8 @@
         <module>Core</module>
         <module>LHDTypeInferrer</module>
         <module>LHDNormalizer</module>
-    </modules>
+    <module>MapReduce</module>
+  </modules>
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
