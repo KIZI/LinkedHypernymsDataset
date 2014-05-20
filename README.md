@@ -8,7 +8,7 @@ LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpe
 + Gate 7.0
 + Maven 2
 + Java 7
-+ Downloaded current DBpedia datasets for the set language
++ Downloaded current DBpedia datasets for the set language (it is possible to use a downloader in the Core module).
   + Mapping-based Types
   + Titles
   + Short Abstracts
@@ -51,13 +51,12 @@ There is a recommended file structure in the root directory:
 
 Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package).
 
-Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads39 to the dataset directory. Datasets must be unzipped; having .nt suffix.
-
-Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
-
-Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
-
 Install memcached (Debian: apt-get memcached).
+
+You can download required datasets manually or use a downloader in the Core module (see installation steps). If you want to download datasets manually, you will find all in the DBpedia homepage:
++ Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads39 to the dataset directory. Datasets must be unzipped; having .nt suffix.
++ Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
++ Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
 
 For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified. 
 + tree-tagger-german-gate (for German)
@@ -78,6 +77,9 @@ After that, check the global.properties file. You have to input the absolute or 
     logging.enabled=false         # you can enable saving application logs to a file in the logs direcotory (true|false)
     lang=en                       # a set language (en|de|nl)         
 
+If there are no downloaded datasets in your local computer you can use the downloader in the Core module. Go to the Core module and type this command (all required datasets will be downloaded to the datasets directory):
+
+    mvn scala:run -DaddArgs=../global.properties
 
 ##1. HypernymExtractor module
 
