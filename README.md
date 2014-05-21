@@ -59,7 +59,8 @@ You can download required datasets manually or use a downloader in the Core modu
 + Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
 + Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
 
-For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory). 
+For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory).
+
 + tree-tagger-german-gate (for German)
 + tree-tagger-dutch-gate (for Dutch)
 
@@ -117,6 +118,12 @@ Optionaly: The extraction process can be started in parallel. You can **map** it
     mvn scala:run -Dlauncher=runner -DaddArgs=module.properties|10000|20000       -- this command handles all resources from 10000 to 20000
     mvn scala:run -Dlauncher=stats -DaddArgs=module.properties                    -- this command shows number of all resources
 
+Optionaly: For the parallel processing in your local computer by using a multiple core processor, you can use the MapReduce module. Go to the MapReduce directory and run the extraction proccess for multiple threads by this maven command (the first arg is a number of resources being extracted in one thread, the optionaly second arg is a path to the maven executive file):
+
+    mvn scala:run -Dlauncher=starter -DaddArgs=20000
+    OR
+    mvn scala:run -Dlauncher=starter -DaddArgs=20000|C:\maven\mvn.bat       # for Windows
+    
 
 ##2. LHDOntologyCleanup module
 
