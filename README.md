@@ -122,7 +122,7 @@ Optionaly: For the parallel processing in your local computer by using a multipl
 
     mvn scala:run -Dlauncher=starter -DaddArgs=20000
     OR
-    mvn scala:run -Dlauncher=starter -DaddArgs=20000|C:\maven\mvn.bat       # for Windows
+    mvn scala:run -Dlauncher=starter -DaddArgs=20000|C:\maven\mvn.bat       -- for Windows
     
 
 ##2. LHDOntologyCleanup module
