@@ -36,8 +36,12 @@ object Downloader extends AppConf {
   if (!datasetsDir.isDirectory)
     datasetsDir.mkdir
   
-  for (file <- files) {
-    val strFile = file.replaceAll(".*/", "").stripSuffix(".bz2")
+  for {
+    file <- files
+    strFile = file.replaceAll(".*/", "").stripSuffix(".bz2")
+    fileFile = new File(datasetsStrDir + strFile)
+    if !fileFile.isFile
+  } {
     println(s"The file: $strFile is downloading...")
     var i = 0L
     var time = System.currentTimeMillis

@@ -19,7 +19,7 @@ object Conf extends ConfGlobal {
       prop.getProperty("dataset.instance_types.path"),
       prop.getProperty("dataset.instance_types.en.path"),
       prop.getProperty("dataset.ontology.path"),
-      prop.getProperty("dataset.interlanguage_links.path")
+      prop.getProperty("dataset.interlanguage_links.en.path")
     )
   }
   
