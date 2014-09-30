@@ -41,6 +41,13 @@
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                             </jvmArgs>
                         </launcher>
+                        <launcher>
+                            <id>rawToLod</id>
+                            <mainClass>cz.vse.lhd.lhdnormalizer.RawToLod</mainClass>
+                            <jvmArgs>
+                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+                            </jvmArgs>
+                        </launcher>
                     </launchers>
                 </configuration>
             </plugin>

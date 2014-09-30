@@ -434,9 +434,9 @@ public class THDOntologyCleanup {
         String DBpediaInstancesExceptions = basePath + "ExceptionsFromInstancesFileByType";
         //if a DBpedia entity has in instance file a type from this list, it is a class not an instance
         System.out.println("DBpediaInstancesExceptions=" + DBpediaInstancesExceptions);
-        String overrideTypesPath = basePath + "override-types_" + lang;
+        String overrideTypesPath = Conf.manualmappingOverridetypesPath();
         System.out.println("OverrideTypesPath=" + overrideTypesPath);
-        String excludeTypes = basePath + "exclude-types";
+        String excludeTypes = Conf.manualmappingExcludetypesPath();
 
         ManualMapping mm = new ManualMapping(overrideTypesPath, excludeTypes);
         String typesOverridenPath = manualTypeOverride(thdInputOnlyUniqueLines, basePath, mm, lang);

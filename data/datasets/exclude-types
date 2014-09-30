@@ -1,0 +1,89 @@
+#instances with these types are excluded.
+#ALL URIS MUST BE FROM DBPEDIA
+#the exclusion is performed after the types are mapped to English DBpedia, it makes thus sense to put in this file URIs from non-English DBpedia only if these are known not to be mapped to English DBpedia
+http://dbpedia.org/resource/Design #!!!Provisionary 
+http://dbpedia.org/resource/Utility #disambiguate computer program from utility company
+http://dbpedia.org/resource/Unit #usually error in extraction
+http://dbpedia.org/resource/Line #too ambiguate: ... is a line of computers, is a railway line, line encircling the fullest part
+http://dbpedia.org/resource/Family #too ambiguate: species, family of products, family (genealogy)
+http://dbpedia.org/resource/Field #too ambiguate
+http://dbpedia.org/resource/Agent #for person, the most general replacement is a person, which is generally already known. The minor sense is chemical compound
+http://dbpedia.org/resource/Members #for person, the most general replacement is a person, which is generally already known. The minor sense is chemical compound
+http://dbpedia.org/resource/MEN
+http://dbpedia.org/resource/Medium
+http://dbpedia.org/resource/Box
+http://dbpedia.org/resource/The
+http://dbpedia.org/resource/Oil
+http://dbpedia.org/resource/Set
+http://dbpedia.org/resource/Class
+http://dbpedia.org/resource/Official
+http://dbpedia.org/resource/Number
+http://dbpedia.org/resource/Range
+http://dbpedia.org/resource/Wing
+http://dbpedia.org/resource/Use
+http://dbpedia.org/resource/Source
+http://dbpedia.org/resource/Representation
+http://dbpedia.org/resource/Sequence
+http://dbpedia.org/resource/Level
+http://dbpedia.org/resource/CHRISTIAN
+http://dbpedia.org/resource/FAN
+http://dbpedia.org/resource/HAND
+http://dbpedia.org/resource/Way
+http://dbpedia.org/resource/Space #often building, but too many other senses
+http://dbpedia.org/resource/Concept
+http://dbpedia.org/resource/Style
+http://dbpedia.org/resource/Type
+http://dbpedia.org/resource/Name
+http://dbpedia.org/resource/JUNIOR
+http://dbpedia.org/resource/LEG
+http://dbpedia.org/resource/United
+http://dbpedia.org/resource/System
+http://dbpedia.org/resource/Title
+http://dbpedia.org/resource/Term
+http://dbpedia.org/resource/A
+http://dbpedia.org/resource/Part
+http://dbpedia.org/resource/List
+http://dbpedia.org/resource/S
+http://dbpedia.org/resource/Form
+http://dbpedia.org/resource/R
+http://dbpedia.org/resource/Results
+http://dbpedia.org/resource/Entry
+http://dbpedia.org/resource/’
+http://dbpedia.org/resource/Kind
+http://dbpedia.org/resource/Variant
+http://dbpedia.org/resource//
+http://dbpedia.org/resource/Safety
+http://dbpedia.org/resource/Round
+http://dbpedia.org/resource/Result
+http://dbpedia.org/resource/Development
+http://dbpedia.org/resource/West
+http://dbpedia.org/resource/The
+http://dbpedia.org/resource/Km
+http://dbpedia.org/resource/–
+#ended at freq 350 of en.hypout.log.dbpedia.unique.stat
+#the following comes from superclass mapping review
+http://dbpedia.org/resource/Eugene
+http://dbpedia.org/resource/P-Model
+http://dbpedia.org/resource/Motown
+http://dbpedia.org/resource/Cambridge
+http://dbpedia.org/resource/Emmy-Award
+http://dbpedia.org/resource/Grammy-award
+http://dbpedia.org/resource/Longbridge
+http://dbpedia.org/resource/Footbridge
+http://dbpedia.org/resource/Christchurch
+http://dbpedia.org/resource/Timagenes
+http://dbpedia.org/resource/Northlake
+http://dbpedia.org/resource/Silverlake
+http://dbpedia.org/resource/Irish-language
+http://dbpedia.org/resource/English-language
+http://dbpedia.org/resource/Spanish-language
+http://dbpedia.org/resource/Japanese-language
+http://dbpedia.org/resource/Rijksmonument
+http://dbpedia.org/resource/Metropark
+http://dbpedia.org/resource/Pentax
+http://dbpedia.org/resource/Jamestown
+http://dbpedia.org/resource/Allentown
+http://dbpedia.org/resource/Middletown
+http://dbpedia.org/resource/Sophiatown
+http://dbpedia.org/resource/Marshalltown
+http://dbpedia.org/resource/Glassworks
