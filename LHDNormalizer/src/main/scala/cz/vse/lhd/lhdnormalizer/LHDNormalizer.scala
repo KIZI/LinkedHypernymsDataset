@@ -3,10 +3,10 @@ package cz.vse.lhd.lhdnormalizer
 import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import cz.vse.lhd.core.FileExtractor
+import cz.vse.lhd.core.Match
 import java.io.ByteArrayInputStream
 import java.io.FileOutputStream
 import java.io.PrintWriter
-import scala.cz.vse.lhd.core.Match
 import scala.io.Source
 
 object LHDNormalizer {
