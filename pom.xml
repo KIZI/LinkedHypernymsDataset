@@ -13,7 +13,8 @@
         <module>LHDTypeInferrer</module>
         <module>LHDNormalizer</module>
     <module>MapReduce</module>
-  </modules>
+        <module>Downloader</module>
+    </modules>
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>

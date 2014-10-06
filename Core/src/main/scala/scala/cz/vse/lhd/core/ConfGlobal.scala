@@ -36,7 +36,8 @@ trait ConfGlobal {
     outputDir,
     loggingDir,
     loggingEnabled,
-    lang
+    lang,
+    dbpediaVersion
     ) = {
     val prop = buildProp(new FileInputStream(globalPropertiesFile))
     (
@@ -46,7 +47,8 @@ trait ConfGlobal {
         case "true" | "1" => true
         case _ => false
       },
-      prop.getProperty("lang"))
+      prop.getProperty("lang"),
+      prop.getProperty("dbpedia.version"))
   }
 
   protected def buildProp(is: InputStream) = {
