@@ -3,7 +3,7 @@ package cz.vse.lhd.downloader
 import java.io.File
 import java.net.URL
 import org.jsoup.Jsoup
-import scala.cz.vse.lhd.core.AnyToInt
+import cz.vse.lhd.core.AnyToInt
 
 class DatasetDownloaderDe(version: String) extends DatasetDownloader {
 
