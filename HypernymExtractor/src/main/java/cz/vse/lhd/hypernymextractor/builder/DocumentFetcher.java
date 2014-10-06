@@ -43,53 +43,19 @@ import java.util.logging.Logger;
  */
 public class DocumentFetcher {
 
-    public static DocumentFetcher documentFetcher = null;
-    public static SerialAnalyserController pipeline = null;
-    public static boolean prepared = false;
-    public static String defaultSpecialExportURL = "http://en.wikipedia.org/wiki/Special";
-    private static String specialExportURL;
-    private Corpus tempCorpus;
-    int MINFIRSTSENTENCELENGTH = 50;
-    private static boolean isInitialized = false;
+    public SerialAnalyserController pipeline = null;
+    public boolean prepared = false;
+    public String defaultSpecialExportURL = "http://en.wikipedia.org/wiki/Special";
+    private final String specialExportURL;
+    //int MINFIRSTSENTENCELENGTH = 50;
 
-    public static void init(String _specialExportURL) {
-        specialExportURL = _specialExportURL;
-
-        isInitialized = true;
+    public DocumentFetcher(String specialExportURL) throws GateException {
+        this.specialExportURL = specialExportURL;
+        Gate.init();
+        prepareSentenceExtractPipeline();
     }
 
-    public static DocumentFetcher getInstance() {
-        if (!isInitialized) {
-            Logger.getLogger(DocumentFetcher.class.getName()).log(Level.SEVERE, null, "Run init first");
-            return null;
-        }
-        if (documentFetcher == null) {
-            try {
-                documentFetcher = new DocumentFetcher();
-                //File gateHomeFile = new File("/Applications/GATE_Developer_7.0/");
-                //Gate.setGateHome(gateHomeFile);
-
-                //File pluginsHome = new File("/Applications/GATE_Developer_7.0/plugins");
-                //Gate.setPluginsHome(pluginsHome);
-
-                //URL annieHome = null;            
-                //annieHome  =new File(pluginsHome, "ANNIE").toURL();
-
-                Gate.init();
-
-                //CreoleRegister register = Gate.getCreoleRegister();
-                //register.registerDirectories(annieHome);
-                // prepare the pipeline
-                prepareSentenceExtractPipeline();
-
-            } catch (GateException ex) {
-                Logger.getLogger(DocumentFetcher.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return documentFetcher;
-    }
-
-    public static void prepareSentenceExtractPipeline() {
+    private void prepareSentenceExtractPipeline() {
         if (!prepared) {
             try {
                 prepared = true;
@@ -113,7 +79,7 @@ public class DocumentFetcher {
 
     }
 
-    public boolean fetch(Integer corpusSize, Integer docCountStartOffset, Boolean assignDBpediaTypes, String lang, Boolean firstSentenceOnly, Corpus corpus, String[] articleList) throws Exception {
+    public boolean fetch(HypernymExtractor hypernymExtractor, Integer corpusSize, Integer docCountStartOffset, Boolean assignDBpediaTypes, String lang, Boolean firstSentenceOnly, Corpus corpus, String[] articleList) throws Exception {
 
         Logger.getLogger(DocumentFetcher.class.getName()).log(Level.INFO, "==== Started fetching documents ====");
         int maxAttempts;
@@ -151,13 +117,11 @@ public class DocumentFetcher {
             try {
                 Article article;
 
-
                 if (articleList == null) {
                     article = getRandomArticle(lang, "");
                 } else {
                     article = getRandomArticle(lang, articleList[article_counter]);
                 }
-
 
                 if (article.getType().equals("normal_article")) {
                     //remove after
@@ -166,9 +130,7 @@ public class DocumentFetcher {
 
                     Document doc;
 
-
                     doc = Factory.newDocument(article.getFirstSection());
-
 
                     // Document doc = Factory.newDocument(buffer.toString());
                     doc.setName("doc-" + (docCountStartOffset + article_counter));
@@ -286,10 +248,8 @@ public class DocumentFetcher {
             }
         }
 
-
         System.out.println("NOW HYPERNYM EXTRACTOR WILL START");
-        HypernymExtractor hypExtractor = HypernymExtractor.getInstance();
-        hypExtractor.extractHypernyms(corpus);
+        hypernymExtractor.extractHypernyms(corpus);
 
         return true;
     }
@@ -297,7 +257,6 @@ public class DocumentFetcher {
 //    public Article getArticleFromDBpediaDatasets(String lang, String subject) {
 //        
 //    }
-    
     public Article getRandomArticle(String lang, String firmArticleTitle) {
         try {
             URL url;
@@ -308,7 +267,6 @@ public class DocumentFetcher {
             } else {
                 url = new URL(specialExportURL.substring(0, specialExportURL.lastIndexOf(":")) + ":Random");
             }
-
 
             // HttpURLConnection.setFollowRedirects(false);
             URLConnection connection = url.openConnection();
@@ -338,7 +296,6 @@ public class DocumentFetcher {
                 buffer.append((char) ch);
             }
             in.close();
-
 
             //possible performance optimization: do not create article before it is known that it is normal article
             Article article = new Article(buffer.toString(), lang);

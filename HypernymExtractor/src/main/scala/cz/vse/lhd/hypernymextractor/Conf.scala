@@ -2,11 +2,16 @@ package cz.vse.lhd.hypernymextractor
 
 import cz.vse.lhd.core.AppConf
 import cz.vse.lhd.core.ConfGlobal
+import cz.vse.lhd.core.FileExtractor
+import java.io.File
 import java.io.FileInputStream
-import scala.cz.vse.lhd.core.Dir
+import java.io.IOException
+import cz.vse.lhd.core.Dir
+import java.net.HttpURLConnection
+import java.net.URL
 
 object Conf extends ConfGlobal {
-  
+
   val (
     globalPropertiesFile,
     gateDir,
@@ -15,11 +20,8 @@ object Conf extends ConfGlobal {
     memcachedAddress,
     memcachedPort,
     indexDir,
-    datasetShort_abstractsPath,
-    datasetLabelsPath,
-    datasetInstance_typesPath,
     wikiApi
-  ) = {
+    ) = {
     val prop = buildProp(new FileInputStream(AppConf.args(0).replaceFirst("""^["]""", "")))
     (
       prop.getProperty("global.properties.file"),
@@ -29,18 +31,41 @@ object Conf extends ConfGlobal {
       prop.getProperty("memcached.address"),
       prop.getProperty("memcached.port"),
       prop.getProperty("index.dir") /: Dir,
-      prop.getProperty("dataset.short_abstracts.path"),
-      prop.getProperty("dataset.labels.path"),
-      prop.getProperty("dataset.instance_types.path"),
-      prop.getProperty("wiki.api")
-    )
+      prop.getProperty("wiki.api"))
+  }
+
+  val (
+    datasetShort_abstractsPath,
+    datasetLabelsPath,
+    datasetInstance_typesPath) = (
+    s"${Conf.datasetsDir}short_abstracts_$lang.nt",
+    s"${Conf.datasetsDir}labels_$lang.nt",
+    s"${Conf.datasetsDir}instance_types_$lang.nt")
+
+  List(gateJapeGrammar, datasetShort_abstractsPath, datasetLabelsPath, datasetInstance_typesPath) foreach {
+    case FileExtractor(_) =>
+    case x => throw new IOException(s"File $x does not exist or is not writable.")
+  }
+
+  {
+    val of = new File(Conf.outputDir)
+    if (!of.isDirectory) of.mkdir
+    val conn = new URL(wikiApi).openConnection.asInstanceOf[HttpURLConnection]
+    try {
+      conn.connect
+      if (conn.getResponseCode != HttpURLConnection.HTTP_OK)
+        throw new IOException(s"WikiAPI $wikiApi is not reachable.")
+    } finally {
+      conn.disconnect
+    }
   }
 
 }
 
-class Loader private (step : Int, end : Int) {
-  def this(end : Int) = this(0, end)
-  def ++ = new Loader(step + 1, end)
+class ProcessStatus private (step: Int, end: Int) extends cz.vse.lhd.hypernymextractor.builder.ProcessStatus {
+  def this(end: Int) = this(0, end)
+  def ++ = new ProcessStatus(step + 1, end)
+  def plusplus = ++
   def tryPrint = if (step % 1000 == 0)
     Logger.get.info(s"$step of $end resources extracted: " + ((step.toDouble / end) * 100).round + "%")
 }

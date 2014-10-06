@@ -3,7 +3,6 @@ package cz.vse.lhd.core
 import java.io.FileInputStream
 import java.io.InputStream
 import java.util.Properties
-import scala.cz.vse.lhd.core.Dir
 
 trait AppConf extends DelayedInit {
 
@@ -34,19 +33,14 @@ trait ConfGlobal {
 
   lazy val (
     outputDir,
-    loggingDir,
-    loggingEnabled,
+    datasetsDir,
     lang,
     dbpediaVersion
     ) = {
     val prop = buildProp(new FileInputStream(globalPropertiesFile))
     (
       prop.getProperty("output.dir") /: Dir,
-      prop.getProperty("logging.dir") /: Dir,
-      prop.getProperty("logging.enabled") match {
-        case "true" | "1" => true
-        case _ => false
-      },
+      prop.getProperty("datasets.dir") /: Dir,
       prop.getProperty("lang"),
       prop.getProperty("dbpedia.version"))
   }

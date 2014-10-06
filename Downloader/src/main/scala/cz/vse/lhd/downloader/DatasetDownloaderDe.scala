@@ -17,7 +17,7 @@ class DatasetDownloaderDe(version: String) extends DatasetDownloader {
     "instance-types.nt.gz" -> "instance_types_de.nt")
   val urlBaseEn = urlBase + "en/"
   val enFiles = (Set("instance_types_en.nt.bz2", "interlanguage_links_en.nt.bz2") map (urlBaseEn + _)) + (urlBase + s"dbpedia_$version.owl.bz2")
-  val datasetsStrDir = Downloader.Conf.outputDir + "../datasets/"
+  val datasetsStrDir = Downloader.Conf.datasetsDir
 
   def download = {
     import scala.collection.JavaConversions._

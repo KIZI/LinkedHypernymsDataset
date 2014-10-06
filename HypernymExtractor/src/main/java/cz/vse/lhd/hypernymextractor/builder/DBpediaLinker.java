@@ -27,55 +27,22 @@ import net.spy.memcached.MemcachedClient;
  */
 public class DBpediaLinker {
 
-    private static DBpediaLinker dbpediaLinker = null;
-    //local-wikipedia
-    private static String APIBase;
-    private static String lang;
-    private static boolean isInitialized = false;
-    //live-wikipedia
-    //private String wikipediaAPIbase  = "http://en.wikipedia.org/w/";
-    private static MemcachedClient memClient;
+    private final String APIBase;
+    private final String lang;
+    private MemcachedClient memClient;
 
-    public DBpediaLinker() {
-    }
-
-    ;
-    /*
-     * closes the memcached client, otherwise the application will not finish (will hang)
-     */
-    public static void close() {
-
-        memClient.shutdown();
-    }
-
-    public static void init(String _APIBase, String _lang, String address, int port) {
+    public DBpediaLinker(String _APIBase, String _lang, String address, int port) {
         try {
             memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), Arrays.asList(new InetSocketAddress(address, port)));
         } catch (IOException e) {
             Logger.getGlobal().log(Level.SEVERE, null, "Memcached init failed");
-            memClient = null;
         }
-
-
-        isInitialized = true;
         APIBase = _APIBase;
         lang = _lang;
     }
-    
-    public static void init(String _APIBase, String _lang) {
-        init(_APIBase, _lang, "localhost", 11211);
-    }
 
-    public static DBpediaLinker getInstance() {
-        if (!isInitialized) {
-            Logger.getGlobal().log(Level.SEVERE, null, "Run init first");
-            return null;
-        }
-
-        if (dbpediaLinker == null) {
-            dbpediaLinker = new DBpediaLinker();
-        }
-        return dbpediaLinker;
+    public void close() {
+        memClient.shutdown();
     }
 
     private String getFromCache(String key) {
@@ -126,7 +93,6 @@ public class DBpediaLinker {
             if (cached != null) {
                 return cached;
             }
-
 
             input = input.replaceAll(" ", "_");
             try {

@@ -1,16 +1,10 @@
 package cz.vse.lhd.hypernymextractor.builder;
 
 import gate.Corpus;
-import gate.Factory;
 import gate.ProcessingResource;
 import gate.Resource;
 import gate.creole.AbstractLanguageAnalyser;
-import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * @author Milan Dojchinovski
@@ -18,7 +12,7 @@ import java.util.logging.Logger;
  * Twitter:
  * @m1ci www: http://dojchinovski.mk
  */
-public class CorpusBuilderPR extends AbstractLanguageAnalyser implements ProcessingResource {
+public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implements ProcessingResource {
 
     private Corpus corpus = null;
     private Integer corpusSize;
@@ -50,7 +44,7 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
 
     @Override
     public Resource init() throws ResourceInstantiationException {
-        System.out.println("Incialization");
+        //System.out.println("Incialization");
         return super.init();
     }
 
@@ -59,105 +53,8 @@ public class CorpusBuilderPR extends AbstractLanguageAnalyser implements Process
         init();
     }
 
-//    private String[] readArticleTitles(String path, int start, int end) throws Exception {
-//        //BZip2CompressorInputStream bZip2CompressorInputStream = new BZip2CompressorInputStream(new FileInputStream(path), true);
-//        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
-//        String line;
-//        StringBuilder stringBuffer = new StringBuilder();
-//        int i = 0;
-//        try {
-//            while ((line = bufferedReader.readLine()) != null) {
-////                if (i % 1000000 == 0) {
-////                    System.out.println(bZip2CompressorInputStream.getBytesRead() / 1000000 + "MB uncompressed");
-////                }
-//                if (i >= start && i < end) {
-//                    stringBuffer.append(line);
-//                }
-//                if (i > end) {
-//                    break;
-//                }
-//                i++;
-//            }
-//        } finally {
-//            bufferedReader.close();
-////            bZip2CompressorInputStream.close();
-//        }
-//        Model model = ModelFactory.createDefaultModel();
-//        model.read(new ByteArrayInputStream(stringBuffer.toString().getBytes()), null, "N-TRIPLE");
-//        String[] result = new String[(int) model.size()];
-//        i = 0;
-//        for (NodeIterator it = model.listObjects(); it.hasNext(); i++) {
-//            RDFNode rn = it.next();
-//            result[i] = rn.asLiteral().getString();
-//        }
-//        return result;
-//    }
-    private String[] readArticleTitles(String path, int start, int end) throws Exception {
-        BufferedReader br = new BufferedReader(new FileReader(path));
-        String line;
-        String[] result = new String[end - start + 1];
-        int counter = 0;
-        while ((line = br.readLine()) != null) {
-            if (counter >= start && counter <= end) {
-                result[counter - start] = line;
-            }
-            counter++;
-        }
-        return result;
-    }
-
     @Override
-    public void execute() throws ExecutionException {
-        try {
-            // creating new corpus
-            Logger.getLogger(DocumentFetcher.class.getName()).log(Level.INFO, "==== CONFIGURATION ====\n" + "Lanuage: {0}, num. of articles:{1}, first section only: {2}", new Object[]{lang, corpusSize, firstSentenceOnly});
-
-            String specialWikiAPIURL;
-            String apiBASE;
-            String JAPEPATH;
-            if (lang.equals("en")) {
-                // http://en.wikipedia.org/wiki/Special:Random
-                specialWikiAPIURL = specialWikiAPIURL_EN;
-                apiBASE = wikiAPIBase_EN;
-                JAPEPATH = JAPEPATH_EN;
-                // url = new URL("http://en.wikipedia.org/wiki/Special:Export/New_York");
-            } else if (lang.equals("de")) {
-                specialWikiAPIURL = specialWikiAPIURL_DE;
-                apiBASE = wikiAPIBase_DE;
-                JAPEPATH = JAPEPATH_DE;
-            } else if (lang.equals("nl")) {
-                specialWikiAPIURL = specialWikiAPIURL_NL;
-                JAPEPATH = JAPEPATH_NL;
-                apiBASE = wikiAPIBase_NL;
-            } else {
-                throw new Exception("Not supported language.");
-            }
-            // initialization of a new corpus
-            Corpus wikicorpus = Factory.newCorpus("WikipediaCorpus");
-
-            String[] articleList;
-            if (pathToArticleNames != null && !"".equals(pathToArticleNames)) {
-                Logger.getLogger(CorpusBuilderPR.class.getName()).log(Level.INFO, "Reading article titles from path ''{0}''", pathToArticleNames);
-                articleList = this.readArticleTitles(pathToArticleNames, getStartPosInArticleNameList(), getEndPosInArticleNameList());
-            } else if (firmArticleTitle != null && !"".equals(firmArticleTitle)) {
-                articleList = new String[1];
-                articleList[0] = firmArticleTitle;
-            } else {
-                articleList = null;
-            }
-            // fetching documentscorpusSize
-            DocumentFetcher.init(specialWikiAPIURL);
-            HypernymExtractor.init(lang, JAPEPATH, hypernymLoggingPath, taggerBinary_DE, taggerBinary_NL, saveInTriplets);
-            if (saveInTriplets) {
-                DBpediaLinker.init(apiBASE, lang);
-            }
-            DocumentFetcher.getInstance().fetch(corpusSize, docCountStartOffset, assignDBpediaTypes, lang, firstSentenceOnly, wikicorpus, articleList);
-
-        } catch (Exception ex) {
-            Logger.getLogger(CorpusBuilderPR.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        DBpediaLinker.close();
-    }
+    abstract public void execute();
 
     @Override
     public Corpus getCorpus() {

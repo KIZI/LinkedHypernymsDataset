@@ -4,7 +4,6 @@ import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.ModelFactory
 import cz.vse.lhd.core.lucene.LuceneReader
 import cz.vse.lhd.hypernymextractor.Conf
-import cz.vse.lhd.hypernymextractor.Loader
 import cz.vse.lhd.hypernymextractor.Logger
 import cz.vse.lhd.hypernymextractor.indexbuilder.ArticleDocument
 import gate.Corpus
@@ -17,23 +16,23 @@ import org.apache.lucene.index.Term
 import scala.io.Source
 
 class CorpusBuilderPR2 extends CorpusBuilderPR {
-  
+
   val pipeline = {
     val pl = Factory.createResource("gate.creole.SerialAnalyserController").asInstanceOf[SerialAnalyserController]
     pl.add(Factory.createResource("gate.creole.tokeniser.DefaultTokeniser", Factory.newFeatureMap).asInstanceOf[ProcessingResource])
     pl.add(Factory.createResource("gate.creole.splitter.RegexSentenceSplitter", Factory.newFeatureMap()).asInstanceOf[ProcessingResource])
     pl
   }
-  
+
   override def execute = {
     import scala.collection.JavaConversions._
     import language.postfixOps
-    
+
     ARQ.init
-  
+
     Logger.get.info("== Gate init ==")
     Gate.init
-    
+
     Logger.get.info("== Corpus size counting ==")
     val start = getStartPosInArticleNameList.toInt match {
       case x if x <= 0 => 0
@@ -46,12 +45,11 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     val step = 500
     Logger.get.info(s"Start of extraction from $start to $end")
     Logger.get.info("Total steps: " + (end - start))
-    
-    HypernymExtractor.init(Conf.lang, Conf.gateJapeGrammar, Conf.outputDir + "/hypoutput" + (if (getEndPosInArticleNameList.toInt > 0) s".$start-$end" else "") + ".log", "resources/TreeTagger/tree-tagger-german-gate", "resources/TreeTagger/tree-tagger-dutch-gate", getSaveInTriplets)
-    if (getSaveInTriplets)
-      DBpediaLinker.init(Conf.wikiApi, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt)
-    HypernymExtractor.setLoader(new Loader(end - start))
-    
+
+    val memCache = new DBpediaLinker(Conf.wikiApi, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt)
+    val hypernymExtractor = new HypernymExtractor(memCache, Conf.lang, Conf.gateJapeGrammar, Conf.outputDir + "/hypoutput" + (if (getEndPosInArticleNameList.toInt > 0) s".$start-$end" else "") + ".log", "resources/TreeTagger/tree-tagger-german-gate", "resources/TreeTagger/tree-tagger-dutch-gate", getSaveInTriplets)
+    hypernymExtractor.setLoader(new cz.vse.lhd.hypernymextractor.ProcessStatus(end - start))
+
     try {
       for (offset <- start to end by step) {
         val endBlock = if (offset + step > end) end else offset + step
@@ -59,32 +57,31 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
         val wikicorpus = Factory.newCorpus("WikipediaCorpus")
         try {
           Source
-          .fromFile(Conf.datasetLabelsPath)
-          .getLines
-          .slice(offset, endBlock)
-          .map(line => {
+            .fromFile(Conf.datasetLabelsPath)
+            .getLines
+            .slice(offset, endBlock)
+            .map(line => {
               val model = ModelFactory.createDefaultModel
               model.read(new ByteArrayInputStream(line.toString().getBytes()), null, "N-TRIPLE")
               model.listStatements.toList match {
                 case x if !x.isEmpty => {
-                    val stmt = x.get(0)
-                    (Some(stmt), lr.select(new Term(ArticleDocument.strId, stmt.getSubject.getURI), 1))
-                  }
+                  val stmt = x.get(0)
+                  (Some(stmt), lr.select(new Term(ArticleDocument.strId, stmt.getSubject.getURI), 1))
+                }
                 case _ => (None, Nil)
               }
-            }
-          )
-          .foldLeft(offset){
-            case (idx, (Some(stmt), ArticleDocument(ad) :: _)) => {
+            })
+            .foldLeft(offset) {
+              case (idx, (Some(stmt), ArticleDocument(ad) :: _)) => {
                 addDocToCorpus(wikicorpus, stmt.getObject.asLiteral.getString, ad, idx)
                 idx + 1
               }
-            case (idx, _) => {
-                HypernymExtractor.getLoader.tryPrint
-                HypernymExtractor.setLoader(HypernymExtractor.getLoader++)
+              case (idx, _) => {
+                hypernymExtractor.getLoader.tryPrint
+                hypernymExtractor.setLoader(hypernymExtractor.getLoader.plusplus)
                 idx
               }
-          }
+            }
         } finally {
           lr.close
         }
@@ -103,42 +100,39 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               try {
                 doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
               } catch {
-                case exc : gate.util.InvalidOffsetException => Logger.get.info(exc.getMessage)
+                case exc: gate.util.InvalidOffsetException => Logger.get.info(exc.getMessage)
               }
             }
           }
-          HypernymExtractor.getInstance().extractHypernyms(wikicorpus);
+          hypernymExtractor.extractHypernyms(wikicorpus);
         }
       }
     } finally {
-      if (getSaveInTriplets)
-        DBpediaLinker.close
-      HypernymExtractor.close
+      memCache.close
+      hypernymExtractor.close
     }
-    
+
     Logger.get.info("== Done ==")
   }
-  
-  private def addDocToCorpus(corpus : Corpus, title : String, ad : ArticleDocument, idx : Int) : Unit = {
+
+  private def addDocToCorpus(corpus: Corpus, title: String, ad: ArticleDocument, idx: Int): Unit = {
     val doc = Factory.newDocument(ad.sabs)
     doc.setName("doc-" + idx)
     doc.getFeatures.put("article_title", title)
     doc.getFeatures.put(
       "wikipedia_url",
       ad
-      .url
-      .replaceAllLiterally("dbpedia.org/", "wikipedia.org/")
-      .replaceAllLiterally("/resource/", "/wiki/")
-    )
+        .url
+        .replace("dbpedia.org/", "wikipedia.org/")
+        .replace("/resource/", "/wiki/"))
     doc.getFeatures.put("dbpedia_url", ad.url)
     if (getAssignDBpediaTypes)
       ad.etype.foldLeft(0)((r, t) => {
-          doc.getFeatures.put("db_type_" + r, t)
-          r + 1
-        }
-      )
+        doc.getFeatures.put("db_type_" + r, t)
+        r + 1
+      })
     doc.getFeatures().put("lang", Conf.lang)
     corpus.add(doc)
   }
-  
+
 }

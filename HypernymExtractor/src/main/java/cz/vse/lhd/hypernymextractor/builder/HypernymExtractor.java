@@ -1,6 +1,5 @@
 package cz.vse.lhd.hypernymextractor.builder;
 
-import cz.vse.lhd.hypernymextractor.Loader;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,68 +29,45 @@ import java.util.logging.Logger;
  */
 public class HypernymExtractor {
 
-    private static HypernymExtractor hypernymExtractor = null;
-    private static Loader loader;
+    private ProcessStatus loader;
     private SerialAnalyserController pipeline = null;
     private SerialAnalyserController resetPipeline = null;
-    private static String hypernymLoggingPath;
+    private final String hypernymLoggingPath;
     boolean prepared = false;
-    private static boolean saveInTriplets;
-    AnnotationSet as_all;
-    AnnotationSet as_hearst;
-    String hyp_text;
-    long hyp_start;
-    long hyp_end;
-    private static String lang = "en";
-    private static boolean isInitialized = false;
-    public static String JAPEPATH;
-    private static String taggerBinary_DE;
-    private static String taggerBinary_NL;
-    private static PrintWriter dbpediaOutputFile;
-    private static PrintWriter rawOutputFile;
+    private final boolean saveInTriplets;
+    private String lang = "en";
+    public String JAPEPATH;
+    private final String taggerBinary_DE;
+    private final String taggerBinary_NL;
+    private final PrintWriter dbpediaOutputFile;
+    private final PrintWriter rawOutputFile;
+    private final DBpediaLinker dbpediaLinker;
 
-    public static void init(String _lang, String _JAPEPATH, String _hypernymLoggingPath, String _taggerBinary_DE, String _taggerBinary_NL, boolean _saveInTriplets) throws FileNotFoundException {
-        lang = _lang;
-        JAPEPATH = _JAPEPATH;
-        isInitialized = true;
-        saveInTriplets = _saveInTriplets;
-        hypernymLoggingPath = _hypernymLoggingPath;
-        taggerBinary_DE = _taggerBinary_DE;
-        taggerBinary_NL = _taggerBinary_NL;
+    public HypernymExtractor(DBpediaLinker dbpediaLinker, String lang, String JAPEPATH, String hypernymLoggingPath, String taggerBinary_DE, String taggerBinary_NL, boolean saveInTriplets) throws FileNotFoundException, GateException, MalformedURLException {
+        this.lang = lang;
+        this.JAPEPATH = JAPEPATH;
+        this.saveInTriplets = saveInTriplets;
+        this.hypernymLoggingPath = hypernymLoggingPath;
+        this.taggerBinary_DE = taggerBinary_DE;
+        this.taggerBinary_NL = taggerBinary_NL;
         dbpediaOutputFile = new PrintWriter(hypernymLoggingPath + ".dbpedia");
         rawOutputFile = new PrintWriter(hypernymLoggingPath + ".raw");
+        this.dbpediaLinker = dbpediaLinker;
+        Gate.getCreoleRegister().registerDirectories(
+                new File(Gate.getPluginsHome(), "Tagger_Framework").toURL());
     }
 
-    public static void close() {
+    public void close() {
         dbpediaOutputFile.close();
         rawOutputFile.close();
     }
 
-    public static void setLoader(Loader loader) {
-        HypernymExtractor.loader = loader;
+    public void setLoader(ProcessStatus loader) {
+        this.loader = loader;
     }
 
-    public static Loader getLoader() {
+    public ProcessStatus getLoader() {
         return loader;
-    }
-
-    public static HypernymExtractor getInstance() throws GateException, MalformedURLException {
-        if (!isInitialized) {
-            Logger.getGlobal().log(Level.SEVERE, null, "Run init first");
-            return null;
-        }
-        if (hypernymExtractor == null) {
-            
-            Gate.getCreoleRegister().registerDirectories(
-                    new File(Gate.getPluginsHome(), "Tagger_Framework").toURL());
-
-
-
-            hypernymExtractor = new HypernymExtractor();
-            return hypernymExtractor;
-        } else {
-            return hypernymExtractor;
-        }
     }
 
     public void extractHypernyms(Corpus corpus) {
@@ -105,21 +80,20 @@ public class HypernymExtractor {
             pipeline.execute();
             for (Document doc : corpus) {
                 loader.tryPrint();
-                loader = loader.$plus$plus();
-                as_all = doc.getAnnotations();
+                loader = loader.plusplus();
+                AnnotationSet as_all = doc.getAnnotations();
 
                 //                if (!ann_iter.hasNext()) {
 //                    String articleName = (String) doc.getFeatures().get("article_title");
 //                    Logger.getGlobal().log(Level.WARNING, "Article ''{0}'' no annotation ''h'' found.", articleName);
 //                    //MyLogger.log(articleName + " ;NO Hypernym found");
 //                }
-
-                as_hearst = as_all.get("h");
+                AnnotationSet as_hearst = as_all.get("h");
                 for (Annotation isaAnnot : as_hearst) {
                     Node isaStart = isaAnnot.getStartNode();
                     Node isaEnd = isaAnnot.getEndNode();
                     String hypernym = doc.getContent().getContent(isaStart.getOffset(), isaEnd.getOffset()).toString();
-
+                    
                     // override with lemma feature if present
                     if (isaAnnot.getFeatures().containsKey("lemma")) {
                         String hypCand = isaAnnot.getFeatures().get("lemma").toString();
@@ -132,12 +106,11 @@ public class HypernymExtractor {
                     }
 
 //                    Logger.getGlobal().log(Level.INFO, "HYPERNYM: {0}", hypernym);
-
                     if (hypernymLoggingPath != null && !"".equals(hypernymLoggingPath)) {
                         String dbPediaURL;
                         if (saveInTriplets) {
                             String urlName = (String) doc.getFeatures().get("dbpedia_url");
-                            String urlHypernym = DBpediaLinker.getInstance().getLink(hypernym);
+                            String urlHypernym = dbpediaLinker.getLink(hypernym);
                             if (urlHypernym == null) {
 //                                Logger.getGlobal().log(Level.WARNING, "Hypernym found and not mapped: {0}", hypernym);
                             } else {
@@ -149,8 +122,6 @@ public class HypernymExtractor {
                     } else {
                         //MyLogger.log((String) doc.getFeatures().get("article_title") + " ;Hypernym found");
                     }
-
-
 
                     //resetPipeline.setCorpus(corpus);
                     //resetPipeline.execute();
@@ -198,7 +169,6 @@ public class HypernymExtractor {
 //            BufferedWriter bw = new BufferedWriter(fw);
 //            bw.write(content.toString());
 //            bw.close();
-
     }
 
     private void preparePipeline() {
@@ -228,13 +198,13 @@ public class HypernymExtractor {
 
                 FeatureMap taggerFeatureMap = Factory.newFeatureMap();
                 taggerFeatureMap.put("debug", "false");
-
-                if (!lang.equals("de")) {
-                    taggerFeatureMap.put("encoding", "utf-8");
-                } else {
-                    // for de, utf-8 causes on some documents tagger to fail
-                    taggerFeatureMap.put("encoding", "ISO-8859-1");
-                }
+                taggerFeatureMap.put("encoding", "utf-8");
+//                if (!lang.equals("de")) {
+//                    taggerFeatureMap.put("encoding", "utf-8");
+//                } else {
+//                    // for de, utf-8 causes on some documents tagger to fail
+//                    taggerFeatureMap.put("encoding", "ISO-8859-1");
+//                }
 
                 taggerFeatureMap.put("failOnUnmappableCharacter", "false");
                 taggerFeatureMap.put("featureMapping", "lemma=3;category=2;string=1");
@@ -261,11 +231,8 @@ public class HypernymExtractor {
                 ProcessingResource genTag = (ProcessingResource) Factory.createResource("gate.taggerframework.GenericTagger", taggerFeatureMap);
                 //genTag.setFeatures(taggerFeatureMap); 
 
-
-
                 pipeline.add(genTag);
             }
-
 
             File japeOrigFile = new File(JAPEPATH);
             //File japeOrigFile = new File("/Users/Milan/Documents/Programming/repositories/linkedtv/WP2/THD/code/CorpusBuilderPR/en_hearst.jape");

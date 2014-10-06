@@ -34,4 +34,23 @@
             <version>1.8</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <configuration>
+                    <launchers>
+                        <launcher>
+                            <id>test</id>
+                            <mainClass>cz.vse.lhd.core.Test</mainClass>
+                            <jvmArgs>
+                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+                            </jvmArgs>
+                        </launcher>
+                    </launchers>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

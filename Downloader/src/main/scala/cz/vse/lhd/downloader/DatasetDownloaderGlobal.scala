@@ -16,7 +16,7 @@ class DatasetDownloaderGlobal(version: String) extends DatasetDownloader {
     "instance_types_" + Downloader.Conf.lang + ".nt.bz2") map (urlBaseLang + _)) ++ (Set(
       "instance_types_en.nt.bz2",
       "interlanguage_links_en.nt.bz2") map (urlBaseEn + _)) + (urlBase + s"dbpedia_$version.owl.bz2")
-  val datasetsStrDir = Downloader.Conf.outputDir + "../datasets/"
+  val datasetsStrDir = Downloader.Conf.datasetsDir
 
   def download = for {
     file <- files

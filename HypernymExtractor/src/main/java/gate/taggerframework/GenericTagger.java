@@ -21,6 +21,7 @@ import gate.util.Files;
 import gate.util.OffsetComparator;
 import gate.util.ProcessManager;
 import gate.util.Strings;
+import java.io.BufferedInputStream;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.nio.charset.CharacterCodingException;
@@ -517,14 +519,13 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
         // get a decoder using the charset
         Charset charset = Charset.forName(encoding);
-        CharsetDecoder charsetDecoder = charset.newDecoder();
+        //CharsetDecoder charsetDecoder = charset.newDecoder();
 
         try {
             // get a reader over the output from the tagger remembering to
             // handle the encoding
-            BufferedReader input = new BomStrippingInputStreamReader(in,
-                    charsetDecoder);
-
+            BufferedReader input = new BufferedReader(new InputStreamReader(in, encoding));
+                    
             // compile the regular expression so that we can interpret the
             // output
             Pattern resultPattern = Pattern.compile(regex);
@@ -552,7 +553,7 @@ public class GenericTagger extends AbstractLanguageAnalyser implements
 
                 // if we are debugging then dump the output line
                 if (debug) {
-                    System.out.println(line);
+                    System.out.println(new String(charset.encode(line).array(), encoding));
                 }
 
                 // get the matcher for the line from the regex

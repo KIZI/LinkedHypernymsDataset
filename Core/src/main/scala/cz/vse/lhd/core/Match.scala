@@ -1,4 +1,4 @@
-package scala.cz.vse.lhd.core
+package cz.vse.lhd.core
 
 object Match {
   def default: PartialFunction[Any, Unit] = { case _ => }
