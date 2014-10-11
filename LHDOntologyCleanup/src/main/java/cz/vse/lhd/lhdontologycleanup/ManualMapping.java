@@ -16,13 +16,16 @@ import java.util.logging.Logger;
  */
 public class ManualMapping {
 
-    private HashMap<String, String> overrideMappings = new HashMap();
-    private HashSet<String> excludeTypes = new HashSet();
+    private final HashMap<String, String> overrideMappings = new HashMap();
+    private final HashSet<String> excludeTypes = new HashSet();
 
     public ManualMapping(String overridePath, String excludePath) throws IOException {
-        readOverrideTypesFile(overridePath);
-        readExcludeTypesFile(excludePath);
-
+        if (overridePath != null) {
+            readOverrideTypesFile(overridePath);
+        }
+        if (excludePath != null) {
+            readExcludeTypesFile(excludePath);
+        }
     }
 
     private void readOverrideTypesFile(String path) {
@@ -54,8 +57,6 @@ public class ManualMapping {
                 int indexOfMapFromEnd = thisLine.indexOf(" ");
                 String mapFrom = thisLine.substring(0, indexOfMapFromEnd).trim();
                 String mapTo = thisLine.substring(indexOfMapFromEnd, thisLine.length()).trim();
-
-
                 overrideMappings.put(mapFrom, mapTo);
             }
         } catch (IOException ex) {
@@ -106,8 +107,6 @@ public class ManualMapping {
 
                 //to save memory only the concept name is stored, not full uri            
                 String exclude = thisLine.trim();
-
-
                 excludeTypes.add(exclude);
             }
         } catch (IOException ex) {
