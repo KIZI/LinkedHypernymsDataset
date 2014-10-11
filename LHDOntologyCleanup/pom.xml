@@ -31,7 +31,7 @@
                             <mainClass>cz.vse.lhd.lhdontologycleanup.LHDOntologyCleanup</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
-                                <jvmArg>-Xmx4g</jvmArg>
+                                <jvmArg>-Xmx6g</jvmArg>
                             </jvmArgs>
                         </launcher>
                     </launchers>
