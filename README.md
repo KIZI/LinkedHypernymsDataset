@@ -8,62 +8,110 @@ LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpe
 + Gate 7.0
 + Maven 2
 + Java 7
-+ Downloaded current DBpedia datasets for the set language (it is possible to use a downloader in the Core module).
++ Downloaded current DBpedia datasets for the set language (it is possible to use the Downloader module).
   + Mapping-based Types (English and the set language)
   + Titles
   + Short Abstracts
   + Inter-Language Links (only English dataset is required)
   + DBpedia Ontology (owl)
 + Memcached endpoint
-+ 4GB RAM or more
++ 6GB RAM or more
 + Optionaly: local Wikipedia Search API (for faster processing)
 
 ## Preparation
 
+First download the current version of LHD extraction framework:
+
+    git clone https://github.com/KIZI/LinkedHypernymsDataset.git
+    cd LinkedHypernymsDataset
+    git fetch
+
 There is a recommended file structure in the root directory:
 
-    | Core
-    | HypernymExtractor
-      - module.properties                // settings of the HypernymExtractor module
-    | LHDNormalizer
-    | LHDOntologyCleanup
-      - module.properties                // settings of the LHDOntologyCleanup module
-    | LHDTypeInferrer
-      - module.properties                // settings of the LHDTypeInferrer module
-    | MapReduce
-    | data
-      | datasets
-        - dbpedia_3.9.owl                // DBpedia ontology
-        - instance_types_LANG.nt         // DBpedia Mapping-based Types dataset for the set language
-        - interlanguage_links_en.nt      // DBpedia Inter-Language Links dataset for English
-        - labels_LANG.nt                 // DBpedia Titles dataset for the set language
-        - short_abstracts_LANG.nt        // DBpedia Short Abstracts dataset for the set language
-      | grammar
-        - de_hearst.jape                 // JAPE grammar for German
-        - en_hearst.jape                 // JAPE grammar for English
-        - nl_hearst.jape                 // JAPE grammar for Dutch
-      | index                            
-      | logs
-      | output
-    | utils
-      | gate-7.0                         // Gate software - binary package
-    - global.properties                  // global settings of all modules
-    - pom.xml
+    * Core
+    * HypernymExtractor
+      * module.properties                // settings of the HypernymExtractor module
+    * LHDNormalizer
+    * LHDOntologyCleanup
+      * module.properties                // settings of the LHDOntologyCleanup module
+    * LHDTypeInferrer
+      * module.properties                // settings of the LHDTypeInferrer module
+    * MapReduce
+    * Downloader
+    * data
+      * datasets
+        * dbpedia_3.9.owl                // DBpedia ontology
+        * instance_types_LANG.nt         // DBpedia Mapping-based Types dataset for the set language
+        * interlanguage_links_en.nt      // DBpedia Inter-Language Links dataset for English
+        * labels_LANG.nt                 // DBpedia Titles dataset for the set language
+        * short_abstracts_LANG.nt        // DBpedia Short Abstracts dataset for the set language
+        * exclude-types                  // Handwritten rules - excluded types (optional)
+        * override-types                 // Handwritten rules - mappings of types to another one (optional)
+      * grammar
+        * de_hearst.jape                 // JAPE grammar for German
+        * en_hearst.jape                 // JAPE grammar for English
+        * nl_hearst.jape                 // JAPE grammar for Dutch
+      * index                            
+      * logs
+      * output
+    * utils
+      * gate-7.0                         // Gate software - binary package
+      * treetagger                       // Treetagger - POS tagger for German and Dutch
+    * global.properties                  // global settings of all modules
+    * pom.xml
 
 Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package).
 
 Install memcached (Debian: apt-get memcached).
 
-You can download required datasets manually or use a downloader in the Core module (see installation steps). If you want to download datasets manually, you will find all in the DBpedia homepage:
-+ Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads39 to the dataset directory. Datasets must be unzipped; having .nt suffix.
-+ Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads39 to the dataset directory (the datasets must be unzipped).
-+ Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads39 and unzip it to the dataset directory.
+You can download required datasets manually or use the Downloader module (see installation steps). If you want to download datasets manually, you will find all in the DBpedia homepage:
++ Download DBpedia **Mapping-based Types dataset**, **Titles dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads to the dataset directory. Datasets must be unzipped; having .nt suffix.
++ Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads to the dataset directory (the datasets must be unzipped).
++ Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads and unzip it to the dataset directory.
 
 For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory).
 
 + tree-tagger-german-gate (for German)
 + tree-tagger-dutch-gate (for Dutch)
 
+Example for German (tree-tagger-german-gate):
+
+```
+#!/bin/sh
+
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+OPTIONS="-token -lemma -sgml"
+
+BIN=$SCRIPT_DIR/../../../../../treetagger/bin
+CMD=$SCRIPT_DIR/../../../../../treetagger/cmd
+LIB=$SCRIPT_DIR/../../../../../treetagger/lib
+
+TOKENIZER=${CMD}/utf8-tokenize.perl
+TAGGER=${BIN}/tree-tagger
+ABBR_LIST=${LIB}/german-abbreviations-utf8
+PARFILE=${LIB}/german-utf8.par
+LEXFILE=${LIB}/german-lexicon-utf8.txt
+FILTER=${CMD}/filter-german-tags
+
+$TOKENIZER -a $ABBR_LIST $* |
+# external lexicon lookup
+perl $CMD/lookup.perl $LEXFILE |
+# tagging
+$TAGGER $OPTIONS $PARFILE | 
+# error correction
+$FILTER
+```
+
+##Getting started
+
+Before starting of the extraction process, config files should be specified, see Installation and Modules paragraphs.
+
+It is possible to use a shell script "run-all.sh" for starting of all processes which are needed to generate LHD dataset. This script fetches the current version of LHD extraction framework by the git command, install it by the maven command, download required datasets, remove old output files and launch the extraction process. This process can take several days therefore it should be run as a background process:
+
+    ./run-all.sh > output.log 2>&1 &
+    
+Or you can launch the extraction process step by step. See following paragraphs.
 
 ##Installation
 
@@ -74,12 +122,12 @@ Go to the root directory and type these Maven commands:
 
 After that, check the global.properties file. You have to input the absolute or relative path to key directories; any relative path begins in some used module; therefore the prefix ../ is needed to get into the root directory:
 
-    output.dir=../data/output     # the output directory where all output files will be saved 
-    logging.dir=../data/logs      # the log directory where all log files will be saved
-    logging.enabled=false         # you can enable saving application logs to a file in the logs direcotory (true|false)
-    lang=en                       # a set language (en|de|nl)         
+    output.dir=../data/output               # the output directory where all output files will be saved
+    datasets.dir=../data/datasets           # the dataset directory
+    lang=de                                 # a set language (en|de|nl)
+    dbpedia.version=2014                    # DBpedia version
 
-If there are no downloaded datasets in your local computer you can use the downloader in the Core module. Go to the Core module and type this command (all required datasets will be downloaded to the datasets directory):
+If there are no downloaded datasets in your local computer you can use the Downloader module. Go to the Downloader module folder and type this command (all required datasets will be downloaded to the datasets directory):
 
     mvn scala:run -DaddArgs=../global.properties
 
@@ -96,9 +144,6 @@ Before starting the extraction process, check the HypernymExtractor/module.prope
 
     global.properties.file=../global.properties                             # path to the global.properties file
     index.dir=../data/index                                                 # path to the directory where indexed datasets will be saved by Lucene
-    dataset.short_abstracts.path=../data/datasets/short_abstracts_en.nt     # path to the Short Abstracts dataset for the set language
-    dataset.instance_types.path=../data/datasets/instance_types_en.nt       # path to the Mapping-based Types dataset for the set language
-    dataset.labels.path=../data/datasets/labels_en.nt                       # path to the Titles dataset for the set language
     gate.dir=../utils/gate-7.0                                              # path to the Gate root directory (binary package)
     gate.plugin.lhd.dir=../HypernymExtractor/target/gateplugin              # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
     gate.jape.grammar=../data/grammar/en_hearst.jape                        # path to the JAPE grammar for the set language
@@ -113,12 +158,12 @@ After checking the properties go to the HypernymExtractor directory and start th
     
 For each command you must set path to the properties file as first argument of the script launcher (-DaddArgs=module.properties). The first command indexes datasets by Lucene; the second one extracts hypernyms for all DBpedia resources and saves results to the output directory. After these steps you can continnue to the next module.
 
-Optionaly: The extraction process can be started in parallel. You can **map** it to more processes by specifying a start pointer and final pointer; then you can **reduce** these pieces to the one result file.
+Optionaly: The extraction process can be started in parallel. You can **map** it to more processes by specifying a start pointer and a final pointer; then you can **reduce** these pieces to the one result file.
 
     mvn scala:run -Dlauncher=runner -DaddArgs=module.properties|10000|20000       -- this command handles all resources from 10000 to 20000
     mvn scala:run -Dlauncher=stats -DaddArgs=module.properties                    -- this command shows number of all resources
 
-Optionaly: For the parallel processing in your local computer by using a multiple core processor, you can use the MapReduce module. Go to the MapReduce directory and run the extraction proccess for multiple threads by this maven command (the first arg is a number of resources being extracted in one thread, the optionaly second arg is a path to the maven executive file):
+Optionaly: For the parallel multi-thread processing in your local computer by using a multiple core processor, you can use the MapReduce module. Go to the MapReduce directory and run the extraction proccess for multiple threads by this maven command (the first arg is a number of resources being extracted in one thread, the optionaly second arg is a path to the maven executive file):
 
     mvn scala:run -Dlauncher=starter -DaddArgs=20000
     OR
@@ -129,13 +174,14 @@ Optionaly: For the parallel processing in your local computer by using a multipl
 
 This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map it to a DBpedia ontology type. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
 
+Handwritten rules - excluded types (optional)
+        * override-types                 // Handwritten rules - mappings of types to another one (optional)
+
 Before starting the mapping process, check the LHDOntologyCleanup/module.properties file:
 
     global.properties.file=../global.properties                                          # path to the global.properties file
-    dataset.instance_types.path=../data/datasets/instance_types_en.nt                    # path to the Mapping-based Types dataset depends on the set language
-    dataset.instance_types.en.path=../data/datasets/instance_types_en.nt                 # path to the English Mapping-based Types dataset
-    dataset.interlanguage_links.en.path=../data/datasets/interlanguage_links_en.nt       # path to the English Inter-Language Links dataset
-    dataset.ontology.path=../data/datasets/dbpedia_3.9.owl                               # path to the DBpedia Ontology file
+    manualmapping.overridetypes.path=../data/datasets/override-types_en                  # path to the file where handwritten rules - excluded types are saved (this is an optional setting)
+    manualmapping.excludetypes.path=../data/datasets/exclude-types                       # path to the file where handwritten rules, mappings of types to another one, are saved (this is an optional setting)
     
 After checking the properties go to the LHDOntologyCleanup directory and start the mapping process by these commands (there are required result files of the HypernymExtractor process in the output directory):
 
@@ -149,8 +195,6 @@ This is the final step making LHD datasets. LHDTypeInferrer module tries to infe
 Before starting the inferring process, check the LHDTypeInferrer/module.properties file:
 
     global.properties.file=../global.properties                              # path to the global.properties file
-    dataset.instance_types.path=../data/datasets/instance_types_en.nt        # path to the Mapping-based Types dataset
-    dataset.ontology.path=../data/datasets/dbpedia_3.9.owl                   # path to the DBpedia Ontology file
     compressTemporaryFiles=true                                              # if true then all generated temporary files will be zipped to the one file and deleted from the output directory (true|false).
     
 After checking the properties go to the LHDTypeInferrer directory and start the inferring process by these commands (there are required result files of the LHDOntologyCleanup process in the output directory):
@@ -159,7 +203,7 @@ After checking the properties go to the LHDTypeInferrer directory and start the 
     
 ##Results
 
-The LHDTypeInferrer module made two key files: **en.LHDv1.draft.nt** and **en.LHDv2.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true', all temporary files were zipped to the **en.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
+The LHDTypeInferrer module made two key files: **LANG.LHDv1.draft.nt** and **LANG.LHDv2.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true', all temporary files were zipped to the **LANG.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
 
 ###LHD 1.0
 
@@ -182,3 +226,11 @@ In this dataset, all unmapped types are assigned to a DBpedia ontology type by t
     <http://dbpedia.org/resource/Germany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Place> .
     
     <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
+
+###PlainHyp
+
+This dataset **LANG.plainHyp.draft.nt** contains hypernyms in the plain-text form. Example:
+
+    <http://de.dbpedia.org/resource/Angela_Salem> <http://de.dbpedia.org/property/hypernym> "Fu\u00DFballspielerin"@de .
+    <http://de.dbpedia.org/resource/Lee_Hsin-han> <http://de.dbpedia.org/property/hypernym> "Tennisspieler"@de .
+
