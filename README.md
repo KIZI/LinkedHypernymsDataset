@@ -174,9 +174,6 @@ Optionaly: For the parallel multi-thread processing in your local computer by us
 
 This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map it to a DBpedia ontology type. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
 
-Handwritten rules - excluded types (optional)
-        * override-types                 // Handwritten rules - mappings of types to another one (optional)
-
 Before starting the mapping process, check the LHDOntologyCleanup/module.properties file:
 
     global.properties.file=../global.properties                                          # path to the global.properties file
