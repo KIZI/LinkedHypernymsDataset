@@ -58,6 +58,7 @@ There is a recommended file structure in the root directory:
       * gate-7.0                         // Gate software - binary package
       * treetagger                       // Treetagger - POS tagger for German and Dutch
     * global.properties                  // global settings of all modules
+    * run-all.sh                         // main launcher
     * pom.xml
 
 Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package).
