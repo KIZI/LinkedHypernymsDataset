@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.net.ConnectException;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -103,41 +104,54 @@ public class DBpediaLinker {
 
             URL url;
             StringBuilder buffer = new StringBuilder();
-            Pattern articleTitle;
-            try {
-                //System.out.println("Fetching url for linking: " + wikiBase + spanPath+"&srlimit=" + 5 + "&srsearch=" + input);
-                long start = System.currentTimeMillis();
+            Pattern articleTitle = null;
+            for (int i = 0; i < 10; i++) {
+                try {
+                    //System.out.println("Fetching url for linking: " + wikiBase + spanPath+"&srlimit=" + 5 + "&srsearch=" + input);
+                    long start = System.currentTimeMillis();
 
-                if (APIBase.contains("search")) {
-                    //e.g. http://ner.vse.cz:8125/search/de_wikimirror/iron%20lady?limit=1
-                    url = new URL(APIBase + input + "?limit=" + 1);
-                    articleTitle = Pattern.compile("^\\d.*\\s(\\S+)$", Pattern.MULTILINE);
-                } else {
+                    if (APIBase.contains("search")) {
+                        //e.g. http://ner.vse.cz:8125/search/de_wikimirror/iron%20lady?limit=1
+                        url = new URL(APIBase + input + "?limit=" + 1);
+                        articleTitle = Pattern.compile("^\\d.*\\s(\\S+)$", Pattern.MULTILINE);
+                    } else {
                     //api search with xml formatted results
-                    // e.g. http://ner.vse.cz/wiki/api.php?action=query&format=xml&list=search&srwhat=text&srsearch=film
+                        // e.g. http://ner.vse.cz/wiki/api.php?action=query&format=xml&list=search&srwhat=text&srsearch=film
 
-                    //(!) srwhat=nearmatch seems to be giving better results than srwhat=text, 
-                    //e.g. player is mapped to Player with nearmatch, but to John Player & Sons with text
-                    url = new URL(APIBase + "api.php?action=query&format=xml&list=search&srwhat=nearmatch" + "&srlimit=" + 1 + "&srsearch=" + input);
-                    //articleTitle_text = Pattern.compile("title=\"(.*?)\"", Pattern.DOTALL);  
-                    articleTitle = Pattern.compile(" title=\"([^\"]+)\" ", Pattern.MULTILINE);
+                        //(!) srwhat=nearmatch seems to be giving better results than srwhat=text, 
+                        //e.g. player is mapped to Player with nearmatch, but to John Player & Sons with text
+                        url = new URL(APIBase + "api.php?action=query&format=xml&list=search&srwhat=nearmatch" + "&srlimit=" + 1 + "&srsearch=" + input);
+                        //articleTitle_text = Pattern.compile("title=\"(.*?)\"", Pattern.DOTALL);  
+                        articleTitle = Pattern.compile(" title=\"([^\"]+)\" ", Pattern.MULTILINE);
 
+                    }
+                    //Logger.getGlobal().log(Level.INFO, url.toString());
+                    URLConnection connection = url.openConnection();
+                    InputStream is = connection.getInputStream();
+                    Reader isr = new InputStreamReader(is, "UTF-8");
+                    Reader in = new BufferedReader(isr);
+                    int ch;
+
+                    while ((ch = in.read()) > -1) {
+                        buffer.append((char) ch);
+                    }
+                    in.close();
+                    long elapsedTime = System.currentTimeMillis() - start;
+                    break;
+                    //System.out.println("Document for linking fetched in: " + elapsedTime/1000F + "s ");                
+                } catch (ConnectException e) {
+                    Logger.getGlobal().log(Level.INFO, "{0}. Retry #{1}", new Object[]{e.getMessage(), i});
+                    try {
+                        Thread.sleep((long) (Math.pow(2, i) * 1000));
+                    } catch (InterruptedException ex) {
+                    }
+                } catch (IOException e) {
+                    Logger.getGlobal().log(Level.SEVERE, null, e);
+                    return null;
                 }
-                //Logger.getGlobal().log(Level.INFO, url.toString());
-                URLConnection connection = url.openConnection();
-                InputStream is = connection.getInputStream();
-                Reader isr = new InputStreamReader(is, "UTF-8");
-                Reader in = new BufferedReader(isr);
-                int ch;
+            }
 
-                while ((ch = in.read()) > -1) {
-                    buffer.append((char) ch);
-                }
-                in.close();
-                long elapsedTime = System.currentTimeMillis() - start;
-                //System.out.println("Document for linking fetched in: " + elapsedTime/1000F + "s ");                
-            } catch (IOException e) {
-                Logger.getGlobal().log(Level.SEVERE, null, e);
+            if (articleTitle == null) {
                 return null;
             }
 

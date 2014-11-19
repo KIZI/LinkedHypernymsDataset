@@ -20,6 +20,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.commons.lang.StringEscapeUtils;
 
 /**
  * @author Milan Dojchinovski
@@ -147,12 +148,12 @@ public class HypernymExtractor {
         } else {
             StringBuilder content = new StringBuilder();
             content.append("<");
-            content.append(source);
+            content.append(StringEscapeUtils.escapeJava(source));
             content.append(">");
             //content.append(" <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ");
             content.append(" <?> ");
             content.append("<");
-            content.append(hypernym);
+            content.append(StringEscapeUtils.escapeJava(hypernym));
             content.append(">.");
             dbpediaOutputFile.println(content);
         }
