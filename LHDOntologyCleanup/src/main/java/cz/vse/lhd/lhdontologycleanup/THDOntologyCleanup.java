@@ -159,7 +159,6 @@ public class THDOntologyCleanup {
         output_file_classes_subclass_bw = initOutputFile(basePath + ".class.subclasss.nt", true);
         output_file_instances_less_sure_bw = initOutputFile(basePath + ".instances.less_sure.nt", true);
 
-
         output_file_instances_notmapped_probably_existing_bw.append("#Statements where the name of the object does not match any of the DBpedia-owl types, but it exactly matches a name of another assigned type in DBpedia (such as from the schema.org) ontology. These statements are thus redundant.\n");
         //but this type matches the name of the wikipedia resource
         // example: http://dbpedia.org/resource/Garden_Networks have thd assigned type http://en.wikipedia.org/wiki/Organization
@@ -174,8 +173,6 @@ public class THDOntologyCleanup {
         output_file_classes_superclass_bw.append("#The mappings from DBpedia article to its superclass - a DBpedia ontology class\n#These are most likely all wrong, since the confirmed mappings from *.class.superclass.confirmed.nt do not appear in this file \n");
         output_file_classes_subclass_bw.append("#The mappings from DBpedia article to its subclass - a DBpedia ontology class\n");
         output_file_instances_less_sure_bw.append("#Statements with the subject used as object (i.e. hypernym) in another extracted statement and at the same time the object is considered as instance in DBpedia\n");
-
-
 
         //output_file_instances_suspicious_bw = new BufferedWriter(output_file_instances_suspicious_fw);        
     }
@@ -240,11 +237,11 @@ public class THDOntologyCleanup {
      */
 
     private static String urlEncodeResource(String uri) throws UnsupportedEncodingException {
-        int indexoflastSlash = uri.lastIndexOf("/");
-        String lastPart = uri.substring(indexoflastSlash + 1);
-        String firstPart = uri.substring(0, indexoflastSlash + 1);
-        return firstPart + URLEncoder.encode(lastPart, "UTF-8");
-
+//        int indexoflastSlash = uri.lastIndexOf("/");
+//        String lastPart = uri.substring(indexoflastSlash + 1);
+//        String firstPart = uri.substring(0, indexoflastSlash + 1);
+//        return firstPart + URLEncoder.encode(lastPart, "UTF-8");
+        return uri;
     }
 
     private static void saveTriple(String subject, String predicate, String object, BufferedWriter bw) throws IOException {
@@ -300,9 +297,6 @@ public class THDOntologyCleanup {
                     mappingMethod = MappingMethodEnum.notmapped;
                 }
             }
-
-
-
 
             if (hypoIsHypernym) {
                 if (hypoIsMarkedAsInstanceInDBpedia) {
@@ -410,7 +404,7 @@ public class THDOntologyCleanup {
             System.out.println("argument 1 'Base path' not provided, using default=" + basePath);
             System.out.println("argument 2 'language' not provided, using default=" + lang);
             /*System.out.println("Running in the desktop mode (limiting the number of processed lines to avoid out of memory)");
-            maxLines = 1000000;*/
+             maxLines = 1000000;*/
         } else {
             basePath = args[0];
             lang = args[1];
@@ -441,7 +435,6 @@ public class THDOntologyCleanup {
         ManualMapping mm = new ManualMapping(overrideTypesPath, excludeTypes);
         String typesOverridenPath = manualTypeOverride(thdInputOnlyUniqueLines, basePath, mm, lang);
 
-
         System.out.println("ExcludeTypesPath=" + excludeTypes);
 
         String supplementalOntologyPath_EN = basePath + "en.class.superclass.confirmed.nt";
@@ -452,7 +445,6 @@ public class THDOntologyCleanup {
         InstanceCheck firstLangClassMappings = null;
         LanguageMapping mapping = null;
         InstanceCheck ENfallbackLangInstanceClassMappings;
-
 
         if (!lang.equals("en")) {
             String mappingFile = Conf.datasetInterlanguage_linksEnPath();//.excerpt
@@ -475,7 +467,6 @@ public class THDOntologyCleanup {
 
         buildHyperHypoHashMap(finalInstancesPath);
 
-
         OntologyMapping omEnglish = new OntologyMapping(ontologyPath, supplementalOntologyPath_EN, "en");
         OntologyMapping omLanguageDependent = null;
         if (!lang.equals("en")) {
@@ -485,7 +476,6 @@ public class THDOntologyCleanup {
 
             // this contains mappings from non-English alternative names to dbpedia-owl classes
             //and is used in generate* functions when the statement's object failed to map to English DBpedia in translateTypesInInstanceFile
-
             //for dutch this is completely useless, since there are no alternative names for nl in dbpedia_3.8.owl, 
             // but there are many for de
             omLanguageDependent = new OntologyMapping(ontologyPath, supplementalOntologyPath_lang_dep, lang);
@@ -498,8 +488,6 @@ public class THDOntologyCleanup {
         for (String path : allFilePathToGenerateStatsFrom) {
             generateFileWithListOfTypesAndFrequency(path);
         }
-
-
 
         //listSuspiciousEntries();
         //REMOVE LINES from INSTANCES WHICH CONTAIN AS HYPERNYM A CONCEPT, WHICH DOES NOT HAVE ANY TYPE IN DBPEDIA INSTANCES FILE
@@ -660,7 +648,6 @@ public class THDOntologyCleanup {
 
                 }
 
-
             }
 
         }
@@ -668,7 +655,6 @@ public class THDOntologyCleanup {
     }
 
     private static void buildHyperHypoHashMap(String filePath) {
-
 
         try {
             FileInputStream fstream = new FileInputStream(filePath);
@@ -681,7 +667,6 @@ public class THDOntologyCleanup {
                     continue;
                 }
 
-
                 int indexOfSubjectStart = thisLine.indexOf("<");
                 int indexOfSubjectEnd = thisLine.indexOf(">");
 
@@ -689,7 +674,6 @@ public class THDOntologyCleanup {
                 int indexOfObjectStart = thisLine.lastIndexOf("<");
                 int indexOfObjectEnd = thisLine.lastIndexOf(">");
                 String object = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
-
 
                 String hypo = subject;
                 String hyper = object;
