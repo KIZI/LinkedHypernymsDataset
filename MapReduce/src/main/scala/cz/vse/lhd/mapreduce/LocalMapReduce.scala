@@ -15,14 +15,16 @@ object LocalMapReduce extends AppConf {
   val mapReduce = new MapReduce {
     
     def map = {
-      new HypenymExtractionCountCommand(count => 
-        0.to(count, Conf.intervalLength).par foreach (start => {
-            val end = start + Conf.intervalLength
-            val hec = new HypenymExtractionCommand(start, end)
-            hec.execute
-          }
-        ) 
-      ).execute
+      new HypenymExtractionCountCommand(count => {
+          val start = Conf.offset.getOrElse(0)
+          val end = Conf.limit.map(_ + start).getOrElse(count)
+          start.to(end, Conf.intervalLength).par foreach (start => {
+              val end = start + Conf.intervalLength
+              val hec = new HypenymExtractionCommand(start, end)
+              hec.execute
+            }
+          )
+        }).execute
       this
     }
     
