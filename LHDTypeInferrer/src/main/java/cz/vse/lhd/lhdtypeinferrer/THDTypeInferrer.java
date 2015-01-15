@@ -10,8 +10,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -19,11 +26,13 @@ import java.util.Iterator;
  */
 public class THDTypeInferrer {
 
-    private static HashMap<String, ArrayList<String>> hyperHypo = new HashMap();
+    private static final HashMap<String, ArrayList<String>> hyperHypo = new HashMap();
     public static Integer maxLines = Integer.MAX_VALUE;
 
     /**
-     * @param args the command line arguments
+     * @param input
+     * @return 
+     * @throws java.io.FileNotFoundException
      */
     public static ArrayList<String> readStatFile(String input) throws FileNotFoundException, IOException {
         ArrayList<String> result = new ArrayList();
@@ -49,7 +58,6 @@ public class THDTypeInferrer {
 
     private static void buildHyperHypoHashMap(String filePath) {
 
-
         try {
             FileInputStream fstream = new FileInputStream(filePath);
             // Get the object of DataInputStream
@@ -61,7 +69,6 @@ public class THDTypeInferrer {
                     continue;
                 }
 
-
                 int indexOfSubjectStart = thisLine.indexOf("<");
                 int indexOfSubjectEnd = thisLine.indexOf(">");
                 if (indexOfSubjectStart == -1) {
@@ -72,7 +79,6 @@ public class THDTypeInferrer {
                 int indexOfObjectStart = thisLine.lastIndexOf("<");
                 int indexOfObjectEnd = thisLine.lastIndexOf(">");
                 String object = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
-
 
                 String hypo = subject;
                 String hyper = object;
@@ -133,6 +139,8 @@ public class THDTypeInferrer {
         String fileWithEntitiesForMapping = resultPath + lang + ".instances.all.nt";
         String fileWithHypernymsForMapping = resultPath + lang + ".instances.all.stat";
         String fileMappedToDBpedia = resultPath + lang + ".instances.all.inferredmapping.nt";
+        String debugPathDBpediaTypes = resultPath + lang + ".debug.inference";
+        BufferedWriter bw_debug = initOutputFile(debugPathDBpediaTypes);
         ArrayList urisToProcess = readStatFile(fileWithHypernymsForMapping);
         String completeLHD = resultPath + lang + ".instances.all.nt";
         //Ontology omEnglish = new Ontology(dataPath+"dbpedia_3.8.owl" ,lang);
@@ -161,10 +169,9 @@ public class THDTypeInferrer {
                 }
                 for (String hypoType : hypoTypes) {
                     //imList contains zero-length hyponyms (these replace types which are not in the dbpedia ontology namespace)
-                    if (hypoType == "") {
+                    if ("".equals(hypoType)) {
                         continue;
                     }
-
 
                     Integer freq = typeFrequency.get(hypoType);
                     if (freq == null) {
@@ -178,10 +185,15 @@ public class THDTypeInferrer {
 
             System.out.println(hypernymURI);
             // print the frequency for each type
+            bw_debug.append("# type \n");
+            bw_debug.append(hypernymURI + "\n");
+            bw_debug.append("#list of  candidate mapped types,frequency,confidence \n");
+            int totalFreq = 0;
             for (String type : typeFrequency.keySet()) {
-                typeFrequency.get(type);
+                totalFreq = totalFreq + typeFrequency.get(type);
                 System.out.println(type + ":" + typeFrequency.get(type));
             }
+            printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
             //while (at least one discard is made)
             // discard the type if among types of the hypernym there is at least one subtype with frequency,
             //which is not significantly lower (0.8)
@@ -201,12 +213,10 @@ public class THDTypeInferrer {
                     for (String candidateSubtype : typeFrequency.keySet()) {
                         //among the other types there is also the current type - we skip it
                         if (type.equals(candidateSubtype)) {
-                            continue;
                         } //if the other type is a subtype of the current type
                         else if (ocheck.isTransitiveSubtype(expandToDBpediaOntologyURI(type), expandToDBpediaOntologyURI(candidateSubtype))) {
                             if (typeFrequency.get(candidateSubtype) <= minSubTypeFrequency) {
                                 //the candidate subtype does not have sufficiently high support
-                                continue;
                             } else {
                                 //for the current type there is a subclass with similar support
                                 // the type can thus be removed
@@ -229,12 +239,16 @@ public class THDTypeInferrer {
             // now just selecting the type with highest support
             int maxFreq = -1;
             String maxFreqType = "";
+            int maxFrequencyofMaxFreqType = -1;
+            bw_debug.append("#Pruned set of types,frequency,confidence \n");
+            printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
             for (String type : typeFrequency.keySet()) {
                 int curFreq = typeFrequency.get(type);
 
                 if (curFreq > maxFreq) {
                     maxFreq = curFreq;
                     maxFreqType = type;
+                    maxFrequencyofMaxFreqType = curFreq;
                 }
             }
             if (maxFreq == -1) {
@@ -244,17 +258,19 @@ public class THDTypeInferrer {
             System.out.println(hypernymURI);
             System.out.println(maxFreqType);
             System.out.println(maxFreq);
+            bw_debug.append("#Selected mapping, confidence\n");
+            float confidence = ((float) maxFrequencyofMaxFreqType) / ((float) totalFreq);
+            bw_debug.append(maxFreqType + "," + confidence + " \n\n");
             mappingFromResourcesToClasses.put(hypernymURI, maxFreqType);
             result = result + "#" + maxFreq + "\n";
             result = result + "<" + hypernymURI + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/" + maxFreqType + "> .\n";
             //System.out.println("<http://dbpedia.org/resource/Stagename> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Name>".
             System.out.println("xxxxx");
-
-
         }
 
         bw.append(result);
         bw.close();
+        bw_debug.close();
         translateTypesFromResourcesToClasses(fileWithEntitiesForMapping, fileMappedToDBpedia, mappingFromResourcesToClasses, imList);
 //        hypernym  h in instances.all.dbpedia.resource.stat
 //{
@@ -279,6 +295,40 @@ public class THDTypeInferrer {
 //kde
 //instances.all.dbpedia.resource.stat - všechny typy nenamapovaných
 //        
+    }
+
+    private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
+
+        List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
+
+        // Sorting the list based on values
+        Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+            public int compare(Entry<String, Integer> o1,
+                    Entry<String, Integer> o2) {
+                if (order) {
+                    return o1.getValue().compareTo(o2.getValue());
+                } else {
+                    return o2.getValue().compareTo(o1.getValue());
+
+                }
+            }
+        });
+
+        // Maintaining insertion order with the help of LinkedList
+        Map<String, Integer> sortedMap = new LinkedHashMap<String, Integer>();
+        for (Entry<String, Integer> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
+    }
+
+    public static void printMap(Map<String, Integer> map, BufferedWriter bw, int totalFreq) throws IOException {
+        for (String type : map.keySet()) {
+            int freq = map.get(type);
+            bw.append(type + "," + map.get(type) + "," + ((float) freq / (float) totalFreq) + "\n");
+            System.out.println(type + ":" + map.get(type));
+        }
     }
 
     public static BufferedWriter initOutputFile(String path) throws IOException {
@@ -313,13 +363,11 @@ public class THDTypeInferrer {
         int lineCounter = 0;
         try {
 
-
             while ((thisLine = br.readLine()) != null) {
                 lineCounter++;
                 if (thisLine.startsWith("#")) {
                     continue;
                 }
-
 
                 int indexOfSubjectEnd = thisLine.indexOf(">");
                 if (indexOfSubjectEnd < 0) {
@@ -332,7 +380,6 @@ public class THDTypeInferrer {
 
                 //yago does not use url encoding
                 //subjectName = URLDecoder.decode(subjectName, "UTF-8");
-
                 int indexOfObjectStart = thisLine.lastIndexOf("<");//indexOfObjectEnd + predicateLength + 3;
                 int indexOfObjectEnd = thisLine.lastIndexOf(">");
                 String objectName = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);

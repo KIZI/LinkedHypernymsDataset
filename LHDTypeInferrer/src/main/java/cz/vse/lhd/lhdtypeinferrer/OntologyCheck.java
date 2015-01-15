@@ -1,10 +1,12 @@
 package cz.vse.lhd.lhdtypeinferrer;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.HashMap;
 
 /**
@@ -14,7 +16,7 @@ import java.util.HashMap;
 public class OntologyCheck {
 
     //key = class ,  value list of  superclass
-    private HashMap<String, String[]> allITaxonomy = new HashMap();
+    private final HashMap<String, String[]> allITaxonomy = new HashMap();
     /*
      * example input line
      * <http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Disease> .
@@ -22,7 +24,6 @@ public class OntologyCheck {
 
     public OntologyCheck(String path) throws IOException {
         readAllITaxonomy(path);
-
     }
 
     /*public boolean isType(String name)
@@ -84,13 +85,14 @@ public class OntologyCheck {
      }*/
 
     private void readAllITaxonomy(String path) throws IOException {
-//                    Pattern classPattern  = Pattern.compile("<owl:Class rdf:about=\"([^\"]+)\">(.*?)</owl:Class>", Pattern.DOTALL);    
-
-        FileInputStream fstream = new FileInputStream(path);
-        // Get the object of DataInputStream
-        DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        StringBuilder all = new StringBuilder();
+//                    Pattern classPattern  = Pattern.compile("<owl:Class rdf:about=\"([^\"]+)\">(.*?)</owl:Class>", Pattern.DOTALL);
+        Model model = ModelFactory.createDefaultModel();
+        model.read(new FileInputStream(Conf.datasetOntologyPath()), null, "RDF/XML");
+        StringWriter n3 = new StringWriter();
+        model.write(n3, "N-TRIPLE");
+        n3.flush();
+        
+        BufferedReader br = new BufferedReader(new StringReader(n3.toString()));
         String thisLine;
         int lineCounter = 0;
         try {
