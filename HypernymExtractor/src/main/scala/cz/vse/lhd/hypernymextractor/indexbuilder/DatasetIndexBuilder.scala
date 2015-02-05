@@ -16,8 +16,20 @@ import org.apache.lucene.index.Term
 object DatasetIndexBuilder extends AppConf {
 
   ARQ.init
-  indexAbstracts(buildDatasetIterator(Conf.datasetShort_abstractsPath))
-  indexTypes(buildDatasetIterator(Conf.datasetInstance_typesPath))
+
+  {
+    implicit val disambiguations = buildDatasetIterator(Conf.datasetDisambiguations).foldLeft(Set.empty[String]) {
+      case (r, x :: _) => r + x.getSubject.getURI
+      case (r, _) => r
+    }
+    indexAbstracts(buildDatasetIterator(Conf.datasetShort_abstractsPath).filter(filterDisambiguation))
+    indexTypes(buildDatasetIterator(Conf.datasetInstance_typesPath).filter(filterDisambiguation))
+  }
+
+  private def filterDisambiguation(st: List[Statement])(implicit disambiguations: Set[String]) = st match {
+    case x :: _ => !disambiguations(x.getSubject.getURI)
+    case _ => true
+  }
 
   private def buildDatasetIterator(datasetPath: String) = {
     import scala.collection.JavaConversions._
@@ -36,14 +48,16 @@ object DatasetIndexBuilder extends AppConf {
         TraversableUtils.lazySortedSeqGroupBy(
           it collect {
             case x :: _ => x
-          })(x => x.getSubject.getURI) map (x => x -> lr.select(new Term(ArticleDocument.strId, x.head.getSubject.getURI), 1)) collect {
+          }
+        )(x => x.getSubject.getURI) map (x => x -> lr.select(new Term(ArticleDocument.strId, x.head.getSubject.getURI), 1)) collect {
             case (x, ArticleDocument(ad) :: _) => {
               i = i + 1
               if (i % 50000 == 0)
                 Logger.get.info("Types added: " + i)
               (new Term(ArticleDocument.strId, ad.url), ad.etype(x map (_.getObject.asResource.getURI)))
             }
-          })
+          }
+      )
     } finally {
       lr.close
     }
@@ -64,9 +78,11 @@ object DatasetIndexBuilder extends AppConf {
               .getObject
               .asLiteral
               .getString
-              .replaceAll("""(\([^\)]+\))|(\[[^\]]+\])""", ""))
+              .replaceAll("""(\([^\)]+\))|(\[[^\]]+\])""", "")
+          )
         }
-      })
+      }
+    )
     Logger.get.info("Total indexed pages: " + i)
   }
 

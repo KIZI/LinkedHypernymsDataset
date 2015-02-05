@@ -13,6 +13,7 @@ class DatasetDownloaderDe(version: String) extends DatasetDownloader {
   val urlBaseDe = "http://de.dbpedia.org/downloads/"
   val filePatterns = List(
     "short-abstracts.nt.gz" -> "short_abstracts_de.nt",
+    "disambiguations.nt.gz" -> "disambiguations_de.nt",
     "labels.nt.gz" -> "labels_de.nt",
     "instance-types.nt.gz" -> "instance_types_de.nt")
   val urlBaseEn = urlBase + "en/"

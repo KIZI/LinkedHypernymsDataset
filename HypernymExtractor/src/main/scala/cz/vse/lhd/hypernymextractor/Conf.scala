@@ -37,10 +37,12 @@ object Conf extends ConfGlobal {
   val (
     datasetShort_abstractsPath,
     datasetLabelsPath,
-    datasetInstance_typesPath) = (
+    datasetInstance_typesPath,
+    datasetDisambiguations) = (
     s"${Conf.datasetsDir}short_abstracts_$lang.nt",
     s"${Conf.datasetsDir}labels_$lang.nt",
-    s"${Conf.datasetsDir}instance_types_$lang.nt")
+    s"${Conf.datasetsDir}instance_types_$lang.nt",
+    s"${Conf.datasetsDir}disambiguations_$lang.nt")
 
   List(gateJapeGrammar, datasetShort_abstractsPath, datasetLabelsPath, datasetInstance_typesPath) foreach {
     case FileExtractor(_) =>
