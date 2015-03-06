@@ -1,7 +1,11 @@
 package cz.vse.lhd.lhdtypeinferrer;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,6 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -31,7 +38,7 @@ public class THDTypeInferrer {
 
     /**
      * @param input
-     * @return 
+     * @return
      * @throws java.io.FileNotFoundException
      */
     public static ArrayList<String> readStatFile(String input) throws FileNotFoundException, IOException {
@@ -57,42 +64,27 @@ public class THDTypeInferrer {
     }
 
     private static void buildHyperHypoHashMap(String filePath) {
-
-        try {
-            FileInputStream fstream = new FileInputStream(filePath);
-            // Get the object of DataInputStream
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String thisLine;
-            while ((thisLine = br.readLine()) != null) {
-                if (thisLine.startsWith("#")) {
-                    continue;
-                }
-
-                int indexOfSubjectStart = thisLine.indexOf("<");
-                int indexOfSubjectEnd = thisLine.indexOf(">");
-                if (indexOfSubjectStart == -1) {
-                    continue;
-                }
-
-                String subject = thisLine.substring(indexOfSubjectStart + 1, indexOfSubjectEnd);
-                int indexOfObjectStart = thisLine.lastIndexOf("<");
-                int indexOfObjectEnd = thisLine.lastIndexOf(">");
-                String object = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
-
-                String hypo = subject;
-                String hyper = object;
-                ArrayList<String> existingHypos = hyperHypo.get(hyper);
-                if (existingHypos == null) {
-                    existingHypos = new ArrayList();
-                    existingHypos.add(hypo);
-                    hyperHypo.put(hyper, existingHypos);
-                } else {
-                    existingHypos.add(hypo);
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                Model model = ModelFactory.createDefaultModel();
+                model.read(new ByteArrayInputStream(line.getBytes()), null, "N-TRIPLE");
+                if (!model.isEmpty()) {
+                    Statement stmt = model.listStatements().next();
+                    String hypo = URLDecoder.decode(stmt.getSubject().getURI(), "UTF-8");
+                    String hyper = stmt.getObject().asResource().getURI();
+                    ArrayList<String> existingHypos = hyperHypo.get(hyper);
+                    if (existingHypos == null) {
+                        existingHypos = new ArrayList();
+                        existingHypos.add(hypo);
+                        hyperHypo.put(hyper, existingHypos);
+                    } else {
+                        existingHypos.add(hypo);
+                    }
                 }
             }
-
         } catch (IOException ex) {
+            Logger.getLogger(THDTypeInferrer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -121,7 +113,7 @@ public class THDTypeInferrer {
     public static void completeWithLHD() {
     }
 
-    public static void run(String[] args) throws Exception {
+    public static void run(String[] args, Logger logger) throws Exception {
 
         HashMap<String, String> mappingFromResourcesToClasses = new HashMap();
         String dataPath = Conf.outputDir();
@@ -141,14 +133,18 @@ public class THDTypeInferrer {
         String fileMappedToDBpedia = resultPath + lang + ".instances.all.inferredmapping.nt";
         String debugPathDBpediaTypes = resultPath + lang + ".debug.inference";
         BufferedWriter bw_debug = initOutputFile(debugPathDBpediaTypes);
+        logger.info("Stats loading...");
         ArrayList urisToProcess = readStatFile(fileWithHypernymsForMapping);
         String completeLHD = resultPath + lang + ".instances.all.nt";
         //Ontology omEnglish = new Ontology(dataPath+"dbpedia_3.8.owl" ,lang);
+        logger.info("Ontology loading...");
         OntologyCheck ocheck = new OntologyCheck(Conf.datasetOntologyPath());
+        logger.info("Instance types loading...");
         InstanceTypesList imList = new InstanceTypesList(DBpediaInstancesFilePath, true);
-
+        logger.info("Hypernyms loading...");
         buildHyperHypoHashMap(completeLHD);
         String result = "";
+        logger.info("STI process has been started...");
         for (Iterator<String> it = urisToProcess.iterator(); it.hasNext();) {
             String hypernymURI = it.next();
 
@@ -158,18 +154,19 @@ public class THDTypeInferrer {
             //for ech instances, which has the current hypernym as its type
             //get its types and add up their frequency
             if (hypos == null) {
-                System.out.println("No hypos, skipping" + hypernymURI);
+                logger.log(Level.WARNING, "No hypos, skipping {0}", hypernymURI);
                 continue;
             }
             for (String hypo : hypos) {
                 //get all types of this instance
                 String[] hypoTypes = imList.getInstanceTypes(hypo);
                 if (hypoTypes == null) {
+                    //logger.log(Level.WARNING, "No types for {0}", hypo);
                     continue;
                 }
                 for (String hypoType : hypoTypes) {
                     //imList contains zero-length hyponyms (these replace types which are not in the dbpedia ontology namespace)
-                    if ("".equals(hypoType)) {
+                    if ("".equals(hypoType) || !ocheck.isType(expandToDBpediaOntologyURI(hypoType))) {
                         continue;
                     }
 
@@ -183,17 +180,18 @@ public class THDTypeInferrer {
             }
             // get the most frequent types     
 
-            System.out.println(hypernymURI);
+            //System.out.println(hypernymURI);
             // print the frequency for each type
             bw_debug.append("# type \n");
             bw_debug.append(hypernymURI + "\n");
             bw_debug.append("#list of  candidate mapped types,frequency,confidence \n");
             int totalFreq = 0;
+            //System.out.println(hypernymURI);
             for (String type : typeFrequency.keySet()) {
                 totalFreq = totalFreq + typeFrequency.get(type);
-                System.out.println(type + ":" + typeFrequency.get(type));
+                //System.out.println(type + ":" + typeFrequency.get(type));
             }
-            printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
+            //printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
             //while (at least one discard is made)
             // discard the type if among types of the hypernym there is at least one subtype with frequency,
             //which is not significantly lower (0.8)
@@ -220,7 +218,7 @@ public class THDTypeInferrer {
                             } else {
                                 //for the current type there is a subclass with similar support
                                 // the type can thus be removed
-                                System.out.println("**Removing type " + type + "(" + typeFrequency.get(type) + ") in favour of its subtype " + candidateSubtype + "(" + typeFrequency.get(candidateSubtype) + ")");
+                                //System.out.println("**Removing type " + type + "(" + typeFrequency.get(type) + ") in favour of its subtype " + candidateSubtype + "(" + typeFrequency.get(candidateSubtype) + ")");
                                 typeFrequency.remove(type);
                                 discardMade = true;
                                 break;
@@ -241,7 +239,7 @@ public class THDTypeInferrer {
             String maxFreqType = "";
             int maxFrequencyofMaxFreqType = -1;
             bw_debug.append("#Pruned set of types,frequency,confidence \n");
-            printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
+            //printMap(sortByComparator(typeFrequency, true), bw_debug, totalFreq);
             for (String type : typeFrequency.keySet()) {
                 int curFreq = typeFrequency.get(type);
 
@@ -254,10 +252,10 @@ public class THDTypeInferrer {
             if (maxFreq == -1) {
                 continue;
             }
-            System.out.println("xxxxx");
-            System.out.println(hypernymURI);
-            System.out.println(maxFreqType);
-            System.out.println(maxFreq);
+            //System.out.println("xxxxx");
+            //System.out.println(hypernymURI);
+            //System.out.println(maxFreqType);
+            //System.out.println(maxFreq);
             bw_debug.append("#Selected mapping, confidence\n");
             float confidence = ((float) maxFrequencyofMaxFreqType) / ((float) totalFreq);
             bw_debug.append(maxFreqType + "," + confidence + " \n\n");
@@ -265,7 +263,7 @@ public class THDTypeInferrer {
             result = result + "#" + maxFreq + "\n";
             result = result + "<" + hypernymURI + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/" + maxFreqType + "> .\n";
             //System.out.println("<http://dbpedia.org/resource/Stagename> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://dbpedia.org/ontology/Name>".
-            System.out.println("xxxxx");
+            //System.out.println("xxxxx");
         }
 
         bw.append(result);
@@ -299,10 +297,11 @@ public class THDTypeInferrer {
 
     private static Map<String, Integer> sortByComparator(Map<String, Integer> unsortMap, final boolean order) {
 
-        List<Entry<String, Integer>> list = new LinkedList<Entry<String, Integer>>(unsortMap.entrySet());
+        List<Entry<String, Integer>> list = new LinkedList<>(unsortMap.entrySet());
 
         // Sorting the list based on values
         Collections.sort(list, new Comparator<Entry<String, Integer>>() {
+            @Override
             public int compare(Entry<String, Integer> o1,
                     Entry<String, Integer> o2) {
                 if (order) {
@@ -356,59 +355,63 @@ public class THDTypeInferrer {
         StringBuilder all = new StringBuilder();
         String thisLine;
 
-        BufferedWriter bw = THDTypeInferrer.initOutputFile(outputPath);
-        BufferedWriter bw_NOTYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_NOTYPEINDBPEDIAINSTANCEFILE);
-        BufferedWriter bw_SAMETYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_SAMETYPEINDBPEDIAINSTANCEFILE);
-        BufferedWriter bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_DIFFERENTTYPEINDBPEDIAINSTANCEFILE);
-        int lineCounter = 0;
-        try {
+        BufferedWriter bw_NOTYPEINDBPEDIAINSTANCEFILE;
+        BufferedWriter bw_SAMETYPEINDBPEDIAINSTANCEFILE;
+        BufferedWriter bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE;
+        try (BufferedWriter bw = THDTypeInferrer.initOutputFile(outputPath)) {
 
-            while ((thisLine = br.readLine()) != null) {
-                lineCounter++;
-                if (thisLine.startsWith("#")) {
-                    continue;
-                }
+            bw_NOTYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_NOTYPEINDBPEDIAINSTANCEFILE);
+            bw_SAMETYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_SAMETYPEINDBPEDIAINSTANCEFILE);
+            bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE = THDTypeInferrer.initOutputFile(pathToOnlyInstancesWhereInferredMappingWasApplied_DIFFERENTTYPEINDBPEDIAINSTANCEFILE);
+            int lineCounter = 0;
+            try {
 
-                int indexOfSubjectEnd = thisLine.indexOf(">");
-                if (indexOfSubjectEnd < 0) {
-                    System.err.println("Skipping line " + thisLine);
-                    continue;
-                }
-                String subject = thisLine.substring(1, indexOfSubjectEnd);
+                while ((thisLine = br.readLine()) != null) {
+                    lineCounter++;
+                    if (thisLine.startsWith("#")) {
+                        continue;
+                    }
 
-                String subjectName = subject;
+                    int indexOfSubjectEnd = thisLine.indexOf(">");
+                    if (indexOfSubjectEnd < 0) {
+                        System.err.println("Skipping line " + thisLine);
+                        continue;
+                    }
+                    String subject = thisLine.substring(1, indexOfSubjectEnd);
 
-                //yago does not use url encoding
-                //subjectName = URLDecoder.decode(subjectName, "UTF-8");
-                int indexOfObjectStart = thisLine.lastIndexOf("<");//indexOfObjectEnd + predicateLength + 3;
-                int indexOfObjectEnd = thisLine.lastIndexOf(">");
-                String objectName = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
+                    String subjectName = subject;
 
-                String mapping = mappingFromResourcesToClasses.get(objectName);
-                String outputLine;
+                    //yago does not use url encoding
+                    //subjectName = URLDecoder.decode(subjectName, "UTF-8");
+                    int indexOfObjectStart = thisLine.lastIndexOf("<");//indexOfObjectEnd + predicateLength + 3;
+                    int indexOfObjectEnd = thisLine.lastIndexOf(">");
+                    String objectName = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
 
-                if (mapping != null) {
-                    outputLine = thisLine.replace(objectName + "> .", "http://dbpedia.org/ontology/" + mapping + "> .");
-                    if (imList.isInstance(getNameFromURI(subjectName))) {
-                        if (imList.isInstanceType(getNameFromURI(subjectName), mapping)) {
-                            bw_SAMETYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
+                    String mapping = mappingFromResourcesToClasses.get(objectName);
+                    String outputLine;
+
+                    if (mapping != null) {
+                        outputLine = thisLine.replace(objectName + "> .", "http://dbpedia.org/ontology/" + mapping + "> .");
+                        if (imList.isInstance(getNameFromURI(subjectName))) {
+                            if (imList.isInstanceType(getNameFromURI(subjectName), mapping)) {
+                                bw_SAMETYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
+                            } else {
+                                bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
+                            }
                         } else {
-                            bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
+                            bw_NOTYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
                         }
                     } else {
-                        bw_NOTYPEINDBPEDIAINSTANCEFILE.write(outputLine + "\n");
+                        outputLine = thisLine;
                     }
-                } else {
-                    outputLine = thisLine;
+                    bw.write(outputLine + "\n");
+
                 }
-                bw.write(outputLine + "\n");
+            } catch (java.lang.OutOfMemoryError e) {
+                System.err.println(lineCounter);
 
             }
-        } catch (java.lang.OutOfMemoryError e) {
-            System.err.println(lineCounter);
-
         }
-        bw.close();
         bw_NOTYPEINDBPEDIAINSTANCEFILE.close();
         bw_DIFFERENTTYPEINDBPEDIAINSTANCEFILE.close();
         bw_SAMETYPEINDBPEDIAINSTANCEFILE.close();

@@ -26,22 +26,10 @@ public class OntologyCheck {
         readAllITaxonomy(path);
     }
 
-    /*public boolean isType(String name)
-     {
-     if (allITaxonomy.containsKey(name))
-     {
-     return true;
-     }
-     else if (allITaxonomy.containsValue(name))
-     {
-     return true;
-     }
-     else
-     {
-     return false;
-     }
-     //return allInstances.contains(name);
-     }*/
+    public boolean isType(String name) {
+        return allITaxonomy.containsKey(name);
+    }
+
     public boolean isTransitiveSubtype(String superType, String subType) {
         String[] ontologySuperTypes = allITaxonomy.get(subType);
         //first check if one of the direct supertypes matches
@@ -91,12 +79,11 @@ public class OntologyCheck {
         StringWriter n3 = new StringWriter();
         model.write(n3, "N-TRIPLE");
         n3.flush();
-        
+
         BufferedReader br = new BufferedReader(new StringReader(n3.toString()));
         String thisLine;
         int lineCounter = 0;
         try {
-
 
             while ((thisLine = br.readLine()) != null) {
                 lineCounter++;
@@ -126,7 +113,6 @@ public class OntologyCheck {
                  //this happens e.g. for "<%>	rdfs:subClassOf	xsd:decimal ."
                  //System.err.println(e.toString());
                  }*/
-
                 int indexOfObjectStart = thisLine.lastIndexOf("<");//indexOfObjectEnd + predicateLength + 3;
                 int indexOfObjectEnd = thisLine.lastIndexOf(">");
                 String objectName = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);

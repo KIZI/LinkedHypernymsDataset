@@ -1,12 +1,17 @@
 package cz.vse.lhd.lhdtypeinferrer;
 
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Statement;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,7 +20,7 @@ import java.util.HashMap;
 public class InstanceTypesList {
     //private static HashSet allInstances = new HashSet();
 
-    private HashMap<String, String[]> allInstances_types = new HashMap();
+    private final HashMap<String, String[]> allInstances_types = new HashMap();
     //private static int predicateLength = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>".length();
     private boolean onlyDBpediantologyTypes = false;
     /*
@@ -58,67 +63,32 @@ public class InstanceTypesList {
     }
 
     private void readAllInstances(String path) throws IOException {
-//                    Pattern classPattern  = Pattern.compile("<owl:Class rdf:about=\"([^\"]+)\">(.*?)</owl:Class>", Pattern.DOTALL);    
-
-        FileInputStream fstream = new FileInputStream(path);
-        // Get the object of DataInputStream
-        DataInputStream in = new DataInputStream(fstream);
-        BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        StringBuilder all = new StringBuilder();
-        String thisLine;
-        int lineCounter = 0;
-        try {
-
-
-            while ((thisLine = br.readLine()) != null) {
-                lineCounter++;
-                if (thisLine.startsWith("#")) {
-                    continue;
-                }
-                if (lineCounter > THDTypeInferrer.maxLines) {
-                    System.out.println("Reached maxLines, quitting InstanceCheck.readAllInstances");
-                    break;
-                }
-
-
-//to save memory only the concept name is stored, not full uri            
-                int indexOfSubjectEnd = thisLine.indexOf(" ");
-                String subject = thisLine.substring(0, indexOfSubjectEnd - 1);
-
-                String subjectName = subject.substring(subject.lastIndexOf("/") + 1);
-
-                subjectName = URLDecoder.decode(subjectName, "UTF-8");
-
-                int indexOfObjectStart = thisLine.lastIndexOf("/");//indexOfObjectEnd + predicateLength + 3;
-                int indexOfObjectEnd = thisLine.lastIndexOf(">");
-                String objectName;
-                if (onlyDBpediantologyTypes && !thisLine.contains("/dbpedia.org/ontology")) {
-                    //use empty objectName rather than skip, 
-                    // because the list of keys is used to check whether the article is an instance or not
-                    objectName = "";
-                } else {
-                    objectName = thisLine.substring(indexOfObjectStart + 1, indexOfObjectEnd);
-                }
-
-
-
-                String[] types = allInstances_types.get(subjectName);
-                if (types == null) {
-                    types = new String[1];
-                    types[0] = objectName;
-                } else {
-                    String newTypes[] = new String[types.length + 1];
-                    for (int i = 0; i < types.length; i++) {
-                        newTypes[i] = types[i];
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if ((onlyDBpediantologyTypes && line.contains("/dbpedia.org/ontology")) || !onlyDBpediantologyTypes) {
+                    Model model = ModelFactory.createDefaultModel();
+                    model.read(new ByteArrayInputStream(line.getBytes()), null, "N-TRIPLE");
+                    if (!model.isEmpty()) {
+                        Statement stmt = model.listStatements().next();
+                        String subjectName = URLDecoder.decode(stmt.getSubject().getURI().replaceFirst(".+?dbpedia.org/resource/", ""), "UTF-8");
+                        String objectName = URLDecoder.decode(stmt.getObject().asResource().getURI().replaceFirst(".+?dbpedia.org/ontology/", ""), "UTF-8");
+                        String[] types = allInstances_types.get(subjectName);
+                        if (types == null) {
+                            types = new String[1];
+                            types[0] = objectName;
+                        } else {
+                            String newTypes[] = new String[types.length + 1];
+                            System.arraycopy(types, 0, newTypes, 0, types.length);
+                            newTypes[newTypes.length - 1] = objectName;
+                            types = newTypes;
+                        }
+                        allInstances_types.put(subjectName, types);
                     }
-                    newTypes[newTypes.length - 1] = objectName;
-                    types = newTypes;
                 }
-                allInstances_types.put(subjectName, types);
             }
-        } catch (java.lang.OutOfMemoryError e) {
-            System.err.println(lineCounter);
-
+        } catch (IOException ex) {
+            Logger.getLogger(THDTypeInferrer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

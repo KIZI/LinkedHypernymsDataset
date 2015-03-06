@@ -27,10 +27,14 @@ object TypeInferrerInitializer extends AppConf {
       "instances.mapped.new.nt",
       "instances.notmapped.new.nt",
       "instances.notmapped.probablyexisting.nt",
-      "instances.notmapped.suspicious.nt") map toFilePath collect toFile,
+      "instances.notmapped.suspicious.nt"
+    ) map toFilePath collect toFile,
     List(
       "instances.all.nt",
-      "LHDv1.draft.nt") map toFilePath) foreach (x => {
+      "LHDv1.draft.nt"
+    ) map toFilePath
+  ) foreach (x => {
+      Logger.get.info("Preparing of hypernym datasets and stats files...")
       val statsFile = new PrintWriter(new FileOutputStream(toFilePath("instances.all.stat")))
       try {
         x
@@ -46,15 +50,17 @@ object TypeInferrerInitializer extends AppConf {
       } finally {
         statsFile.close
       }
-      THDTypeInferrer.run(Array())
+      THDTypeInferrer.run(Array(), Logger.get)
     })
-
+  
   FileProcessor(
     List("instances.all.inferredmapping.nt") map toFilePath collect toFile,
-    List("LHDv2.draft.nt") map toFilePath) foreach (
+    List("LHDv2.draft.nt") map toFilePath
+  ) foreach (
       _
       .filter(_.getObject.asResource.getURI.startsWith("http://dbpedia.org/ontology"))
-      .process)
+      .process
+    )
 
   Match(Conf.outputDir + "hypoutput.log.raw") {
     case FileExtractor(file) => {
@@ -70,7 +76,9 @@ object TypeInferrerInitializer extends AppConf {
             model.createStatement(
               model.createResource(s"http://${norLang}dbpedia.org/resource/" + subject.replace(" ", "_")),
               model.createProperty(s"http://${norLang}dbpedia.org/property/hypernym"),
-              model.createLiteral(literal, Conf.lang)))
+              model.createLiteral(literal, Conf.lang)
+            )
+          )
           model.write(fileOutputStream, "N-TRIPLE")
         }
       } finally {
