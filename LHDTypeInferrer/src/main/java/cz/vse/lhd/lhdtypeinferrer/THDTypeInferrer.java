@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -71,7 +70,7 @@ public class THDTypeInferrer {
                 model.read(new ByteArrayInputStream(line.getBytes()), null, "N-TRIPLE");
                 if (!model.isEmpty()) {
                     Statement stmt = model.listStatements().next();
-                    String hypo = URLDecoder.decode(stmt.getSubject().getURI(), "UTF-8");
+                    String hypo = stmt.getSubject().getURI();
                     String hyper = stmt.getObject().asResource().getURI();
                     ArrayList<String> existingHypos = hyperHypo.get(hyper);
                     if (existingHypos == null) {
