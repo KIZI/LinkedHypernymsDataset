@@ -1,8 +1,8 @@
 package cz.vse.lhd.core
 
-import java.io.FileInputStream
-import java.io.InputStream
-import java.util.Properties
+import com.github.kxbmap.configs._
+import com.typesafe.config.ConfigFactory
+import java.io.File
 
 trait AppConf extends DelayedInit {
 
@@ -31,28 +31,20 @@ trait ConfGlobal {
 
   val globalPropertiesFile: String
 
+  protected lazy val config = new EnrichTypesafeConfig(ConfigFactory.parseFile(new File(globalPropertiesFile)))
+
   lazy val (
     outputDir,
     datasetsDir,
     lang,
     dbpediaVersion
     ) = {
-    val prop = buildProp(new FileInputStream(globalPropertiesFile))
     (
-      prop.getProperty("output.dir") /: Dir,
-      prop.getProperty("datasets.dir") /: Dir,
-      prop.getProperty("lang"),
-      prop.getProperty("dbpedia.version"))
-  }
-
-  protected def buildProp(is: InputStream) = {
-    val prop = new Properties
-    try {
-      prop.load(is);
-    } finally {
-      is.close();
-    }
-    prop
+      config.get[String]("LHD.output.dir") /: Dir,
+      config.get[String]("LHD.datasets.dir") /: Dir,
+      config.get[String]("LHD.lang"),
+      config.get[String]("LHD.dbpedia.version")
+    )
   }
 
 }

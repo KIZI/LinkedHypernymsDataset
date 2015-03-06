@@ -4,9 +4,11 @@ object Test extends AppConf {
 
   val logger = new Logger {
     val conf = new ConfGlobal {
-      val globalPropertiesFile = "../global.properties"
+      val globalPropertiesFile = "../application.conf"
     }
   }
-  logger.get.info("ahoj")
+  println(AppConf.args.toList)
+  println(logger.conf.outputDir)
+  logger.get.info("test")
   
 }

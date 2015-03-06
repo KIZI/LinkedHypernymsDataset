@@ -3,21 +3,20 @@ package cz.vse.lhd.lhdontologycleanup
 import cz.vse.lhd.core.AppConf
 import cz.vse.lhd.core.ConfGlobal
 import cz.vse.lhd.core.FileExtractor
-import java.io.FileInputStream
 import java.io.IOException
 
 object Conf extends ConfGlobal {
 
+  val globalPropertiesFile = AppConf.args(0)
+
   val (
-    globalPropertiesFile,
     manualmappingOverridetypesPath,
     manualmappingExcludetypesPath
     ) = {
-    val prop = buildProp(new FileInputStream(AppConf.args(0)))
     (
-      prop.getProperty("global.properties.file"),
-      prop.getProperty("manualmapping.overridetypes.path"),
-      prop.getProperty("manualmapping.excludetypes.path"))
+      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.overridetypes.path", null),
+      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.excludetypes.path", null)
+    )
   }
 
   val (
@@ -28,7 +27,8 @@ object Conf extends ConfGlobal {
     s"${Conf.datasetsDir}instance_types_$lang.nt",
     s"${Conf.datasetsDir}instance_types_en.nt",
     s"${Conf.datasetsDir}dbpedia_${Conf.dbpediaVersion}.owl",
-    s"${Conf.datasetsDir}interlanguage_links_en.nt")
+    s"${Conf.datasetsDir}interlanguage_links_en.nt"
+  )
 
   List(datasetInstance_typesPath, datasetInstance_typesEnPath, datasetOntologyPath, datasetInterlanguage_linksEnPath) foreach {
     case FileExtractor(_) =>

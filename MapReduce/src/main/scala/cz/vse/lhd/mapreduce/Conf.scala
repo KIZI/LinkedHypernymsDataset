@@ -27,7 +27,7 @@ object Conf extends ConfGlobal {
       if (AppConf.args.isDefinedAt(confIndex))
         AppConf.args(confIndex)
       else
-        "../global.properties"
+        "../application.conf"
       ,
       offset,
       limit

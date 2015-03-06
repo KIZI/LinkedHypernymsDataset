@@ -4,7 +4,6 @@ import cz.vse.lhd.core.AppConf
 import cz.vse.lhd.core.ConfGlobal
 import cz.vse.lhd.core.FileExtractor
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
 import cz.vse.lhd.core.Dir
 import java.net.HttpURLConnection
@@ -12,8 +11,9 @@ import java.net.URL
 
 object Conf extends ConfGlobal {
 
+  val globalPropertiesFile = AppConf.args(0).replaceFirst("""^["]""", "")
+
   val (
-    globalPropertiesFile,
     gateDir,
     gatePluginLhdDir,
     gateJapeGrammar,
@@ -22,16 +22,15 @@ object Conf extends ConfGlobal {
     indexDir,
     wikiApi
     ) = {
-    val prop = buildProp(new FileInputStream(AppConf.args(0).replaceFirst("""^["]""", "")))
     (
-      prop.getProperty("global.properties.file"),
-      prop.getProperty("gate.dir") /: Dir,
-      prop.getProperty("gate.plugin.lhd.dir") /: Dir,
-      prop.getProperty("gate.jape.grammar"),
-      prop.getProperty("memcached.address"),
-      prop.getProperty("memcached.port"),
-      prop.getProperty("index.dir") /: Dir,
-      prop.getProperty("wiki.api"))
+      config.get[String]("LHD.HypernymExtractor.gate.dir") /: Dir,
+      config.get[String]("LHD.HypernymExtractor.gate.plugin.lhd.dir") /: Dir,
+      config.get[String]("LHD.HypernymExtractor.gate.jape.grammar"),
+      config.get[String]("LHD.HypernymExtractor.memcached.address"),
+      config.get[String]("LHD.HypernymExtractor.memcached.port"),
+      config.get[String]("LHD.HypernymExtractor.index.dir") /: Dir,
+      config.get[String]("LHD.HypernymExtractor.wiki.api")
+    )
   }
 
   val (
@@ -42,7 +41,8 @@ object Conf extends ConfGlobal {
     s"${Conf.datasetsDir}short_abstracts_$lang.nt",
     s"${Conf.datasetsDir}labels_$lang.nt",
     s"${Conf.datasetsDir}instance_types_$lang.nt",
-    s"${Conf.datasetsDir}disambiguations_$lang.nt")
+    s"${Conf.datasetsDir}disambiguations_$lang.nt"
+  )
 
   List(gateJapeGrammar, datasetShort_abstractsPath, datasetLabelsPath, datasetInstance_typesPath) foreach {
     case FileExtractor(_) =>
