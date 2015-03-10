@@ -7,27 +7,23 @@ import cz.vse.lhd.core.AnyToInt
 object Conf extends ConfGlobal {
 
   val (
+    globalPropertiesFile,
     intervalLength,
     mavenCommand,
-    globalPropertiesFile,
     offset,
     limit
   ) = {
-    val (mvnIndex, confIndex, offset, limit) = AppConf.args match {
-      case Array(_, AnyToInt(offset), AnyToInt(limit), _ @ _*) => (3, 4, Some(offset), Some(limit))
-      case _ => (1, 2, None, None)
+    val (mvnIndex, offset, limit) = AppConf.args match {
+      case Array(_, _, AnyToInt(offset), AnyToInt(limit), _ @ _*) => (4, Some(offset), Some(limit))
+      case _ => (2, None, None)
     }
     (
-      AppConf.args(0).toInt,
+      AppConf.args(0).toString,
+      AppConf.args(1).toInt,
       if (AppConf.args.isDefinedAt(mvnIndex))
         AppConf.args(mvnIndex)
       else
         "mvn"
-      ,
-      if (AppConf.args.isDefinedAt(confIndex))
-        AppConf.args(confIndex)
-      else
-        "../application.conf"
       ,
       offset,
       limit

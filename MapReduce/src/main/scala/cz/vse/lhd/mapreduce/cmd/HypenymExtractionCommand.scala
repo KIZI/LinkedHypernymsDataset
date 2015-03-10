@@ -1,5 +1,6 @@
 package cz.vse.lhd.mapreduce.cmd
 
+import cz.vse.lhd.mapreduce.Conf
 import cz.vse.lhd.mapreduce.Logger
 
 class HypenymExtractionCommand(
@@ -9,7 +10,7 @@ class HypenymExtractionCommand(
 
   def execute = {
     Logger.get.info(s"New extraction process has been started: ${startPointer} - ${endPointer}")
-    MavenCommandReceiver(s"""scala:run -Dlauncher=runner -DaddArgs="module.properties|$startPointer|$endPointer" """.trim, HypenymExtractionCommand.homeDir)
+    MavenCommandReceiver(s"""scala:run -Dlauncher=runner -DaddArgs="${Conf.globalPropertiesFile}|$startPointer|$endPointer" """.trim, HypenymExtractionCommand.homeDir)
     Logger.get.info(s"The extraction process has been finished: ${startPointer} - ${endPointer}")
   }
   
