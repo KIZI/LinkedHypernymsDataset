@@ -206,9 +206,9 @@ Optionaly: The extraction process can be started in parallel. You can **map** it
 
 Optionaly: For the parallel multi-thread processing in your local computer by using a multiple core processor, you can use the MapReduce module. Go to the MapReduce directory and run the extraction proccess for multiple threads by this maven command (the first arg is a number of resources being extracted in one thread, the optionaly second arg is a path to the maven executive file):
 
-    mvn scala:run -Dlauncher=starter -DaddArgs=20000
+    mvn scala:run -Dlauncher=starter -DaddArgs=../application.LANG.conf|20000
     OR
-    mvn scala:run -Dlauncher=starter -DaddArgs=20000|C:\maven\mvn.bat       -- for Windows
+    mvn scala:run -Dlauncher=starter -DaddArgs=../application.LANG.conf|20000|C:\maven\mvn.bat       -- for Windows
     
 
 ##2. LHDOntologyCleanup module
