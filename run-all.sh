@@ -37,7 +37,7 @@ rm -R data/output/*
 # One Thread
 #(cd HypernymExtractor; mvn scala:run -Dlauncher=runner -DaddArgs=$1)
 # Multi Thread
-(cd MapReduce; mvn scala:run -Dlauncher=starter -DaddArgs=10000) || failure "Failed to extract all hypernyms"
+(cd MapReduce; mvn scala:run -Dlauncher=starter -DaddArgs="$1|10000") || failure "Failed to extract all hypernyms"
 
 # Mapping of DBpedia resources to DBpedia ontology by text-matching; Resources cleaning
 (cd LHDOntologyCleanup; mvn scala:run -DaddArgs=$1) || failure "Failed to clean hypernym datasets"
