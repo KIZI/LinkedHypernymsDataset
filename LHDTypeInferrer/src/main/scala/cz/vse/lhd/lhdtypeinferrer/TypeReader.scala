@@ -5,10 +5,10 @@ package cz.vse.lhd.lhdtypeinferrer
  */
 trait TypeReader {
 
-  def isInstance: Boolean
+  def isInstance(instance: String): Boolean
 
-  def isInstanceType(instanceName: String, instanceType: String): Boolean
+  def isInstanceType(instance: String, instanceType: String): Boolean
 
-  def getInstanceTypes(instanceName: String): Seq[String]
+  def getInstanceTypes(instance: String): Seq[String]
 
 }
