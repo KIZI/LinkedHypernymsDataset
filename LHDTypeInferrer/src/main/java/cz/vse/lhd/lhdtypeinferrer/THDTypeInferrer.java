@@ -137,7 +137,7 @@ public class THDTypeInferrer {
         String completeLHD = resultPath + lang + ".instances.all.nt";
         //Ontology omEnglish = new Ontology(dataPath+"dbpedia_3.8.owl" ,lang);
         logger.info("Ontology loading...");
-        OntologyCheck ocheck = new OntologyCheck(Conf.datasetOntologyPath());
+        OntologyCheckOld ocheck = new OntologyCheckOld(Conf.datasetOntologyPath());
         logger.info("Instance types loading...");
         InstanceTypesList imList = new InstanceTypesList(DBpediaInstancesFilePath, true);
         logger.info("Hypernyms loading...");

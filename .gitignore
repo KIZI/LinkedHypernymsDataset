@@ -15,3 +15,5 @@ data/output/*
 **/nbactions.xml
 .svn
 utils.tar.gz
+.idea
+*.iml

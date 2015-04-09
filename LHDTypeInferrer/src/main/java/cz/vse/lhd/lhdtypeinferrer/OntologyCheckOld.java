@@ -13,7 +13,7 @@ import java.util.HashMap;
  *
  * @author tomas
  */
-public class OntologyCheck {
+public class OntologyCheckOld {
 
     //key = class ,  value list of  superclass
     private final HashMap<String, String[]> allITaxonomy = new HashMap();
@@ -22,7 +22,7 @@ public class OntologyCheck {
      * <http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Disease> .
      */
 
-    public OntologyCheck(String path) throws IOException {
+    public OntologyCheckOld(String path) throws IOException {
         readAllITaxonomy(path);
     }
 
