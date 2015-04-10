@@ -1,9 +1,12 @@
 package cz.vse.lhd.core
 
-import java.io.{File, ByteArrayInputStream}
+import java.io.{ByteArrayInputStream, File}
 import java.net.URLDecoder
 
-import com.hp.hpl.jena.rdf.model.ModelFactory
+import com.hp.hpl.jena.rdf.model.{ModelFactory, Statement}
+import cz.vse.lhd.core.BasicFunction._
+import org.apache.jena.riot.RiotException
+import org.slf4j.LoggerFactory
 
 import scala.io.Source
 import scala.util.Try
@@ -13,9 +16,20 @@ import scala.util.Try
  */
 object NTReader {
 
+  lazy val logger = LoggerFactory.getLogger("cz.vse.lhd.core.NTReader")
+
   def fromIterator(it: Iterator[String]) = for (
     line <- it;
-    model = ModelFactory.createDefaultModel().read(new ByteArrayInputStream(line.getBytes), null, "N-TRIPLE")
+    model = {
+      val model = ModelFactory.createDefaultModel
+      try {
+        model.read(new ByteArrayInputStream(line.getBytes), null, "N-TRIPLE")
+      } catch {
+        case e: RiotException =>
+          logger.warn("Invalid triple: " + line)
+          model
+      }
+    }
     if !model.isEmpty
   ) yield {
       val stmt = model.listStatements.next
@@ -27,11 +41,8 @@ object NTReader {
       )
     }
 
-  def fromSource(source: Source) = {
-    import BasicConversion.ClosableSource
-    fromIterator(source.getLinesClosable)
-  }
+  def fromSource(source: Source)(fn: Iterator[Statement] => Unit) = tryClose(source)(x => fn(fromIterator(x.getLines())))
 
-  def fromFile(file: File) = fromSource(Source.fromFile(file, "UTF-8"))
+  def fromFile(file: File) = fromSource(Source.fromFile(file, "UTF-8")) _
 
 }

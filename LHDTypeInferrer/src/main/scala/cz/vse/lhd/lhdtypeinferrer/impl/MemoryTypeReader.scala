@@ -12,8 +12,11 @@ class MemoryTypeReader(dataset: File) extends TypeReader {
 
   val types = collection.mutable.Map.empty[String, collection.mutable.ListBuffer[String]]
 
-  for (stmt <- NTReader.fromFile(dataset))
-    types.getOrElseUpdate(stmt.getSubject.getURI, collection.mutable.ListBuffer.empty) += stmt.getObject.asResource().getURI
+  NTReader.fromFile(dataset) {
+    it =>
+      for (stmt <- it)
+        types.getOrElseUpdate(stmt.getSubject.getURI, collection.mutable.ListBuffer.empty) += stmt.getObject.asResource().getURI
+  }
 
   def isInstance(instance: String): Boolean = types.contains(instance)
 

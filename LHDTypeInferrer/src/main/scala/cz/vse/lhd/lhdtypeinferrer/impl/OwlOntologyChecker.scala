@@ -24,11 +24,12 @@ class OwlOntologyChecker(owl: File) extends OntologyChecker {
     n3.flush()
     //load the n-triple owl dataset and read only triples which have the rdfs:subClassOf predicate
     //triples of the class taxonomy are saved into Map where the key is some class and values are superclasses of the class
-    for (
-      stmt <- NTReader.fromSource(Source.fromString(n3.toString))
-      if List("rdfs:subClassOf", "http://www.w3.org/2000/01/rdf-schema#subClassOf") exists stmt.getPredicate.getURI.contains
-    )
-      classes.getOrElseUpdate(stmt.getSubject.getURI, collection.mutable.ListBuffer.empty) += stmt.getObject.asResource().getURI
+    NTReader.fromSource(Source.fromString(n3.toString)) {
+      it =>
+        for (stmt <- it if List("rdfs:subClassOf", "http://www.w3.org/2000/01/rdf-schema#subClassOf") exists stmt.getPredicate.getURI.contains)
+          classes.getOrElseUpdate(stmt.getSubject.getURI, collection.mutable.ListBuffer.empty) += stmt.getObject.asResource().getURI
+    }
+
   }
 
   def isType(name: String): Boolean = classes.contains(name)
