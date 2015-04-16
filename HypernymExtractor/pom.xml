@@ -7,7 +7,6 @@
         <artifactId>LHD2</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>cz.vse.lhd</groupId>
     <artifactId>HypernymExtractor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>HypernymExtractor</name>
@@ -24,19 +23,9 @@
             <version>2.10.2</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.jena</groupId>
-            <artifactId>jena-arq</artifactId>
-            <version>2.9.4</version>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>Core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>4.6.0</version>
         </dependency>
     </dependencies>
     <build>

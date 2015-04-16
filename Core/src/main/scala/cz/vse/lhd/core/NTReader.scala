@@ -18,7 +18,7 @@ object NTReader {
 
   lazy val logger = LoggerFactory.getLogger("cz.vse.lhd.core.NTReader")
 
-  def fromIterator(it: Iterator[String]) = for (
+  def fromIterator[A](it: Iterator[String]) = for (
     line <- it;
     model = {
       val model = ModelFactory.createDefaultModel

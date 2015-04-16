@@ -1,8 +1,9 @@
 package cz.vse.lhd.core
 
+import java.io.File
+
 import com.github.kxbmap.configs._
 import com.typesafe.config.ConfigFactory
-import java.io.File
 
 trait AppConf extends DelayedInit {
 
@@ -46,5 +47,7 @@ trait ConfGlobal {
       config.get[String]("LHD.dbpedia.version")
     )
   }
+
+  lazy val dbpediaBasicUri = "http://" + (if (lang == "en") "" else s"$lang.") + "dbpedia.org/"
 
 }

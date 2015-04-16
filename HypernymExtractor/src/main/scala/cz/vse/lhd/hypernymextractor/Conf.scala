@@ -9,9 +9,11 @@ import cz.vse.lhd.core.Dir
 import java.net.HttpURLConnection
 import java.net.URL
 
+import org.slf4j.LoggerFactory
+
 object Conf extends ConfGlobal {
 
-  val globalPropertiesFile = AppConf.args(0).replaceFirst("""^["]""", "")
+  val globalPropertiesFile = AppConf.args(0).replaceFirst( """^["]""", "")
 
   val (
     gateDir,
@@ -30,21 +32,17 @@ object Conf extends ConfGlobal {
       config.get[String]("LHD.HypernymExtractor.memcached.port"),
       config.get[String]("LHD.HypernymExtractor.index.dir") /: Dir,
       config.get[String]("LHD.HypernymExtractor.wiki.api")
-    )
+      )
   }
 
   val (
     datasetShort_abstractsPath,
-    datasetLabelsPath,
-    datasetInstance_typesPath,
     datasetDisambiguations) = (
     s"${Conf.datasetsDir}short_abstracts_$lang.nt",
-    s"${Conf.datasetsDir}labels_$lang.nt",
-    s"${Conf.datasetsDir}instance_types_$lang.nt",
     s"${Conf.datasetsDir}disambiguations_$lang.nt"
-  )
+    )
 
-  List(gateJapeGrammar, datasetShort_abstractsPath, datasetLabelsPath, datasetInstance_typesPath) foreach {
+  List(gateJapeGrammar, datasetShort_abstractsPath) foreach {
     case FileExtractor(_) =>
     case x => throw new IOException(s"File $x does not exist or is not writable.")
   }
@@ -54,24 +52,26 @@ object Conf extends ConfGlobal {
     if (!of.isDirectory) of.mkdir
     val conn = new URL(wikiApi).openConnection.asInstanceOf[HttpURLConnection]
     try {
-      conn.connect
+      conn.connect()
       if (conn.getResponseCode != HttpURLConnection.HTTP_OK)
         throw new IOException(s"WikiAPI $wikiApi is not reachable.")
     } finally {
-      conn.disconnect
+      conn.disconnect()
     }
   }
 
 }
 
-class ProcessStatus private (step: Int, end: Int) extends cz.vse.lhd.hypernymextractor.builder.ProcessStatus {
-  def this(end: Int) = this(0, end)
-  def ++ = new ProcessStatus(step + 1, end)
-  def plusplus = ++
-  def tryPrint = if (step % 1000 == 0)
-    Logger.get.info(s"$step of $end resources extracted: " + ((step.toDouble / end) * 100).round + "%")
-}
+class ProcessStatus private(step: Int, end: Int) extends cz.vse.lhd.hypernymextractor.builder.ProcessStatus {
 
-object Logger extends cz.vse.lhd.core.Logger {
-  val conf = Conf
+  lazy val logger = LoggerFactory.getLogger(getClass)
+
+  def this(end: Int) = this(0, end)
+
+  def ++ = new ProcessStatus(step + 1, end)
+
+  def plusplus = ++
+
+  def tryPrint() = if (step % 1000 == 0)
+    logger.info(s"$step of $end resources extracted: " + ((step.toDouble / end) * 100).round + "%")
 }

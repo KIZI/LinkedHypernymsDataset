@@ -8,36 +8,20 @@ import gate.creole.ResourceInstantiationException;
 
 /**
  * @author Milan Dojchinovski
- * <milan (at) dojchinovski (dot) mk>
- * Twitter:
+ *         <milan (at) dojchinovski (dot) mk>
+ *         Twitter:
  * @m1ci www: http://dojchinovski.mk
  */
 public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implements ProcessingResource {
 
     private Corpus corpus = null;
-    private Integer corpusSize;
-    private Integer docCountStartOffset;
-    private String lang;
-    private Boolean firstSentenceOnly;
-    private String firmArticleTitle;
-    private Boolean assignDBpediaTypes;
-    private Boolean saveInTriplets;
-    private String specialWikiAPIURL_NL;
-    private String specialWikiAPIURL_DE;
-    private String specialWikiAPIURL_EN;
-    private String wikiAPIBase_NL;
-    private String wikiAPIBase_DE;
-    private String wikiAPIBase_EN;
     private String taggerBinary_DE;
     private String taggerBinary_NL;
     private String JAPEPATH_EN;
     private String JAPEPATH_NL;
     private String JAPEPATH_DE;
-    private String pathToArticleNames;
-    private String hypernymLoggingPath;
     private Integer startPosInArticleNameList;
     private Integer endPosInArticleNameList;
-    private String confFilePath;
 
     public CorpusBuilderPR() {
     }
@@ -64,96 +48,6 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
     @Override
     public void setCorpus(Corpus corpus) {
         this.corpus = corpus;
-    }
-
-    public Integer getCorpusSize() {
-        return corpusSize;
-    }
-
-    public void setCorpusSize(Integer corpusSize) {
-        this.corpusSize = corpusSize;
-    }
-
-    public Integer getDocCountStartOffset() {
-        return docCountStartOffset;
-    }
-
-    public void setDocCountStartOffset(Integer docCountStartOffset) {
-        this.docCountStartOffset = docCountStartOffset;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
-    }
-
-    public Boolean getAssignDBpediaTypes() {
-        return assignDBpediaTypes;
-    }
-
-    public void setAssignDBpediaTypes(Boolean assignDBpediaTypes) {
-        this.assignDBpediaTypes = assignDBpediaTypes;
-    }
-
-    public String getFirmArticleTitle() {
-        return firmArticleTitle;
-    }
-
-    public void setFirmArticleTitle(String debugFirmURL) {
-        this.firmArticleTitle = debugFirmURL;
-    }
-
-    public Boolean getFirstSentenceOnly() {
-        return firstSentenceOnly;
-    }
-
-    public void setFirstSentenceOnly(Boolean firstSentenceOnly) {
-        this.firstSentenceOnly = firstSentenceOnly;
-    }
-
-    /**
-     * @return the specialWikiAPIURL_NL
-     */
-    public String getSpecialWikiAPIURL_NL() {
-        return specialWikiAPIURL_NL;
-    }
-
-    /**
-     * @param specialWikiAPIURL_NL the specialWikiAPIURL_NL to set
-     */
-    public void setSpecialWikiAPIURL_NL(String specialWikiAPIURL_NL) {
-        this.specialWikiAPIURL_NL = specialWikiAPIURL_NL;
-    }
-
-    /**
-     * @return the specialWikiAPIURL_DE
-     */
-    public String getSpecialWikiAPIURL_DE() {
-        return specialWikiAPIURL_DE;
-    }
-
-    /**
-     * @param specialWikiAPIURL_DE the specialWikiAPIURL_DE to set
-     */
-    public void setSpecialWikiAPIURL_DE(String specialWikiAPIURL_DE) {
-        this.specialWikiAPIURL_DE = specialWikiAPIURL_DE;
-    }
-
-    /**
-     * @return the specialWikiAPIURL_EN
-     */
-    public String getSpecialWikiAPIURL_EN() {
-        return specialWikiAPIURL_EN;
-    }
-
-    /**
-     * @param specialWikiAPIURL_EN the specialWikiAPIURL_EN to set
-     */
-    public void setSpecialWikiAPIURL_EN(String specialWikiAPIURL_EN) {
-        this.specialWikiAPIURL_EN = specialWikiAPIURL_EN;
     }
 
     /**
@@ -199,20 +93,6 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
     }
 
     /**
-     * @return the pathToArticeNames
-     */
-    public String getPathToArticleNames() {
-        return pathToArticleNames;
-    }
-
-    /**
-     * @param pathToArticeNames the pathToArticeNames to set
-     */
-    public void setPathToArticleNames(String pathToArticeNames) {
-        this.pathToArticleNames = pathToArticeNames;
-    }
-
-    /**
      * @return the startPosInArticleNameList
      */
     public Integer getStartPosInArticleNameList() {
@@ -238,76 +118,6 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
      */
     public void setEndPosInArticleNameList(Integer endPosInArticleNameList) {
         this.endPosInArticleNameList = endPosInArticleNameList;
-    }
-
-    /**
-     * @return the hypernymLoggingPath
-     */
-    public String getHypernymLoggingPath() {
-        return hypernymLoggingPath;
-    }
-
-    /**
-     * @param hypernymLoggingPath the hypernymLoggingPath to set
-     */
-    public void setHypernymLoggingPath(String hypernymLoggingPath) {
-        this.hypernymLoggingPath = hypernymLoggingPath;
-    }
-
-    /**
-     * @return the wikiAPIBase_NL
-     */
-    public String getWikiAPIBase_NL() {
-        return wikiAPIBase_NL;
-    }
-
-    /**
-     * @param wikiAPIBase_NL the wikiAPIBase_NL to set
-     */
-    public void setWikiAPIBase_NL(String wikiAPIBase_NL) {
-        this.wikiAPIBase_NL = wikiAPIBase_NL;
-    }
-
-    /**
-     * @return the wikiAPIBase_DE
-     */
-    public String getWikiAPIBase_DE() {
-        return wikiAPIBase_DE;
-    }
-
-    /**
-     * @param wikiAPIBase_DE the wikiAPIBase_DE to set
-     */
-    public void setWikiAPIBase_DE(String wikiAPIBase_DE) {
-        this.wikiAPIBase_DE = wikiAPIBase_DE;
-    }
-
-    /**
-     * @return the wikiAPIBase_EN
-     */
-    public String getWikiAPIBase_EN() {
-        return wikiAPIBase_EN;
-    }
-
-    /**
-     * @param wikiAPIBase_EN the wikiAPIBase_EN to set
-     */
-    public void setWikiAPIBase_EN(String wikiAPIBase_EN) {
-        this.wikiAPIBase_EN = wikiAPIBase_EN;
-    }
-
-    /**
-     * @return the saveInTriplets
-     */
-    public Boolean getSaveInTriplets() {
-        return saveInTriplets;
-    }
-
-    /**
-     * @param saveInTriplets the saveInTriplets to set
-     */
-    public void setSaveInTriplets(Boolean saveInTriplets) {
-        this.saveInTriplets = saveInTriplets;
     }
 
     /**
@@ -338,11 +148,4 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
         this.taggerBinary_NL = taggerDir_NL;
     }
 
-    public String getConfFilePath() {
-        return confFilePath;
-    }
-
-    public void setConfFilePath(String confFilePath) {
-        this.confFilePath = confFilePath;
-    }
 }

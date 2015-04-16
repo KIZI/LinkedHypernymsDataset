@@ -44,7 +44,7 @@ public class HypernymExtractor {
     private final PrintWriter rawOutputFile;
     private final DBpediaLinker dbpediaLinker;
 
-    public HypernymExtractor(DBpediaLinker dbpediaLinker, String lang, String JAPEPATH, String hypernymLoggingPath, String taggerBinary_DE, String taggerBinary_NL, boolean saveInTriplets) throws FileNotFoundException, GateException, MalformedURLException {
+    public HypernymExtractor(DBpediaLinker dbpediaLinker, String lang, String JAPEPATH, String hypernymLoggingPath, String taggerBinary_DE, String taggerBinary_NL) throws FileNotFoundException, GateException, MalformedURLException {
         this.lang = lang;
         this.JAPEPATH = JAPEPATH;
         this.saveInTriplets = saveInTriplets;

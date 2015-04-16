@@ -1,10 +1,17 @@
 package cz.vse.lhd.hypernymextractor
 
-import cz.vse.lhd.core.AppConf
+import java.io.File
+
+import cz.vse.lhd.core.BasicFunction._
+import cz.vse.lhd.core.NTReader
+
 import scala.io.Source
 
-object Stats extends AppConf {
-  
-  println(Source.fromFile(Conf.datasetLabelsPath).getLines.size)
-  
+object Stats {
+
+  def countResources(dataset: File) = tryClose(Source.fromFile(dataset, "UTF-8")) {
+    source =>
+      NTReader.fromIterator(source.getLines()).size
+  }
+
 }
