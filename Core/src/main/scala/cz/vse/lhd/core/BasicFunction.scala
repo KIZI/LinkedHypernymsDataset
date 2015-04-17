@@ -1,5 +1,8 @@
 package cz.vse.lhd.core
 
+import scala.annotation.tailrec
+import scala.util.{Failure, Success, Try}
+
 /**
  * Created by propan on 9. 4. 2015.
  */
@@ -7,8 +10,29 @@ object BasicFunction {
 
   import scala.language.reflectiveCalls
 
-  def tryClose[A, B <: { def close(): Unit }](closeable: B)(f: B => A): A = try { f(closeable) } finally { closeable.close() }
+  def tryClose[A, B <: {def close() : Unit}](closeable: B)(f: B => A): A = try {
+    f(closeable)
+  } finally {
+    closeable.close()
+  }
 
-  def tryCloseBool[A, B <: { def close(): Boolean }](closeable: B)(f: B => A): A = try { f(closeable) } finally { closeable.close() }
+  def tryCloseBool[A, B <: {def close() : Boolean}](closeable: B)(f: B => A): A = try {
+    f(closeable)
+  } finally {
+    closeable.close()
+  }
+
+  @tailrec
+  def retry[T](n: Int)(fn: => T)(ffn: (Throwable, Int) => Unit = (_, _) => Unit): T = {
+    Try {
+      fn
+    } match {
+      case Success(x) => x
+      case Failure(e) if n > 1 =>
+        ffn(e, n)
+        retry(n - 1)(fn)(ffn)
+      case Failure(e) => throw e
+    }
+  }
 
 }

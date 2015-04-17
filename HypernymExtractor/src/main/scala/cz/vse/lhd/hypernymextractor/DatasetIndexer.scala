@@ -5,8 +5,8 @@ import java.io.File
 import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.Statement
 import cz.vse.lhd.core.BasicFunction._
+import cz.vse.lhd.core.NTReader
 import cz.vse.lhd.core.lucene.NTIndexer
-import cz.vse.lhd.core.{AppConf, NTReader}
 import org.apache.commons.io.FileUtils
 
 object DatasetIndexer {

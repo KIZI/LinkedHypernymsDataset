@@ -28,8 +28,8 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     import scala.collection.JavaConversions._
 
     ARQ.init()
-    logger.info("== Gate init ==")
-    Gate.init()
+    /*logger.info("== Gate init ==")
+    Gate.init()*/
 
     logger.info("== Corpus size counting ==")
     val start = getStartPosInArticleNameList.toInt match {

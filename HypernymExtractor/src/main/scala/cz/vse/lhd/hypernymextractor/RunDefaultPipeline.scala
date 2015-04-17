@@ -25,9 +25,7 @@ object RunDefaultPipeline extends AppConf {
   Gate.setPluginsHome(pluginsHomeFile)
   Gate.init()
   Gate.getCreoleRegister.registerDirectories(new File(pluginsHomeFile, "ANNIE").toURI.toURL)
-  val cBuilderHome = new File(Conf.gatePluginLhdDir).toURI.toURL
-  val register = Gate.getCreoleRegister
-  register.registerDirectories(cBuilderHome)
+  Gate.getCreoleRegister.registerDirectories(new File(Conf.gatePluginLhdDir).toURI.toURL)
   val featureMap = Factory.newFeatureMap
   val list = XPathFactory.newInstance.newXPath.compile("//PARAMETER").evaluate(
     DocumentBuilderFactory.newInstance.newDocumentBuilder.parse(new InputSource(
@@ -40,16 +38,15 @@ object RunDefaultPipeline extends AppConf {
     featureMap.put(paramName, paramVal)
   }
   AppConf.args match {
-    case Array(_, start, end) => {
+    case Array(_, start, end) =>
       featureMap.put("startPosInArticleNameList", start)
-      featureMap.put("endPosInArticleNameList", end);
-    }
+      featureMap.put("endPosInArticleNameList", end)
     case _ =>
   }
 
   val wikiPR = Factory.createResource("cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2", featureMap).asInstanceOf[ProcessingResource]
   val cPipeline = Factory.createResource("gate.creole.SerialController").asInstanceOf[SerialController]
   cPipeline.add(wikiPR)
-  cPipeline.execute();
+  cPipeline.execute()
 
 }
