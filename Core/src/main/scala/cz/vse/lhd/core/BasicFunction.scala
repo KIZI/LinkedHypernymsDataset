@@ -16,6 +16,12 @@ object BasicFunction {
     closeable.close()
   }
 
+  def tryCloses[A, B <: {def close() : Unit}](closeable: B*)(f: Seq[B] => A): A = try {
+    f(closeable)
+  } finally {
+    closeable.foreach(_.close())
+  }
+
   def tryCloseBool[A, B <: {def close() : Boolean}](closeable: B)(f: B => A): A = try {
     f(closeable)
   } finally {
@@ -35,4 +41,24 @@ object BasicFunction {
     }
   }
 
+}
+
+object Match {
+  def default: PartialFunction[Any, Unit] = {
+    case _ =>
+  }
+
+  def apply[T](x: T)(body: PartialFunction[T, Unit]) = (body orElse default)(x)
+}
+
+object Lift {
+  def default[U]: PartialFunction[Any, Option[U]] = {
+    case _ => None
+  }
+
+  def apply[T, U](x: T)(body: PartialFunction[T, Option[U]]) = (body orElse default)(x)
+}
+
+object AutoLift {
+  def apply[T, U](x: T)(body: PartialFunction[T, U]) = body.lift(x)
 }

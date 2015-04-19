@@ -62,7 +62,7 @@ object Conf extends ConfGlobal {
 
 }
 
-class ProcessStatus private(step: Int, end: Int) extends cz.vse.lhd.hypernymextractor.builder.ProcessStatus {
+class ProcessStatus private(step: Int, end: Int) {
 
   lazy val logger = LoggerFactory.getLogger(getClass)
 

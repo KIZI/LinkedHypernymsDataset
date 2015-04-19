@@ -33,7 +33,12 @@ class DBpediaLinker(apiBase: String, lang: String, address: String, port: Int) e
 
   private def normKey(key: String) = if (key.length > 200) md5(key) else key
 
-  private def getFromCache(key: String) = Option(memClient.get(normKey(key)))
+  private def getFromCache(key: String) = Option(memClient.get(normKey(key))).map {
+    cachedVal =>
+      val cachedStrVal = cachedVal.asInstanceOf[String]
+      logger.debug(s"Fetched resource from cache: $key -> $cachedStrVal")
+      cachedStrVal
+  }
 
   private def saveToCache(key: String, value: String) = Option(value).foreach(x => memClient.set(normKey(key), 604800, x))
 
@@ -52,8 +57,12 @@ class DBpediaLinker(apiBase: String, lang: String, address: String, port: Int) e
     else
       new URL(apiBase + "api.php?action=query&format=xml&list=search&srwhat=nearmatch" + "&srlimit=" + 1 + "&srsearch=" + normInput)
     getUrlContent(url) match {
-      case ArticlePattern(title) => Some(Conf.dbpediaBasicUri + "resource/" + title.replaceAll(" ", "_"))
-      case _ => None
+      case ArticlePattern(title) =>
+        logger.debug(s"Fetched resource from wiki API: $input -> $title")
+        Some(Conf.dbpediaBasicUri + "resource/" + title.replaceAll(" ", "_"))
+      case _ =>
+        logger.debug(s"No resource fetched for input: $input")
+        None
     }
   }
 

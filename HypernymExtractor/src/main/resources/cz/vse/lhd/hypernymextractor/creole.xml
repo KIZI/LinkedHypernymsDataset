@@ -9,11 +9,6 @@
       <CLASS>cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2</CLASS>
       <COMMENT>Builds random Wikipedia corpus.</COMMENT>
       <!--/home/tomas/GATE_Developer_7.0/plugins/CorpusBuilderPR/-->
-      <PARAMETER NAME="JAPEPATH_EN" DEFAULT="../data/grammar/en_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
-      <PARAMETER NAME="JAPEPATH_DE" DEFAULT="../data/grammar/de_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
-      <PARAMETER NAME="JAPEPATH_NL" DEFAULT="../data/grammar/nl_hearst.jape" RUNTIME="true" COMMENT="Path to JAPE grammar for Hearst Patterns">java.lang.String</PARAMETER>
-      <PARAMETER NAME="taggerBinary_DE" DEFAULT="../utils/gate-7.0-build4195/plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-german-gate" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
-      <PARAMETER NAME="taggerBinary_NL" DEFAULT="../utils/gate-7.0-build4195/plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-dutch-gate" RUNTIME="true" COMMENT="URI to special API">java.lang.String</PARAMETER>
       <PARAMETER NAME="startPosInArticleNameList" DEFAULT="0" RUNTIME="true" COMMENT="start from this line number, min value 1 (0 line contains heading), inclusive">java.lang.Integer</PARAMETER>
       <PARAMETER NAME="endPosInArticleNameList" DEFAULT="0" RUNTIME="true" COMMENT="end at this line number, min value 1, inclusive">java.lang.Integer</PARAMETER>
       <ICON>corpusbuilder.gif</ICON>
