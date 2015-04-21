@@ -47,6 +47,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
 
     HypernymExtractor(getDbpediaLinker, start, end) {
       hypernymExtractor =>
+        val disambiguations = getDisambiguations
         val outputFilePath = Conf.outputDir + "/hypoutput" + (if (getEndPosInArticleNameList.toInt > 0) s".$start-$end" else "") + ".log"
         val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
         val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
@@ -57,42 +58,38 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
         }
         try {
-          NTReader.fromFile(new File(Conf.datasetDisambiguations)) {
-            disambIt =>
-              val disambiguations = disambIt.map(_.getSubject.getURI).toSet
-              logger.info(s"Disambiguations")
-              for (offset <- start to end by step) {
-                val endBlock = if (offset + step > end) end else offset + step
-                val wikicorpus = Factory.newCorpus("WikipediaCorpus")
-                NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
-                  _.slice(offset, endBlock)
-                    .filter(stmt => !disambiguations(stmt.getSubject.getURI))
-                    .foldLeft(offset) {
-                    (idx, stmt) =>
-                      addDocToCorpus(wikicorpus, stmt, idx)
-                      idx + 1
-                  }
-                }
-                if (!wikicorpus.isEmpty) {
-                  pipeline.setCorpus(wikicorpus)
-                  pipeline.execute()
-                  for {
-                    doc <- wikicorpus
-                    sa <- doc.getAnnotations.get("Sentence").get("Sentence")
-                    isaStart = sa.getStartNode
-                    isaEnd = sa.getEndNode
-                    if isaStart.getOffset == 0 || isaStart.getOffset == 2
-                  } {
-                    try {
-                      doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
-                    } catch {
-                      case exc: gate.util.InvalidOffsetException => logger.error(exc.getMessage)
-                    }
-                  }
-                  hypernymExtractor.extractHypernyms(wikicorpus)
+          for (offset <- start to end by step) {
+            val endBlock = if (offset + step > end) end else offset + step
+            val wikicorpus = Factory.newCorpus("WikipediaCorpus")
+            NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
+              _.slice(offset, endBlock)
+                .filter(stmt => !disambiguations(stmt.getSubject.getURI))
+                .foldLeft(offset) {
+                (idx, stmt) =>
+                  addDocToCorpus(wikicorpus, stmt, idx)
+                  idx + 1
+              }
+            }
+            if (!wikicorpus.isEmpty) {
+              pipeline.setCorpus(wikicorpus)
+              pipeline.execute()
+              for {
+                doc <- wikicorpus
+                sa <- doc.getAnnotations.get("Sentence").get("Sentence")
+                isaStart = sa.getStartNode
+                isaEnd = sa.getEndNode
+                if isaStart.getOffset == 0 || isaStart.getOffset == 2
+              } {
+                try {
+                  doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
+                } catch {
+                  case exc: gate.util.InvalidOffsetException => logger.error(exc.getMessage)
                 }
               }
+              hypernymExtractor.extractHypernyms(wikicorpus)
+            }
           }
+
         } finally {
           outputRawWriter.close()
           outputResourceWriter.close()
@@ -102,8 +99,10 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     logger.info("== Done ==")
   }
 
+  private def normalizeAbstract(str: String) = str.replaceAll("\\(.*?\\)|\\[.*?\\]", "").replaceAll("\\s+", " ")
+
   private def addDocToCorpus(corpus: Corpus, shortAbstractStmt: Statement, idx: Int): Unit = {
-    val doc = Factory.newDocument(shortAbstractStmt.getObject.asLiteral().getString)
+    val doc = Factory.newDocument(normalizeAbstract(shortAbstractStmt.getObject.asLiteral().getString))
     val resourceUri = shortAbstractStmt.getSubject.getURI
     doc.setName("doc-" + idx)
     doc.getFeatures.put("article_title", resourceUri.replaceFirst(s"^${Conf.dbpediaBasicUri}resource/", ""))

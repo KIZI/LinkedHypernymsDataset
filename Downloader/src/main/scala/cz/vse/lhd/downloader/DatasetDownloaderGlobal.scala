@@ -11,7 +11,6 @@ class DatasetDownloaderGlobal(version: String) extends DatasetDownloader {
   val urlBaseLang = urlBase + Downloader.Conf.lang + "/"
   val urlBaseEn = urlBase + "en/"
   val files = (Set(
-    "labels_" + Downloader.Conf.lang + ".nt.bz2",
     "disambiguations_" + Downloader.Conf.lang + ".nt.bz2",
     "short_abstracts_" + Downloader.Conf.lang + ".nt.bz2",
     "instance_types_" + Downloader.Conf.lang + ".nt.bz2") map (urlBaseLang + _)) ++ (Set(

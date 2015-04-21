@@ -17,3 +17,4 @@ data/output/*
 utils.tar.gz
 .idea
 *.iml
+*.log

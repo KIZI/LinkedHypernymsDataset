@@ -1,23 +1,19 @@
 package cz.vse.lhd.downloader
 
-import cz.vse.lhd.core.AppConf
-import cz.vse.lhd.core.ConfGlobal
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.File
-import java.io.FileOutputStream
+import java.io.{BufferedInputStream, BufferedOutputStream, File, FileOutputStream}
 import java.net.URL
+
+import cz.vse.lhd.core.{AppConf, ConfGlobal}
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream
+import org.slf4j.LoggerFactory
 
 object Downloader extends AppConf {
 
+  val logger = LoggerFactory.getLogger(getClass)
+
   object Conf extends ConfGlobal {
     val globalPropertiesFile = AppConf.args(0)
-  }
-
-  object Logger extends cz.vse.lhd.core.Logger {
-    val conf = Conf
   }
 
   val datasetDownloader = {
@@ -36,22 +32,22 @@ object Downloader extends AppConf {
           case GZ => new GzipCompressorInputStream(url.openStream(), true)
         })
         val bos = new BufferedOutputStream(new FileOutputStream(target))
-        Logger.get.info(s"The file: ${target.getName} is downloading...")
+        logger.info(s"The file: ${target.getName} is downloading...")
         try {
-          for (bytes <- (Stream continually (bis.read) takeWhile (_ != -1))) {
+          for (bytes <- Stream continually bis.read takeWhile (_ != -1)) {
             bos.write(bytes)
             i = i + 1
             if (i % 10000000 == 0) {
               val speed = ((10 / ((System.currentTimeMillis - time) / 1000.0)) * 1000).round
-              Logger.get.info(s"The file: ${target.getName} is downloading... ${i / 1000000}MB downloaded (speed: ${speed}kB/s).")
+              logger.info(s"The file: ${target.getName} is downloading... ${i / 1000000}MB downloaded (speed: ${speed}kB/s).")
               time = System.currentTimeMillis
             }
           }
         } finally {
-          bos.close
-          bis.close
+          bos.close()
+          bis.close()
         }
-        Logger.get.info(s"The file: ${target.getName} is completely downloaded.")
+        logger.info(s"The file: ${target.getName} is completely downloaded.")
       }
     }
     if (Conf.lang == "de")

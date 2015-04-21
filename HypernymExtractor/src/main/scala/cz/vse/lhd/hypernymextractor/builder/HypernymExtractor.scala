@@ -32,7 +32,7 @@ class HypernymExtractor private (dbpediaLinker: DBpediaLinker, private var proce
       pipeline.add(posTaggerPR)
     } else if (lang.equals("nl") || lang.equals("de")) {
       val taggerFeatureMap = Factory.newFeatureMap()
-      taggerFeatureMap.put("debug", "false")
+      taggerFeatureMap.put("debug", logger.isDebugEnabled.toString)
       taggerFeatureMap.put("encoding", "utf-8")
       //                if (!lang.equals("de")) {
       //                    taggerFeatureMap.put("encoding", "utf-8");
@@ -69,7 +69,10 @@ class HypernymExtractor private (dbpediaLinker: DBpediaLinker, private var proce
     for (doc <- corpus.iterator().asScala) {
       processStatus.tryPrint()
       processStatus = processStatus.plusplus
-      for (isaAnnot <- doc.getAnnotations.get("h").iterator().asScala) {
+      val annotations = doc.getAnnotations.get("h").asScala.toList
+      if (annotations.isEmpty)
+        logger.debug(s"No hypernym extracted for resource: ${doc.getFeatures.get("dbpedia_url")}")
+      for (isaAnnot <- annotations) {
         val hypernym = {
           val hypernym = Option(isaAnnot.getFeatures)
             .filter(_.containsKey("lemma"))
