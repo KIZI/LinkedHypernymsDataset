@@ -21,6 +21,8 @@ class DBpediaLinker(apiBase: String, lang: String, address: String, port: Int) e
   private val memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), util.Arrays.asList(new InetSocketAddress(address, port)))
   private val ArticlePattern = if (apiBase.contains("search")) "(?m)^\\d.*\\s(\\S+)$".r else "(?m) title=\"([^\"]+)\" ".r.unanchored
 
+  memClient.flush()
+
   def close(): Unit = {
     memClient.flush()
     memClient.shutdown()

@@ -1,6 +1,7 @@
 package cz.vse.lhd.hypernymextractor
 
 import cz.vse.lhd.core.AppConf
+import cz.vse.lhd.core.BasicFunction._
 import cz.vse.lhd.core.ConfGlobal
 import cz.vse.lhd.core.FileExtractor
 import java.io.File
@@ -10,6 +11,8 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 import org.slf4j.LoggerFactory
+
+import scala.io.Source
 
 object Conf extends ConfGlobal {
 
@@ -21,17 +24,17 @@ object Conf extends ConfGlobal {
     gateJapeGrammar,
     memcachedAddress,
     memcachedPort,
-    indexDir,
-    wikiApi
+    wikiApi,
+    corpusSizePerThread
     ) = {
     (
       config.get[String]("LHD.HypernymExtractor.gate.dir") /: Dir,
-      config.get[String]("LHD.HypernymExtractor.gate.plugin.lhd.dir") /: Dir,
-      config.get[String]("LHD.HypernymExtractor.gate.jape.grammar"),
+      config.get[String]("LHD.HypernymExtractor.gate.plugin-lhd-dir") /: Dir,
+      config.get[String]("LHD.HypernymExtractor.gate.jape-grammar"),
       config.get[String]("LHD.HypernymExtractor.memcached.address"),
       config.get[String]("LHD.HypernymExtractor.memcached.port"),
-      config.get[String]("LHD.HypernymExtractor.index.dir") /: Dir,
-      config.get[String]("LHD.HypernymExtractor.wiki.api")
+      config.get[String]("LHD.HypernymExtractor.wiki-api"),
+      config.getOrElse("LHD.HypernymExtractor.corpus-size-per-thread", 10000)
       )
   }
 
@@ -41,6 +44,8 @@ object Conf extends ConfGlobal {
     s"${Conf.datasetsDir}short_abstracts_$lang.nt",
     s"${Conf.datasetsDir}disambiguations_$lang.nt"
     )
+
+  lazy val datasetSize = tryClose(Source.fromFile(Conf.datasetShort_abstractsPath))(_.getLines().size)
 
   List(gateJapeGrammar, datasetShort_abstractsPath) foreach {
     case FileExtractor(_) =>

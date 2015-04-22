@@ -4,14 +4,11 @@ import java.io.{File, FileOutputStream, PrintWriter}
 
 import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.Statement
-import cz.vse.lhd.core.BasicFunction._
 import cz.vse.lhd.core.NTReader
 import cz.vse.lhd.hypernymextractor.Conf
 import gate.creole.SerialAnalyserController
 import gate.{Corpus, Factory, ProcessingResource}
 import org.slf4j.LoggerFactory
-
-import scala.io.Source
 
 class CorpusBuilderPR2 extends CorpusBuilderPR {
 
@@ -38,17 +35,17 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
       case x => getStartPosInArticleNameList.toInt
     }
     val end = getEndPosInArticleNameList.toInt match {
-      case x if x <= 0 => tryClose(Source.fromFile(Conf.datasetShort_abstractsPath))(_.getLines().size)
+      case x if x <= 0 => Conf.datasetSize
       case x => getEndPosInArticleNameList.toInt
     }
     val step = 500
-    logger.info(s"Start of extraction from $start to $end")
+    logger.info(s"Start of extraction from $start until $end")
     logger.info("Total steps: " + (end - start))
 
     HypernymExtractor(getDbpediaLinker, start, end) {
       hypernymExtractor =>
         val disambiguations = getDisambiguations
-        val outputFilePath = Conf.outputDir + "/hypoutput" + (if (getEndPosInArticleNameList.toInt > 0) s".$start-$end" else "") + ".log"
+        val outputFilePath = Conf.outputDir + s"/hypoutpu.$start-$end.log"
         val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
         val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
         implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
@@ -58,7 +55,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
         }
         try {
-          for (offset <- start to end by step) {
+          for (offset <- start until end by step) {
             val endBlock = if (offset + step > end) end else offset + step
             val wikicorpus = Factory.newCorpus("WikipediaCorpus")
             NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
@@ -89,7 +86,6 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
               hypernymExtractor.extractHypernyms(wikicorpus)
             }
           }
-
         } finally {
           outputRawWriter.close()
           outputResourceWriter.close()
