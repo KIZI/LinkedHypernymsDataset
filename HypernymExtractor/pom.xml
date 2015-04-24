@@ -36,13 +36,6 @@
                 <configuration>
                     <launchers>
                         <launcher>
-                            <id>indexer</id>
-                            <mainClass>cz.vse.lhd.hypernymextractor.indexbuilder.DatasetIndexBuilder</mainClass>
-                            <jvmArgs>
-                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
-                            </jvmArgs>
-                        </launcher>
-                        <launcher>
                             <id>runner</id>
                             <mainClass>cz.vse.lhd.hypernymextractor.RunDefaultPipeline</mainClass>
                             <jvmArgs>

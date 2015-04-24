@@ -63,24 +63,25 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
                 .filter(stmt => !disambiguations(stmt.getSubject.getURI))
                 .foldLeft(offset) {
                 (idx, stmt) =>
-                  addDocToCorpus(wikicorpus, stmt, idx)
+                  try {
+                    addDocToCorpus(wikicorpus, stmt, idx)
+                  } catch {
+                    case exc: Throwable => logger.error(exc.getMessage, exc)
+                  }
                   idx + 1
               }
             }
             if (!wikicorpus.isEmpty) {
               pipeline.setCorpus(wikicorpus)
               pipeline.execute()
-              for {
-                doc <- wikicorpus
-                sa <- doc.getAnnotations.get("Sentence").get("Sentence")
-                isaStart = sa.getStartNode
-                isaEnd = sa.getEndNode
-                if isaStart.getOffset == 0 || isaStart.getOffset == 2
-              } {
+              for (doc <- wikicorpus) {
                 try {
-                  doc.setContent(doc.getContent.getContent(isaStart.getOffset, isaEnd.getOffset))
+                  val sa = doc
+                    .getAnnotations.get("Sentence")
+                    .minBy(_.getStartNode.getOffset)
+                  doc.setContent(doc.getContent.getContent(sa.getStartNode.getOffset, sa.getEndNode.getOffset))
                 } catch {
-                  case exc: gate.util.InvalidOffsetException => logger.error(exc.getMessage)
+                  case exc @ (_: gate.util.InvalidOffsetException | _: UnsupportedOperationException) => logger.error(exc.getMessage)
                 }
               }
               hypernymExtractor.extractHypernyms(wikicorpus)
