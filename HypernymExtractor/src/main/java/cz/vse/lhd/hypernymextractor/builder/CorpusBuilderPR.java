@@ -16,7 +16,6 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
     private Corpus corpus = null;
     private Integer startPosInArticleNameList;
     private Integer endPosInArticleNameList;
-    private DBpediaLinker dbpediaLinker;
     private scala.collection.Set<String> disambiguations;
 
     public CorpusBuilderPR() {
@@ -60,14 +59,6 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
 
     public void setEndPosInArticleNameList(Integer endPosInArticleNameList) {
         this.endPosInArticleNameList = endPosInArticleNameList;
-    }
-
-    public DBpediaLinker getDbpediaLinker() {
-        return dbpediaLinker;
-    }
-
-    public void setDbpediaLinker(DBpediaLinker dbpediaLinker) {
-        this.dbpediaLinker = dbpediaLinker;
     }
 
     public scala.collection.Set<String> getDisambiguations() {
