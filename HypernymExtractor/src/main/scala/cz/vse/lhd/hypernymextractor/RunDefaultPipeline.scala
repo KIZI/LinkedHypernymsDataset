@@ -42,9 +42,6 @@ object RunDefaultPipeline extends AppConf {
         new DataInputStream(new FileInputStream(Conf.gatePluginLhdDir + "/creole.xml")))))),
     XPathConstants.NODESET).asInstanceOf[NodeList]
 
-  logger.info(Conf.memcachedAddress)
-  logger.info(Conf.memcachedPort)
-
   new MemCached {
     val address: String = Conf.memcachedAddress
     val port: Int = Conf.memcachedPort.toInt

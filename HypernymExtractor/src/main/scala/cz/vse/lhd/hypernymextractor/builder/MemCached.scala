@@ -17,7 +17,7 @@ trait MemCached extends Closeable {
   val port: Int
 
   private val logger = LoggerFactory.getLogger(getClass)
-  private val memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), util.Arrays.asList(new InetSocketAddress(address, port)))
+  private lazy val memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), util.Arrays.asList(new InetSocketAddress(address, port)))
 
   def close(): Unit = {
     memClient.shutdown()
