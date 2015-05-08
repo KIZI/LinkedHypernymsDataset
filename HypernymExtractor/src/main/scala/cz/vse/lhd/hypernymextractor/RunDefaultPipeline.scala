@@ -59,7 +59,6 @@ object RunDefaultPipeline extends AppConf {
         for (start <- (0 until Conf.datasetSize by Conf.corpusSizePerThread).par) {
           extractHypernyms(newFeatureMap(start, Conf.corpusSizePerThread, dbpediaLinker))
         }
-        logger.info("Konec")
     }
   }
 
