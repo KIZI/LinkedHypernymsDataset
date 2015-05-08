@@ -3,9 +3,8 @@ package cz.vse.lhd.hypernymextractor.builder
 import java.io.Closeable
 import java.net.InetSocketAddress
 import java.security.MessageDigest
-import java.util
 
-import net.spy.memcached.{FailureMode, ConnectionFactoryBuilder, MemcachedClient}
+import net.spy.memcached.MemcachedClient
 import org.slf4j.LoggerFactory
 
 /**
@@ -17,7 +16,7 @@ trait MemCached extends Closeable {
   val port: Int
 
   private val logger = LoggerFactory.getLogger(getClass)
-  private lazy val memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), util.Arrays.asList(new InetSocketAddress(address, port)))
+  private lazy val memClient = new MemcachedClient(new InetSocketAddress(address, port))
 
   def close(): Unit = {
     memClient.shutdown()
