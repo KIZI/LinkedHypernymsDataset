@@ -4,7 +4,7 @@ import java.io.{File, FileOutputStream, PrintWriter}
 
 import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.Statement
-import cz.vse.lhd.core.{BasicFunction, NTReader}
+import cz.vse.lhd.core.NTReader
 import cz.vse.lhd.hypernymextractor.Conf
 import gate.creole.SerialAnalyserController
 import gate.{Corpus, Factory, ProcessingResource}
@@ -42,57 +42,55 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     logger.info(s"Start of extraction from $start until $end")
     logger.info("Total steps: " + (end - start))
 
-    BasicFunction.tryClose(new DBpediaLinker(Conf.wikiApi, Conf.lang, Conf.memcachedAddress, Conf.memcachedPort.toInt) with MemCached) { dbpediaLinker =>
-      HypernymExtractor(dbpediaLinker, start, end) {
-        hypernymExtractor =>
-          val disambiguations = getDisambiguations
-          val outputFilePath = Conf.outputDir + s"/hypoutpu.$start-$end.log"
-          val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
-          val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
-          implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
-            hypernym =>
-              outputRawWriter.println(hypernym.resourceName + ";" + hypernym.rawHypernym)
-              for (resourceHypernym <- hypernym.resourceHypernym)
-                outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
-          }
-          try {
-            for (offset <- start until end by step) {
-              val endBlock = if (offset + step > end) end else offset + step
-              val wikicorpus = Factory.newCorpus("WikipediaCorpus")
-              NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
-                _.slice(offset, endBlock)
-                  .filter(stmt => !disambiguations(stmt.getSubject.getURI))
-                  .foldLeft(offset) {
-                  (idx, stmt) =>
-                    try {
-                      addDocToCorpus(wikicorpus, stmt, idx)
-                    } catch {
-                      case exc: Throwable => logger.error(exc.getMessage, exc)
-                    }
-                    idx + 1
-                }
-              }
-              if (!wikicorpus.isEmpty) {
-                pipeline.setCorpus(wikicorpus)
-                pipeline.execute()
-                for (doc <- wikicorpus) {
+    HypernymExtractor(getDbpediaLinker, start, end) {
+      hypernymExtractor =>
+        val disambiguations = getDisambiguations
+        val outputFilePath = Conf.outputDir + s"/hypoutpu.$start-$end.log"
+        val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
+        val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
+        implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
+          hypernym =>
+            outputRawWriter.println(hypernym.resourceName + ";" + hypernym.rawHypernym)
+            for (resourceHypernym <- hypernym.resourceHypernym)
+              outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
+        }
+        try {
+          for (offset <- start until end by step) {
+            val endBlock = if (offset + step > end) end else offset + step
+            val wikicorpus = Factory.newCorpus("WikipediaCorpus")
+            NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
+              _.slice(offset, endBlock)
+                .filter(stmt => !disambiguations(stmt.getSubject.getURI))
+                .foldLeft(offset) {
+                (idx, stmt) =>
                   try {
-                    val sa = doc
-                      .getAnnotations.get("Sentence")
-                      .minBy(_.getStartNode.getOffset)
-                    doc.setContent(doc.getContent.getContent(sa.getStartNode.getOffset, sa.getEndNode.getOffset))
+                    addDocToCorpus(wikicorpus, stmt, idx)
                   } catch {
-                    case exc @ (_: gate.util.InvalidOffsetException | _: UnsupportedOperationException) => logger.error(exc.getMessage)
+                    case exc: Throwable => logger.error(exc.getMessage, exc)
                   }
-                }
-                hypernymExtractor.extractHypernyms(wikicorpus)
+                  idx + 1
               }
             }
-          } finally {
-            outputRawWriter.close()
-            outputResourceWriter.close()
+            if (!wikicorpus.isEmpty) {
+              pipeline.setCorpus(wikicorpus)
+              pipeline.execute()
+              for (doc <- wikicorpus) {
+                try {
+                  val sa = doc
+                    .getAnnotations.get("Sentence")
+                    .minBy(_.getStartNode.getOffset)
+                  doc.setContent(doc.getContent.getContent(sa.getStartNode.getOffset, sa.getEndNode.getOffset))
+                } catch {
+                  case exc @ (_: gate.util.InvalidOffsetException | _: UnsupportedOperationException) => logger.error(exc.getMessage)
+                }
+              }
+              hypernymExtractor.extractHypernyms(wikicorpus)
+            }
           }
-      }
+        } finally {
+          outputRawWriter.close()
+          outputResourceWriter.close()
+        }
     }
 
     logger.info("== Done ==")

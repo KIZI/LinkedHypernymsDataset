@@ -11,9 +11,9 @@ import scala.io.Source
 /**
  * Created by propan on 17. 4. 2015.
  */
-class DBpediaLinker(apiBase: String, lang: String, val address: String, val port: Int) {
+class DBpediaLinker(apiBase: String, lang: String) {
 
-  self: MemCached =>
+  self: ResourceCache =>
 
   private val logger = LoggerFactory.getLogger(getClass)
   private val ArticlePattern = if (apiBase.contains("search")) "(?m)^\\d.*\\s(\\S+)$".r else "(?m) title=\"([^\"]+)\" ".r.unanchored

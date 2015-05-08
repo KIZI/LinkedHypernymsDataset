@@ -6,7 +6,7 @@ import javax.xml.xpath.{XPathConstants, XPathFactory}
 
 import cz.vse.lhd.core.BasicFunction._
 import cz.vse.lhd.core.{AnyToInt, AppConf, NTReader}
-import cz.vse.lhd.hypernymextractor.builder.MemCached
+import cz.vse.lhd.hypernymextractor.builder.{LocalResourceCache, DBpediaLinker, MemCachedResourceCache}
 import gate.creole.SerialController
 import gate.{Factory, FeatureMap, Gate, ProcessingResource}
 import org.slf4j.LoggerFactory
@@ -42,20 +42,24 @@ object RunDefaultPipeline extends AppConf {
         new DataInputStream(new FileInputStream(Conf.gatePluginLhdDir + "/creole.xml")))))),
     XPathConstants.NODESET).asInstanceOf[NodeList]
 
-  new MemCached {
-    val address: String = Conf.memcachedAddress
-    val port: Int = Conf.memcachedPort.toInt
-  }.flush
-
-  AppConf.args match {
-    case Array(_, AnyToInt(offset), AnyToInt(limit)) =>
-      logger.info("Number of resources for processing: " + limit)
-      extractHypernyms(newFeatureMap(offset, limit))
-    case _ =>
-      logger.info("Number of resources for processing: " + Conf.datasetSize)
-      for (start <- (0 until Conf.datasetSize by Conf.corpusSizePerThread).par) {
-        extractHypernyms(newFeatureMap(start, Conf.corpusSizePerThread))
-      }
+  tryClose((Conf.memcachedAddress, Conf.memcachedPort) match {
+    case (Some(mAddress), Some(AnyToInt(mPort))) => new DBpediaLinker(Conf.wikiApi, Conf.lang) with MemCachedResourceCache {
+      val address: String = mAddress
+      val port: Int = mPort
+    }
+    case _ => new DBpediaLinker(Conf.wikiApi, Conf.lang) with LocalResourceCache
+  }) { dbpediaLinker =>
+    dbpediaLinker.flush()
+    AppConf.args match {
+      case Array(_, AnyToInt(offset), AnyToInt(limit)) =>
+        logger.info("Number of resources for processing: " + limit)
+        extractHypernyms(newFeatureMap(offset, limit, dbpediaLinker))
+      case _ =>
+        logger.info("Number of resources for processing: " + Conf.datasetSize)
+        for (start <- (0 until Conf.datasetSize by Conf.corpusSizePerThread).par) {
+          extractHypernyms(newFeatureMap(start, Conf.corpusSizePerThread, dbpediaLinker))
+        }
+    }
   }
 
   new File(Conf.outputDir)
@@ -80,7 +84,7 @@ object RunDefaultPipeline extends AppConf {
     cPipeline.execute()
   }
 
-  def newFeatureMap(offset: Int, limit: Int) = {
+  def newFeatureMap(offset: Int, limit: Int, dbpediaLinker: DBpediaLinker) = {
     val featureMap = Factory.newFeatureMap
     for (i <- 0 until list.getLength) {
       val paramName = list.item(i).getAttributes.getNamedItem("NAME").getTextContent
@@ -88,6 +92,7 @@ object RunDefaultPipeline extends AppConf {
       featureMap.put(paramName, paramVal)
     }
     featureMap.put("disambiguations", disambiguations)
+    featureMap.put("dbpediaLinker", dbpediaLinker)
     featureMap.put("startPosInArticleNameList", "" + offset)
     featureMap.put("endPosInArticleNameList", "" + (offset + limit))
     featureMap

@@ -31,8 +31,8 @@ object Conf extends ConfGlobal {
       config.get[String]("LHD.HypernymExtractor.gate.dir") /: Dir,
       config.get[String]("LHD.HypernymExtractor.gate.plugin-lhd-dir") /: Dir,
       config.get[String]("LHD.HypernymExtractor.gate.jape-grammar"),
-      config.get[String]("LHD.HypernymExtractor.memcached.address"),
-      config.get[String]("LHD.HypernymExtractor.memcached.port"),
+      config.opt[String]("LHD.HypernymExtractor.memcached.address"),
+      config.opt[String]("LHD.HypernymExtractor.memcached.port"),
       config.get[String]("LHD.HypernymExtractor.wiki-api"),
       config.getOrElse("LHD.HypernymExtractor.corpus-size-per-thread", 10000)
       )
