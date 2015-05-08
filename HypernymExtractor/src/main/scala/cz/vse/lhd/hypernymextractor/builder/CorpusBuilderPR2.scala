@@ -45,7 +45,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     HypernymExtractor(getDbpediaLinker, start, end) {
       hypernymExtractor =>
         val disambiguations = getDisambiguations
-        val outputFilePath = Conf.outputDir + s"/hypoutpu.$start-$end.log"
+        val outputFilePath = Conf.outputDir + s"/hypoutput.$start-$end.log"
         val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
         val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
         implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
