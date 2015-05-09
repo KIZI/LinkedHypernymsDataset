@@ -15,7 +15,7 @@ class DBpediaLinker(apiBase: String, lang: String) {
 
   self: ResourceCache =>
 
-  private val logger = LoggerFactory.getLogger(getClass)
+  private val logger = LoggerFactory.getLogger(classOf[DBpediaLinker])
   private val ArticlePattern = if (apiBase.contains("search")) "(?m)^\\d.*\\s(\\S+)$".r else "(?m) title=\"([^\"]+)\" ".r.unanchored
 
   private def getUrlContent(url: URL) = retry(10) {
@@ -42,10 +42,14 @@ class DBpediaLinker(apiBase: String, lang: String) {
     }
   }
 
-  def getLink(input: String) = getFromCache(input) orElse {
-    val resource = fetchLink(input)
-    resource.foreach(x => saveToCache(input, x))
-    resource
+  def getLink(input: String) = getFromCache(input) match {
+    case Some(link) =>
+      logger.debug(s"Fetched resource from cache: $input -> $link")
+      link
+    case None =>
+      val resource = fetchLink(input)
+      resource.foreach(x => saveToCache(input, x))
+      resource
   }
 
 }

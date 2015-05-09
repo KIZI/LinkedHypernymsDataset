@@ -17,6 +17,8 @@ import scala.io.Source
 
 object RunDefaultPipeline extends AppConf {
 
+  private val monitor = new AnyRef
+
   val logger = LoggerFactory.getLogger(getClass)
   val gateHomeFile = new File(Conf.gateDir)
   val pluginsHomeFile = new File(Conf.gateDir.replaceAll("/+$", "") + "/plugins")
@@ -77,14 +79,14 @@ object RunDefaultPipeline extends AppConf {
     }
   }
 
-  def extractHypernyms(featureMap: FeatureMap) = {
-    val wikiPR = Factory.createResource("cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2", featureMap).asInstanceOf[ProcessingResource]
+  def extractHypernyms(featureMap: FeatureMap) = monitor.synchronized {
+    val wikiPR = retry(10)(Factory.createResource("cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2", featureMap).asInstanceOf[ProcessingResource])()
     val cPipeline = Factory.createResource("gate.creole.SerialController").asInstanceOf[SerialController]
     cPipeline.add(wikiPR)
-    cPipeline.execute()
-  }
+    cPipeline
+  }.execute()
 
-  def newFeatureMap(offset: Int, limit: Int, dbpediaLinker: DBpediaLinker) = {
+  def newFeatureMap(offset: Int, limit: Int, dbpediaLinker: DBpediaLinker) = monitor.synchronized {
     val featureMap = Factory.newFeatureMap
     for (i <- 0 until list.getLength) {
       val paramName = list.item(i).getAttributes.getNamedItem("NAME").getTextContent
