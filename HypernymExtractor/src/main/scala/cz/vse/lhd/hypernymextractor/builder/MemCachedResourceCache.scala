@@ -5,7 +5,6 @@ import java.security.MessageDigest
 import java.util
 
 import net.spy.memcached.{ConnectionFactoryBuilder, FailureMode, MemcachedClient}
-import org.slf4j.LoggerFactory
 
 /**
  * Created by propan on 25. 4. 2015.
@@ -15,7 +14,6 @@ trait MemCachedResourceCache extends ResourceCache {
   val address: String
   val port: Int
 
-  private val logger = LoggerFactory.getLogger(getClass)
   private lazy val memClient = new MemcachedClient(new ConnectionFactoryBuilder().setDaemon(true).setFailureMode(FailureMode.Retry).build(), util.Arrays.asList(new InetSocketAddress(address, port)))
 
   def close(): Unit = memClient.synchronized {
@@ -30,12 +28,7 @@ trait MemCachedResourceCache extends ResourceCache {
   private def normKey(key: String) = if (key.length > 200) md5(key) else key
 
   def getFromCache(key: String) = memClient.synchronized {
-    Option(memClient.get(normKey(key))).map {
-      cachedVal =>
-        val cachedStrVal = cachedVal.asInstanceOf[String]
-        logger.debug(s"Fetched resource from cache: $key -> $cachedStrVal")
-        cachedStrVal
-    }
+    Option(memClient.get(normKey(key))).map(_.asInstanceOf[String])
   }
 
   def saveToCache(key: String, value: String) = memClient.synchronized {
