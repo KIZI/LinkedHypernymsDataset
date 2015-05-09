@@ -43,9 +43,9 @@ class DBpediaLinker(apiBase: String, lang: String) {
   }
 
   def getLink(input: String) = getFromCache(input) match {
-    case Some(link) =>
+    case optLink @ Some(link) =>
       logger.debug(s"Fetched resource from cache: $input -> $link")
-      link
+      optLink
     case None =>
       val resource = fetchLink(input)
       resource.foreach(x => saveToCache(input, x))
