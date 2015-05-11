@@ -64,8 +64,8 @@ object RunDefaultPipeline extends AppConf {
     }
   }
 
-  new File(Conf.outputDir)
-    .listFiles
+  val outputFiles = new File(Conf.outputDir).listFiles
+  outputFiles
     .filter(_.getName.matches( """hypoutput\.\d+-\d+.*"""))
     .groupBy(_.getName.replaceAll( """.+\.""", ""))
     .foreach { case (fileType, files) =>
@@ -78,6 +78,9 @@ object RunDefaultPipeline extends AppConf {
       }
     }
   }
+  outputFiles
+    .filter(_.getName.matches( """.*\.completed$"""))
+    .foreach(_.delete())
 
   def extractHypernyms(featureMap: FeatureMap) = monitor.synchronized {
     val wikiPR = retry(10)(Factory.createResource("cz.vse.lhd.hypernymextractor.builder.CorpusBuilderPR2", featureMap).asInstanceOf[ProcessingResource])()

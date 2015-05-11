@@ -22,12 +22,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
   }
 
   override def execute() = {
-    import language.postfixOps
-    import scala.collection.JavaConversions._
-
     ARQ.init()
-    /*logger.info("== Gate init ==")
-    Gate.init()*/
 
     logger.info("== Corpus size counting ==")
     val start = getStartPosInArticleNameList.toInt match {
@@ -43,57 +38,65 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     logger.info("Total steps: " + (end - start))
 
     HypernymExtractor(getDbpediaLinker, start, end) {
-      hypernymExtractor =>
-        val disambiguations = getDisambiguations
+      implicit hypernymExtractor =>
+        implicit val disambiguations = getDisambiguations
         val outputFilePath = Conf.outputDir + s"/hypoutput.$start-$end.log"
-        val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
-        val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
-        implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
-          hypernym =>
-            outputRawWriter.println(hypernym.resourceName + ";" + hypernym.rawHypernym)
-            for (resourceHypernym <- hypernym.resourceHypernym)
-              outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
-        }
-        try {
-          for (offset <- start until end by step) {
-            val endBlock = if (offset + step > end) end else offset + step
-            val wikicorpus = Factory.newCorpus("WikipediaCorpus")
-            NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
-              _.slice(offset, endBlock)
-                .filter(stmt => !disambiguations(stmt.getSubject.getURI))
-                .foldLeft(offset) {
-                (idx, stmt) =>
-                  try {
-                    addDocToCorpus(wikicorpus, stmt, idx)
-                  } catch {
-                    case exc: Throwable => logger.error(exc.getMessage, exc)
-                  }
-                  idx + 1
-              }
-            }
-            if (!wikicorpus.isEmpty) {
-              pipeline.setCorpus(wikicorpus)
-              pipeline.execute()
-              for (doc <- wikicorpus) {
-                try {
-                  val sa = doc
-                    .getAnnotations.get("Sentence")
-                    .minBy(_.getStartNode.getOffset)
-                  doc.setContent(doc.getContent.getContent(sa.getStartNode.getOffset, sa.getEndNode.getOffset))
-                } catch {
-                  case exc @ (_: gate.util.InvalidOffsetException | _: UnsupportedOperationException) => logger.error(exc.getMessage)
-                }
-              }
-              hypernymExtractor.extractHypernyms(wikicorpus)
-            }
-          }
-        } finally {
-          outputRawWriter.close()
-          outputResourceWriter.close()
-        }
+        val completedFile = new File(outputFilePath + ".completed")
+        if (!completedFile.isFile)
+          extractHypernymsToFile(outputFilePath, completedFile, start, end, step)
     }
 
     logger.info("== Done ==")
+  }
+
+  private def extractHypernymsToFile(outputFilePath: String, completedFile: File, start: Int, end: Int, step: Int)(implicit hypernymExtractor: HypernymExtractor, disambiguations: Set[String]) = {
+    import scala.collection.JavaConversions._
+    val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
+    val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
+    implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {
+      hypernym =>
+        outputRawWriter.println(hypernym.resourceName + ";" + hypernym.rawHypernym)
+        for (resourceHypernym <- hypernym.resourceHypernym)
+          outputResourceWriter.println(s"<${hypernym.resourceUri}> <?> <$resourceHypernym>")
+    }
+    try {
+      for (offset <- start until end by step) {
+        val endBlock = if (offset + step > end) end else offset + step
+        val wikicorpus = Factory.newCorpus("WikipediaCorpus")
+        NTReader.fromFile(new File(Conf.datasetShort_abstractsPath)) {
+          _.slice(offset, endBlock)
+            .filter(stmt => !disambiguations(stmt.getSubject.getURI))
+            .foldLeft(offset) {
+            (idx, stmt) =>
+              try {
+                addDocToCorpus(wikicorpus, stmt, idx)
+              } catch {
+                case exc: Throwable => logger.error(exc.getMessage, exc)
+              }
+              idx + 1
+          }
+        }
+        if (!wikicorpus.isEmpty) {
+          pipeline.setCorpus(wikicorpus)
+          pipeline.execute()
+          for (doc <- wikicorpus) {
+            try {
+              val sa = doc
+                .getAnnotations.get("Sentence")
+                .minBy(_.getStartNode.getOffset)
+              doc.setContent(doc.getContent.getContent(sa.getStartNode.getOffset, sa.getEndNode.getOffset))
+            } catch {
+              case exc @ (_: gate.util.InvalidOffsetException | _: UnsupportedOperationException) => logger.error(exc.getMessage)
+            }
+          }
+          hypernymExtractor.extractHypernyms(wikicorpus)
+        }
+      }
+      completedFile.createNewFile()
+    } finally {
+      outputRawWriter.close()
+      outputResourceWriter.close()
+    }
   }
 
   private def normalizeAbstract(str: String) = str.replaceAll("\\(.*?\\)|\\[.*?\\]", "").replaceAll("\\s+", " ")

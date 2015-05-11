@@ -1,15 +1,10 @@
 package cz.vse.lhd.hypernymextractor
 
-import cz.vse.lhd.core.AppConf
-import cz.vse.lhd.core.BasicFunction._
-import cz.vse.lhd.core.ConfGlobal
-import cz.vse.lhd.core.FileExtractor
-import java.io.File
-import java.io.IOException
-import cz.vse.lhd.core.Dir
-import java.net.HttpURLConnection
-import java.net.URL
+import java.io.{File, IOException}
+import java.net.{HttpURLConnection, URL}
 
+import cz.vse.lhd.core.BasicFunction._
+import cz.vse.lhd.core.{AppConf, ConfGlobal, Dir, FileExtractor}
 import org.slf4j.LoggerFactory
 
 import scala.io.Source
@@ -77,6 +72,15 @@ class ProcessStatus private(step: Int, end: Int) {
 
   def plusplus = ++
 
-  def tryPrint() = if (step % 1000 == 0)
+  def tryPrint() = if (step % 1000 == 0) {
     logger.info(s"$step of $end resources extracted: " + ((step.toDouble / end) * 100).round + "%")
+    val runtime = Runtime.getRuntime
+    val maxMemory = runtime.maxMemory()
+    val allocatedMemory = runtime.totalMemory()
+    val freeMemory = runtime.freeMemory()
+    println("free memory: " + (freeMemory / 1000000) + "<br/>")
+    println("allocated memory: " + (allocatedMemory / 1000000) + "<br/>")
+    println("max memory: " + (maxMemory / 1000000) + "<br/>")
+    println("total free memory: " + ((freeMemory + (maxMemory - allocatedMemory)) / 1000000) + "<br/>")
+  }
 }
