@@ -19,7 +19,9 @@ object Conf extends ConfGlobal {
     gateJapeGrammar,
     memcachedAddress,
     memcachedPort,
+    indexDir,
     wikiApi,
+    mavenCmd,
     corpusSizePerThread
     ) = {
     (
@@ -28,7 +30,9 @@ object Conf extends ConfGlobal {
       config.get[String]("LHD.HypernymExtractor.gate.jape-grammar"),
       config.opt[String]("LHD.HypernymExtractor.memcached.address"),
       config.opt[String]("LHD.HypernymExtractor.memcached.port"),
+      config.get[String]("LHD.HypernymExtractor.index-dir"),
       config.get[String]("LHD.HypernymExtractor.wiki-api"),
+      config.getOrElse("LHD.HypernymExtractor.maven-cmd", "mvn"),
       config.getOrElse("LHD.HypernymExtractor.corpus-size-per-thread", 10000)
       )
   }
@@ -48,8 +52,9 @@ object Conf extends ConfGlobal {
   }
 
   {
-    val of = new File(Conf.outputDir)
-    if (!of.isDirectory) of.mkdir
+    for (of <- List(Conf.outputDir, Conf.indexDir).map(new File(_)) if !of.isDirectory) {
+      of.mkdirs
+    }
     val conn = new URL(wikiApi).openConnection.asInstanceOf[HttpURLConnection]
     try {
       conn.connect()

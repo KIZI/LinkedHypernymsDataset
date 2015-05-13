@@ -1,5 +1,6 @@
 package cz.vse.lhd.hypernymextractor.builder;
 
+import cz.vse.lhd.core.lucene.NTIndexer;
 import gate.Corpus;
 import gate.ProcessingResource;
 import gate.Resource;
@@ -16,7 +17,7 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
     private Corpus corpus = null;
     private Integer startPosInArticleNameList;
     private Integer endPosInArticleNameList;
-    private scala.collection.Set<String> disambiguations;
+    private NTIndexer disambiguations;
     private DBpediaLinker dbpediaLinker;
 
     public CorpusBuilderPR() {
@@ -62,11 +63,11 @@ public abstract class CorpusBuilderPR extends AbstractLanguageAnalyser implement
         this.endPosInArticleNameList = endPosInArticleNameList;
     }
 
-    public scala.collection.Set<String> getDisambiguations() {
+    public NTIndexer getDisambiguations() {
         return disambiguations;
     }
 
-    public void setDisambiguations(scala.collection.Set<String> disambiguations) {
+    public void setDisambiguations(NTIndexer disambiguations) {
         this.disambiguations = disambiguations;
     }
 

@@ -4,11 +4,13 @@ import java.io.{File, FileOutputStream, PrintWriter}
 
 import com.hp.hpl.jena.query.ARQ
 import com.hp.hpl.jena.rdf.model.Statement
-import cz.vse.lhd.core.NTReader
+import cz.vse.lhd.core.{BasicFunction, NTReader}
 import cz.vse.lhd.hypernymextractor.Conf
 import gate.creole.SerialAnalyserController
 import gate.{Corpus, Factory, ProcessingResource}
 import org.slf4j.LoggerFactory
+
+import scala.collection.JavaConversions._
 
 class CorpusBuilderPR2 extends CorpusBuilderPR {
 
@@ -37,20 +39,27 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
     logger.info(s"Start of extraction from $start until $end")
     logger.info("Total steps: " + (end - start))
 
-    HypernymExtractor(getDbpediaLinker, start, end) {
-      implicit hypernymExtractor =>
-        implicit val disambiguations = getDisambiguations
-        val outputFilePath = Conf.outputDir + s"/hypoutput.$start-$end.log"
-        val completedFile = new File(outputFilePath + ".completed")
-        if (!completedFile.isFile)
-          extractHypernymsToFile(outputFilePath, completedFile, start, end, step)
+    HypernymExtractor(getDbpediaLinker, start, end) { implicit hypernymExtractor =>
+      BasicFunction.tryClose(getDisambiguations) { disambiguations =>
+        disambiguations.search { searcher =>
+          implicit val isDisambiaguation = (resource: String) => {
+            logger.debug("Is disambiguation: " + resource)
+            val occ = searcher(resource)
+            logger.debug("Disambiguations: " + occ)
+            occ.nonEmpty
+          }
+          val outputFilePath = Conf.outputDir + s"/hypoutput.$start-$end.log"
+          val completedFile = new File(outputFilePath + ".completed")
+          if (!completedFile.isFile)
+            extractHypernymsToFile(outputFilePath, completedFile, start, end, step)
+        }
+      }
     }
 
     logger.info("== Done ==")
   }
 
-  private def extractHypernymsToFile(outputFilePath: String, completedFile: File, start: Int, end: Int, step: Int)(implicit hypernymExtractor: HypernymExtractor, disambiguations: Set[String]) = {
-    import scala.collection.JavaConversions._
+  private def extractHypernymsToFile(outputFilePath: String, completedFile: File, start: Int, end: Int, step: Int)(implicit hypernymExtractor: HypernymExtractor, disambiguations: String => Boolean) = {
     val outputRawWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".raw"))
     val outputResourceWriter = new PrintWriter(new FileOutputStream(outputFilePath + ".dbpedia"))
     implicit val saveHypernym: HypernymExtractor.Hypernym => Unit = {

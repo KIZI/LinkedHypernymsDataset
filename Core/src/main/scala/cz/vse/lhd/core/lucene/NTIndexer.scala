@@ -39,14 +39,14 @@ class NTIndexer(indexDir: File) extends InputStreamIndexer[NTIndexer.Triple] {
       NTIndexer.Triple(key, hitDoc.get("predicate"), hitDoc.get("object"))
   }
 
-  def index(inputIterator: Iterator[Statement]): Unit = tryClose(new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer))) {
+  def index(inputIterator: Iterator[NTIndexer.Triple]): Unit = tryClose(new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer))) {
     implicit iw =>
       val counter = inputIterator.foldLeft(0) {
         (counter, stmt) =>
           val doc = new Document
-          doc.add(new StringField("subject", stmt.getSubject.getURI, Field.Store.NO))
-          doc.add(new StoredField("predicate", stmt.getPredicate.getURI))
-          doc.add(new StoredField("object", stmt.getObject.toString))
+          doc.add(new StringField("subject", stmt.subject, Field.Store.NO))
+          doc.add(new StoredField("predicate", stmt.predicate))
+          doc.add(new StoredField("object", stmt.`object`))
           iw.addDocument(doc)
           logProgress(counter + 1, false)
           counter + 1
@@ -67,5 +67,9 @@ class NTIndexer(indexDir: File) extends InputStreamIndexer[NTIndexer.Triple] {
 object NTIndexer {
 
   case class Triple(subject: String, predicate: String, `object`: String)
+
+  object Triple {
+    def apply(stmt: Statement) = Triple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
+  }
 
 }
