@@ -29,7 +29,7 @@ object BasicFunction {
   }
 
   @tailrec
-  def retry[T](n: Int)(fn: => T)(ffn: (Throwable, Int) => Unit = (_, _) => Unit): T = {
+  def retry[T](n: Int)(fn: => T)(implicit ffn: (Throwable, Int) => Unit = (_, _) => Unit): T = {
     Try {
       fn
     } match {

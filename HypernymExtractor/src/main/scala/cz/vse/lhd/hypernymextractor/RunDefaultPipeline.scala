@@ -33,6 +33,8 @@ object RunDefaultPipeline extends AppConf {
       case Array(_, AnyToInt(offset), AnyToInt(limit)) =>
         logger.info("Number of resources for processing: " + limit)
         extractExactPart(offset, limit, dbpediaLinker)
+      case Array(_, "index") =>
+        indexDisambiguations()
       case _ =>
         extractBatch(dbpediaLinker)
     }
@@ -41,9 +43,9 @@ object RunDefaultPipeline extends AppConf {
   def extractBatch(cache: ResourceCache) = {
     cache.flush()
     logger.info("Number of resources for processing: " + Conf.datasetSize)
-    val mvn = Conf.mavenCmd
+    val mvn = "\"C:\\Program Files (x86)\\JetBrains\\IntelliJ IDEA 14.1.1\\plugins\\maven\\lib\\maven3\\bin\\mvn.bat\""
     for (start <- (0 until Conf.datasetSize by Conf.corpusSizePerThread).par) retry(10) {
-      val command = s"-q scala:run -Dlauncher=runner -DaddArgs=\"${Conf.globalPropertiesFile}|$start|${Conf.corpusSizePerThread}\""
+      val command = s"""-q scala:run -Dlauncher=runner -DaddArgs="${Conf.globalPropertiesFile}|$start|${Conf.corpusSizePerThread}" """.trim
       logger.info(s"Start command: $mvn $command")
       val exitCode = Process(s"$mvn $command").!
       logger.info(s"$mvn $command: has been finished with code: $exitCode")
@@ -83,7 +85,7 @@ object RunDefaultPipeline extends AppConf {
     extractHypernyms(newFeatureMap(offset, limit, dbpediaLinker))
   }
 
-  def indexDisambiguations = tryCloses(Source.fromFile(Conf.datasetDisambiguations, "UTF-8"), new NTIndexer(Conf.indexDir)) {
+  def indexDisambiguations(): Unit = tryCloses[Unit, AnyRef {def close(): Unit}](Source.fromFile(Conf.datasetDisambiguations, "UTF-8"), new NTIndexer(Conf.indexDir)) {
     case Seq(source: Source, indexer: NTIndexer) =>
       FileUtils.cleanDirectory(new File(Conf.indexDir))
       val disambiguations = NTReader.fromIterator(source.getLines()).map(_.getSubject.getURI).toSet

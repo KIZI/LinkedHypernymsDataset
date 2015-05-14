@@ -15,7 +15,13 @@
         <dependency>  
             <groupId>uk.ac.gate</groupId>  
             <artifactId>gate-core</artifactId>  
-            <version>7.1</version>  
+            <version>7.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.lucene</groupId>
+                    <artifactId>lucene-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.spy</groupId>
@@ -38,13 +44,6 @@
                         <launcher>
                             <id>runner</id>
                             <mainClass>cz.vse.lhd.hypernymextractor.RunDefaultPipeline</mainClass>
-                            <jvmArgs>
-                                <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
-                            </jvmArgs>
-                        </launcher>
-                        <launcher>
-                            <id>stats</id>
-                            <mainClass>cz.vse.lhd.hypernymextractor.Stats</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                             </jvmArgs>

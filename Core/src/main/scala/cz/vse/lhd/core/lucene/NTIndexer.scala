@@ -69,7 +69,7 @@ object NTIndexer {
   case class Triple(subject: String, predicate: String, `object`: String)
 
   object Triple {
-    def apply(stmt: Statement) = Triple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
+    def apply(stmt: Statement) : Triple = Triple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
   }
 
 }
