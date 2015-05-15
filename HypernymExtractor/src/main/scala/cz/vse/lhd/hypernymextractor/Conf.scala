@@ -22,7 +22,8 @@ object Conf extends ConfGlobal {
     indexDir,
     wikiApi,
     mavenCmd,
-    corpusSizePerThread
+    corpusSizePerThread,
+    parallelismLevel
     ) = {
     (
       config.get[String]("LHD.HypernymExtractor.gate.dir") /: Dir,
@@ -33,7 +34,8 @@ object Conf extends ConfGlobal {
       config.get[String]("LHD.HypernymExtractor.index-dir"),
       config.get[String]("LHD.HypernymExtractor.wiki-api"),
       config.getOrElse("LHD.HypernymExtractor.maven-cmd", "mvn"),
-      config.getOrElse("LHD.HypernymExtractor.corpus-size-per-thread", 10000)
+      config.getOrElse("LHD.HypernymExtractor.corpus-size-per-thread", 10000),
+      config.getOrElse("LHD.HypernymExtractor.parallelism-level", 0)
       )
   }
 
@@ -79,13 +81,5 @@ class ProcessStatus private(step: Int, end: Int) {
 
   def tryPrint() = if (step % 1000 == 0) {
     logger.info(s"$step of $end resources extracted: " + ((step.toDouble / end) * 100).round + "%")
-    val runtime = Runtime.getRuntime
-    val maxMemory = runtime.maxMemory()
-    val allocatedMemory = runtime.totalMemory()
-    val freeMemory = runtime.freeMemory()
-    println("free memory: " + (freeMemory / 1000000) + "<br/>")
-    println("allocated memory: " + (allocatedMemory / 1000000) + "<br/>")
-    println("max memory: " + (maxMemory / 1000000) + "<br/>")
-    println("total free memory: " + ((freeMemory + (maxMemory - allocatedMemory)) / 1000000) + "<br/>")
   }
 }

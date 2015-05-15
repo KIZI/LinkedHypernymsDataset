@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory
 import org.w3c.dom.NodeList
 import org.xml.sax.InputSource
 
+import scala.collection.parallel.ForkJoinTaskSupport
 import scala.io.Source
 import scala.sys.process.Process
 
@@ -43,8 +44,11 @@ object RunDefaultPipeline extends AppConf {
   def extractBatch(cache: ResourceCache) = {
     cache.flush()
     logger.info("Number of resources for processing: " + Conf.datasetSize)
-    val mvn = "\"C:\\Program Files (x86)\\JetBrains\\IntelliJ IDEA 14.1.1\\plugins\\maven\\lib\\maven3\\bin\\mvn.bat\""
-    for (start <- (0 until Conf.datasetSize by Conf.corpusSizePerThread).par) retry(10) {
+    val mvn = Conf.mavenCmd
+    val parRange = (0 until Conf.datasetSize by Conf.corpusSizePerThread).par
+    if (Conf.parallelismLevel > 0)
+      parRange.tasksupport = new ForkJoinTaskSupport(new scala.concurrent.forkjoin.ForkJoinPool(Conf.parallelismLevel))
+    for (start <- parRange) retry(10) {
       val command = s"""-q scala:run -Dlauncher=runner -DaddArgs="${Conf.globalPropertiesFile}|$start|${Conf.corpusSizePerThread}" """.trim
       logger.info(s"Start command: $mvn $command")
       val exitCode = Process(s"$mvn $command").!

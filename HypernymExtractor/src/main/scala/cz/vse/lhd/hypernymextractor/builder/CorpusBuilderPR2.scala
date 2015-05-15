@@ -18,7 +18,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
 
   val pipeline = {
     val pl = Factory.createResource("gate.creole.SerialAnalyserController").asInstanceOf[SerialAnalyserController]
-    pl.add(Factory.createResource("gate.creole.tokeniser.DefaultTokeniser", Factory.newFeatureMap).asInstanceOf[ProcessingResource])
+    pl.add(Factory.createResource("gate.creole.tokeniser.DefaultTokeniser", Factory.newFeatureMap()).asInstanceOf[ProcessingResource])
     pl.add(Factory.createResource("gate.creole.splitter.RegexSentenceSplitter", Factory.newFeatureMap()).asInstanceOf[ProcessingResource])
     pl
   }
@@ -43,10 +43,9 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
       BasicFunction.tryClose(getDisambiguations) { disambiguations =>
         disambiguations.search { searcher =>
           implicit val isDisambiaguation = (resource: String) => {
-            logger.debug("Is disambiguation: " + resource)
-            val occ = searcher(resource)
-            logger.debug("Disambiguations: " + occ)
-            occ.nonEmpty
+            val isDisamb = searcher(resource).nonEmpty
+            if (isDisamb) logger.debug(s"Resource $resource is disambiguation page")
+            isDisamb
           }
           val outputFilePath = Conf.outputDir + s"/hypoutput.$start-$end.log"
           val completedFile = new File(outputFilePath + ".completed")
