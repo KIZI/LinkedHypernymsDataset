@@ -16,8 +16,8 @@ object BasicFunction {
     closeable.close()
   }
 
-  def tryCloses[A, B <: {def close() : Unit}](closeable: B*)(f: PartialFunction[Seq[B], A]): Option[A] = try {
-    f.lift(closeable)
+  def tryCloses[A, B <: {def close() : Unit}](closeable: B*)(f: PartialFunction[Seq[B], A]): A = try {
+    f.apply(closeable)
   } finally {
     closeable.foreach(_.close())
   }

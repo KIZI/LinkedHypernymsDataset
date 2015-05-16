@@ -15,7 +15,7 @@ import scala.util.Try
 /**
  * Created by propan on 9. 4. 2015.
  */
-object NTReader extends App {
+object NTReader {
 
   lazy val logger = LoggerFactory.getLogger("cz.vse.lhd.core.NTReader")
 

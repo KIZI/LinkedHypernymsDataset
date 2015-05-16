@@ -2,8 +2,8 @@ package cz.vse.lhd.core.lucene
 
 import java.io.File
 
-import com.hp.hpl.jena.rdf.model.Statement
 import cz.vse.lhd.core.BasicFunction._
+import cz.vse.lhd.core.RdfTriple
 import org.apache.lucene.analysis.core.KeywordAnalyzer
 import org.apache.lucene.document.{Document, Field, StoredField, StringField}
 import org.apache.lucene.index.{DirectoryReader, IndexWriter, IndexWriterConfig, Term}
@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory
 /**
  * Created by propan on 10. 4. 2015.
  */
-class NTIndexer(indexDir: File) extends InputStreamIndexer[NTIndexer.Triple] {
+class NTIndexer(indexDir: File) extends InputStreamIndexer[RdfTriple] {
 
   def this(indexDirStr: String) = this(new File(indexDirStr))
 
@@ -30,16 +30,16 @@ class NTIndexer(indexDir: File) extends InputStreamIndexer[NTIndexer.Triple] {
       logger.info("Indexed triples: " + counter)
   }
 
-  private def searchByKey(key: String)(implicit is: IndexSearcher): Seq[NTIndexer.Triple] = is
+  private def searchByKey(key: String)(implicit is: IndexSearcher): Seq[RdfTriple] = is
     .search(new TermQuery(new Term("subject", key)), 1000)
     .scoreDocs
     .map {
     hit =>
       val hitDoc = is.doc(hit.doc)
-      NTIndexer.Triple(key, hitDoc.get("predicate"), hitDoc.get("object"))
+      RdfTriple(key, hitDoc.get("predicate"), hitDoc.get("object"))
   }
 
-  def index(inputIterator: Iterator[NTIndexer.Triple]): Unit = tryClose(new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer))) {
+  def index(inputIterator: Iterator[RdfTriple]): Unit = tryClose(new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer))) {
     implicit iw =>
       val counter = inputIterator.foldLeft(0) {
         (counter, stmt) =>
@@ -54,22 +54,12 @@ class NTIndexer(indexDir: File) extends InputStreamIndexer[NTIndexer.Triple] {
       logProgress(counter, true)
   }
 
-  def search[A](ibr: ((String) => Seq[NTIndexer.Triple]) => A): A = tryClose(DirectoryReader.open(directory)) {
+  def search[A](ibr: ((String) => Seq[RdfTriple]) => A): A = tryClose(DirectoryReader.open(directory)) {
     dr =>
       implicit val is = new IndexSearcher(dr)
       ibr(searchByKey)
   }
 
   def close(): Unit = directory.close()
-
-}
-
-object NTIndexer {
-
-  case class Triple(subject: String, predicate: String, `object`: String)
-
-  object Triple {
-    def apply(stmt: Statement) : Triple = Triple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
-  }
 
 }

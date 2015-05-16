@@ -28,7 +28,6 @@ public class THDOntologyCleanup {
     private static final String subclassPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
     private static final String equivPredicate = "http://www.w3.org/2002/07/owl#sameAs";
     private static final String seeAlsoPredicate = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
-    public static Integer maxLines = Integer.MAX_VALUE;
     /**
      * @param args the command line arguments
      */

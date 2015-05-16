@@ -11,7 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
  * @author tomas
  */
 public class ManualMapping {
@@ -35,11 +34,8 @@ public class ManualMapping {
             // Get the object of DataInputStream
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            StringBuilder all = new StringBuilder();
             String thisLine;
-            int lineCounter = 0;
             while ((thisLine = br.readLine()) != null) {
-                lineCounter++;
                 if (thisLine.startsWith("#")) {
                     continue;
                 }
@@ -48,12 +44,7 @@ public class ManualMapping {
                 if (!thisLine.contains("dbpedia.org/resource")) {
                     continue;
                 }
-                if (lineCounter > THDOntologyCleanup.maxLines) {
-                    System.out.println("Reached maxLines, quitting LanguageMapping.readMappings");
-                    break;
-                }
 
-//to save memory only the concept name is stored, not full uri            
                 int indexOfMapFromEnd = thisLine.indexOf(" ");
                 String mapFrom = thisLine.substring(0, indexOfMapFromEnd).trim();
                 String mapTo = thisLine.substring(indexOfMapFromEnd, thisLine.length()).trim();
@@ -87,11 +78,8 @@ public class ManualMapping {
             // Get the object of DataInputStream
             DataInputStream in = new DataInputStream(fstream);
             BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            StringBuilder all = new StringBuilder();
             String thisLine;
-            int lineCounter = 0;
             while ((thisLine = br.readLine()) != null) {
-                lineCounter++;
                 if (thisLine.startsWith("#")) {
                     continue;
                 }
@@ -100,11 +88,6 @@ public class ManualMapping {
                 if (!thisLine.contains("dbpedia.org/resource")) {
                     continue;
                 }
-                if (lineCounter > THDOntologyCleanup.maxLines) {
-                    System.out.println("Reached maxLines, quitting LanguageMapping.readMappings");
-                    break;
-                }
-
                 //to save memory only the concept name is stored, not full uri            
                 String exclude = thisLine.trim();
                 excludeTypes.add(exclude);

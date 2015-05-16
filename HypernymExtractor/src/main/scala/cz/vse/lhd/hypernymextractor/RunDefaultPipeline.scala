@@ -6,7 +6,7 @@ import javax.xml.xpath.{XPathConstants, XPathFactory}
 
 import cz.vse.lhd.core.BasicFunction._
 import cz.vse.lhd.core.lucene.NTIndexer
-import cz.vse.lhd.core.{AnyToInt, AppConf, NTReader}
+import cz.vse.lhd.core.{RdfTriple, AnyToInt, AppConf, NTReader}
 import cz.vse.lhd.hypernymextractor.builder.{DBpediaLinker, LocalResourceCache, MemCachedResourceCache, ResourceCache}
 import gate.creole.SerialController
 import gate.{Factory, FeatureMap, Gate, ProcessingResource}
@@ -60,10 +60,10 @@ object RunDefaultPipeline extends AppConf {
     }
     val outputFiles = new File(Conf.outputDir).listFiles
     outputFiles
-      .filter(_.getName.matches( """hypoutput\.\d+-\d+.*"""))
+      .filter(_.getName.matches( s"""${Conf.Output.hypoutName}\.\d+-\d+.*"""))
       .groupBy(_.getName.replaceAll( """.+\.""", ""))
       .foreach { case (fileType, files) =>
-      tryClose(new BufferedOutputStream(new FileOutputStream(Conf.outputDir + s"hypoutput.log.$fileType"))) { outputStream =>
+      tryClose(new BufferedOutputStream(new FileOutputStream(Conf.outputDir + s"${Conf.Output.hypoutName}.${Conf.Output.hypoutLogSuffix}.$fileType"))) { outputStream =>
         for (file <- files) {
           tryClose(new BufferedInputStream(new FileInputStream(file))) { inputStream =>
             Stream continually inputStream.read takeWhile (_ != -1) foreach outputStream.write
@@ -95,7 +95,7 @@ object RunDefaultPipeline extends AppConf {
       val disambiguations = NTReader.fromIterator(source.getLines()).map(_.getSubject.getURI).toSet
       logger.info(s"Disambiguations dataset has been loaded with size ${disambiguations.size}")
       logger.info("Now the disambiguations dataset is being indexed...")
-      indexer.index(disambiguations.toIterator.map(subject => NTIndexer.Triple(subject, "", "")))
+      indexer.index(disambiguations.toIterator.map(subject => RdfTriple(subject, "", "")))
       logger.info("The disambiguations dataset has been indexed")
   }
 

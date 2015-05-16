@@ -49,9 +49,6 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <configuration>
-                    <args>
-                        <arg>-Xmax-classfile-name:75</arg>
-                    </args>
                     <launchers>
                         <launcher>
                             <id>runner</id>

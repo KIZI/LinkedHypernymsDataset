@@ -49,5 +49,17 @@ trait ConfGlobal {
   }
 
   lazy val dbpediaBasicUri = "http://" + (if (lang == "en") "" else s"$lang.") + "dbpedia.org/"
+  lazy val hypernymPredicate = "http://purl.org/linguistics/gold/hypernym"
+
+  object Output {
+    val hypoutName = "hypoutput"
+    val hypoutRawSuffix = "raw"
+    val hypoutDbpediaSuffix = "dbpedia"
+    val hypoutLogSuffix = "log"
+    val hypoutRaw = s"$hypoutName.$hypoutLogSuffix.$hypoutRawSuffix"
+    val hypoutDbpedia = s"$hypoutName.$hypoutLogSuffix.$hypoutDbpediaSuffix"
+    val hypoutDbpediaUnique = s"$lang.$hypoutDbpedia.unique.nt"
+    val hypoutTypeOverride = s"$lang.$hypoutDbpedia.typeoverride.nt"
+  }
 
 }
