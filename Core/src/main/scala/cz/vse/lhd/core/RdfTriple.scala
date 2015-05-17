@@ -21,7 +21,7 @@ case class RdfTriple(subject: String, predicate: String, `object`: String) {
 }
 
 object RdfTriple {
-  def apply(stmt: Statement) = Triple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
+  def apply(stmt: Statement): RdfTriple = RdfTriple(stmt.getSubject.getURI, stmt.getPredicate.getURI, stmt.getObject.toString)
 
   sealed trait ObjectType
 

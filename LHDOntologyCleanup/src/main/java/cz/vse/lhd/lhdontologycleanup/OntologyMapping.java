@@ -189,10 +189,6 @@ public class OntologyMapping {
                 if (!thisLine.contains(subclassPredicate)) {
                     continue;
                 }
-                if (lineCounter > THDOntologyCleanup.maxLines) {
-                    System.out.println("Reached maxLines, quitting InstanceCheck.readAllInstances");
-                    break;
-                }
                 int indexOfSubjectEnd = thisLine.indexOf(" ");
                 String subject = thisLine.substring(1, indexOfSubjectEnd - 1);
                 String subjectName = subject.substring(subject.lastIndexOf("/") + 1);

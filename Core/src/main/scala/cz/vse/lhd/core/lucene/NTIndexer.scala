@@ -52,9 +52,10 @@ class NTIndexer(indexDir: File) extends InputStreamIndexer[RdfTriple] {
           counter + 1
       }
       logProgress(counter, true)
+      iw.forceMerge(1)
   }
 
-  def search[A](ibr: ((String) => Seq[RdfTriple]) => A): A = tryClose(DirectoryReader.open(directory)) {
+  def search[A](ibr: (String => Seq[RdfTriple]) => A): A = tryClose(DirectoryReader.open(directory)) {
     dr =>
       implicit val is = new IndexSearcher(dr)
       ibr(searchByKey)

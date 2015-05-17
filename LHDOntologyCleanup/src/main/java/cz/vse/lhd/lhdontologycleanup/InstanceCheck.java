@@ -131,10 +131,6 @@ public class InstanceCheck {
                 if (thisLine.startsWith("#")) {
                     continue;
                 }
-                if (lineCounter > THDOntologyCleanup.maxLines) {
-                    System.out.println("Reached maxLines, quitting InstanceCheck.readAllInstances");
-                    break;
-                }
 
 
 //to save memory only the concept name is stored, not full uri            
