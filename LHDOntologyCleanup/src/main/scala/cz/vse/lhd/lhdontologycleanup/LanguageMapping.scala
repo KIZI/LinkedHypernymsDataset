@@ -23,4 +23,12 @@ object LanguageMapping {
     }
   }
 
+  def langByResource(resource: String) = {
+    val LangPattern = """http://(.+)\.dbpedia\.org.*""".r
+    resource match {
+      case LangPattern(lang) => lang
+      case _ => "en"
+    }
+  }
+
 }

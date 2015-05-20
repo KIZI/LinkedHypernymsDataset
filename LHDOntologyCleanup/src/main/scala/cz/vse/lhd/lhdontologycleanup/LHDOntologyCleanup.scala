@@ -42,10 +42,12 @@ object LHDOntologyCleanup extends AppConf {
   //    }
   //  }
 
-  tryClose(new NTIndexer(Conf.indexDir)) { indexer =>
-    indexer.search { searcher =>
-      println(searcher("http://dbpedia.org/resource/Revive_(Bjørn_Lynne_album)"))
-    }
-  }
+//  tryClose(new NTIndexer(Conf.indexDir)) { indexer =>
+//    indexer.search { searcher =>
+//      println(searcher("http://dbpedia.org/resource/Revive_(Bjørn_Lynne_album)"))
+//    }
+//  }
+
+  val om = new OntologyMapping(new File(Conf.datasetOntologyPath), Conf.lang)
 
 }

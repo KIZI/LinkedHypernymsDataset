@@ -2,23 +2,24 @@ package cz.vse.lhd.lhdontologycleanup.output
 
 import java.io.{File, OutputStream}
 
-import cz.vse.lhd.core.{RdfTriple, NTWriter, NTReader}
+import cz.vse.lhd.core.{NTReader, NTWriter, RdfTriple}
 import cz.vse.lhd.lhdontologycleanup.{LanguageMapping, OntologyMapping}
 
 /**
  * Created by propan on 18. 5. 2015.
  */
-class ClassEquivallenceOutput(input: File, langOntologyMapping: Map[String, OntologyMapping]) extends OutputMaker with OutputMakerHeader {
+class MappedOutput(input: File, langOntologyMapping: Map[String, OntologyMapping]) extends OutputMaker with OutputMakerHeader {
 
-  val header: String = "# Sameas mappings from DBpedia article to DBpedia ontology"
+  val header: String = "# Mapped hypernyms to DBpedia ontology"
 
   def makeFile(output: OutputStream) = NTReader.fromFile(input) { it =>
     NTWriter.fromIterator(
       for {
-        hypernym <- it.map(_.getObject.asResource().getURI).toSet.toIterator
+        stmt <- it
+        hypernym = stmt.getObject.asResource().getURI
         dbo <- langOntologyMapping(LanguageMapping.langByResource(hypernym)).mapResourceToOntology(hypernym)
       } yield {
-        RdfTriple(hypernym, "http://www.w3.org/2002/07/owl#sameAs", dbo)
+        RdfTriple(stmt.getSubject.getURI, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", dbo)
       },
       output
     )

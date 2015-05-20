@@ -3,13 +3,22 @@ package cz.vse.lhd.lhdontologycleanup
 import java.io.File
 import java.util.regex.Pattern
 
+import scala.annotation.tailrec
 import scala.util.Try
 import scala.xml.XML
 
 /**
  * Created by propan on 18. 5. 2015.
  */
-class OntologyMapping(ontology: File, lang: String) {
+sealed trait OntologyMapping {
+  def mapResourceToOntology(resource: String): Option[String]
+
+  def mapResourceToOntologySubclass(resource: String): Option[String]
+
+  def mapResourceToOntologySuperclass(resource: String): Option[String]
+}
+
+class SingleOntologyMapping(ontology: File, lang: String) extends OntologyMapping {
 
   private val nameClass = (XML.loadFile(ontology) \\ "Class")
     .filter(_.prefix == "owl")
@@ -65,5 +74,30 @@ class OntologyMapping(ontology: File, lang: String) {
         .maxBy(_.length)
     }
   ).getOrElse(None)
+
+}
+
+class MultipleOntologyMapping(implicit ontologyMapping: OntologyMapping*) extends OntologyMapping {
+
+  @tailrec
+  private def findFirst(f: OntologyMapping => Option[String])(implicit oms: Seq[OntologyMapping] = ontologyMapping): Option[String] = oms match {
+    case om :: rest => f(om) match {
+      case result @ Some(_) => result
+      case None => findFirst(f)(rest)
+    }
+    case _ => None
+  }
+
+  def mapResourceToOntology(resource: String) = findFirst { om =>
+    om.mapResourceToOntology(resource)
+  }
+
+  def mapResourceToOntologySubclass(resource: String) = findFirst { om =>
+    om.mapResourceToOntologySubclass(resource)
+  }
+
+  def mapResourceToOntologySuperclass(resource: String) = findFirst { om =>
+    om.mapResourceToOntologySuperclass(resource)
+  }
 
 }
