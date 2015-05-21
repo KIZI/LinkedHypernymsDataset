@@ -15,8 +15,8 @@ object Conf extends ConfGlobal {
     ) = {
     (
       config.get[String]("LHD.OntologyCleanup.index-dir"),
-      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.overridetypes.path", null),
-      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.excludetypes.path", null)
+      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.overridetypes-path", null),
+      config.getOrElse[String]("LHD.OntologyCleanup.manualmapping.excludetypes-path", null)
       )
   }
 

@@ -60,6 +60,14 @@ trait ConfGlobal {
     val hypoutDbpedia = s"$hypoutName.$hypoutLogSuffix.$hypoutDbpediaSuffix"
     val hypoutDbpediaUnique = s"$lang.$hypoutDbpedia.unique.nt"
     val hypoutTypeOverride = s"$lang.$hypoutDbpedia.typeoverride.nt"
+    val hypoutEnAligned = s"$lang.$hypoutDbpedia.en-aligned.nt"
+    val hypoutManualExclusion = s"$lang.$hypoutDbpedia.manualexclusion.nt"
+    val classEquivallence = s"$lang.class.equivallence.nt"
+    val classSuperclass = s"$lang.class.superclass.nt"
+    val classSubclass = s"$lang.class.subclass.nt"
+    val instancesMapped = s"$lang.instances.mapped.nt"
+    val instancesNotMapped = s"$lang.instances.notmapped.nt"
+    val instancesNotMappedSuperMapped = s"$lang.instances.notmapped.mappedsupertype.nt"
   }
 
 }
