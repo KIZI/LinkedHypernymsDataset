@@ -2,7 +2,7 @@ package cz.vse.lhd.lhdontologycleanup.output
 
 import java.io.{OutputStream, File}
 
-import cz.vse.lhd.core.{NTWriter, NTReader}
+import cz.vse.lhd.core.{RdfTriple, NTWriter, NTReader}
 import cz.vse.lhd.lhdontologycleanup.ManualMapping
 
 /**
@@ -22,7 +22,7 @@ class TypeOverrideOutput(input: File, manualMapping: ManualMapping) extends Outp
         val overridenObject = manualMapping.getOverridingType(stmt.getObject.asResource().getURI)
         if (overridenObject != null) {
           mappedCount = mappedCount + 1
-          stmt.changeObject(overridenObject)
+          RdfTriple(stmt).copy(`object` = overridenObject).toStatement
         } else {
           notMappedCount = notMappedCount + 1
           stmt

@@ -15,8 +15,7 @@ object LHDOntologyCleanup extends AppConf {
   AppConf.args match {
     case Array(_, "index") => index()
     case _ =>
-      cleanAndMapToEn()
-      mapToOntology()
+      makeOutputFiles()
   }
 
   def index() = {
@@ -48,28 +47,25 @@ object LHDOntologyCleanup extends AppConf {
     OutputMaker.process(outputNameToFile(outputFile), maker)
   }
 
-  def cleanAndMapToEn() = {
+  def makeOutputFiles() = {
     val pipeline = ListBuffer.empty[(String, OutputMaker)]
     val manualMapping = new ManualMapping(Conf.manualmappingOverridetypesPath, Conf.manualmappingExcludetypesPath)
-    pipeline += (Conf.Output.hypoutDbpediaUnique -> new UniqueLinesOutput(outputNameToFile(Conf.Output.hypoutDbpedia)))
-    pipeline += (Conf.Output.hypoutTypeOverride -> new TypeOverrideOutput(outputNameToFile(Conf.Output.hypoutDbpediaUnique), manualMapping))
-    val exclusionInput = if (Conf.lang != "en") {
-      pipeline += (Conf.Output.hypoutEnAligned -> new EnAlignedOutput(outputNameToFile(Conf.Output.hypoutTypeOverride)))
-      Conf.Output.hypoutEnAligned
-    } else {
-      Conf.Output.hypoutTypeOverride
-    }
-    pipeline += (Conf.Output.hypoutManualExclusion -> new ManualExclusionOutput(outputNameToFile(exclusionInput), manualMapping))
-    runPipeline(pipeline)
-  }
-
-  def mapToOntology() = {
-    val pipeline = ListBuffer.empty[(String, OutputMaker)]
-    val inputFile = outputNameToFile(Conf.Output.hypoutManualExclusion)
     val ontologyMapping = Set(Conf.lang, "en").map(lang => lang -> new SingleOntologyMapping(new File(Conf.datasetOntologyPath), lang)).toMap
-    pipeline += (Conf.Output.classEquivallence -> new ClassEquivallenceOutput(inputFile, ontologyMapping))
-    pipeline += (Conf.Output.classSubclass -> new ClassSubclassOutput(inputFile, ontologyMapping))
-    pipeline += (Conf.Output.classSuperclass -> new ClassSuperclassOutput(inputFile, ontologyMapping))
+    pipeline += (Conf.Output.hypoutDbpediaUnique -> new UniqueLinesOutput(outputNameToFile(Conf.Output.hypoutDbpedia)))
+    val nextInput = outputNameToFile(
+      if (Conf.lang != "en") {
+        pipeline += (Conf.Output.hypoutEnAligned -> new EnAlignedOutput(outputNameToFile(Conf.Output.hypoutTypeOverride)))
+        Conf.Output.hypoutEnAligned
+      } else {
+        Conf.Output.hypoutDbpediaUnique
+      }
+    )
+    pipeline += (Conf.Output.classEquivallence -> new ClassEquivallenceOutput(nextInput, ontologyMapping))
+    pipeline += (Conf.Output.classSubclass -> new ClassSubclassOutput(nextInput, ontologyMapping))
+    pipeline += (Conf.Output.classSuperclass -> new ClassSuperclassOutput(nextInput, ontologyMapping))
+    pipeline += (Conf.Output.hypoutTypeOverride -> new TypeOverrideOutput(nextInput, manualMapping))
+    pipeline += (Conf.Output.hypoutManualExclusion -> new ManualExclusionOutput(outputNameToFile(Conf.Output.hypoutTypeOverride), manualMapping))
+    val inputFile = outputNameToFile(Conf.Output.hypoutManualExclusion)
     pipeline += (Conf.Output.instancesMapped -> new MappedOutput(inputFile, ontologyMapping))
     pipeline += (Conf.Output.instancesNotMapped -> new NotMappedOutput(inputFile, ontologyMapping))
     pipeline += (Conf.Output.instancesNotMappedSuperMapped -> new NotMappedSuperMappedOutput(

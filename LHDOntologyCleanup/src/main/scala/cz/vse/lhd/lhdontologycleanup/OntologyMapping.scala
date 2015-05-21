@@ -28,7 +28,7 @@ class SingleOntologyMapping(ontology: File, lang: String) extends OntologyMappin
       .filter(labelElement => (labelElement \ s"@{${labelElement.getNamespace("xml")}}lang").text == lang)
       .map(_.text)
       .toSet
-    val dbpediaClassName = dbpediaClass.replaceAll(".*/", "")
+    val dbpediaClassName = dbpediaClass.replaceAll(Conf.dbpediaOntologyUri, "")
     (classLabels ++ Set(
       dbpediaClassName,
       dbpediaClassName.replaceAll("_", " "),
@@ -38,7 +38,7 @@ class SingleOntologyMapping(ontology: File, lang: String) extends OntologyMappin
     case (x, y) => x.nonEmpty && y.nonEmpty
   }.toMap
 
-  private def resourceName(resource: String) = resource.replaceAll(".*/", "").replaceAll("_", " ").trim.toLowerCase
+  private def resourceName(resource: String) = resource.replaceAll(s"${Conf.dbpediaResourceUriRegexp}|${Conf.dbpediaOntologyUri}", "").replaceAll("_", " ").trim.toLowerCase
 
   def mapResourceToOntology(resource: String) = nameClass.get(resourceName(resource))
 
@@ -49,14 +49,17 @@ class SingleOntologyMapping(ontology: File, lang: String) extends OntologyMappin
    * @param resource dbpedia resource uri
    * @return
    */
-  def mapResourceToOntologySubclass(resource: String) = Try(
-    nameClass.get(
-      nameClass
-        .keys
-        .filter(_.matches(".+\\b" + Pattern.quote(resourceName(resource))))
-        .maxBy(_.length)
-    )
-  ).getOrElse(None)
+  def mapResourceToOntologySubclass(resource: String) = {
+    val matchRegexp = ".+\\b" + Pattern.quote(resourceName(resource))
+    Try(
+      nameClass.get(
+        nameClass
+          .keysIterator
+          .filter(_.matches(matchRegexp))
+          .maxBy(_.length)
+      )
+    ).getOrElse(None)
+  }
 
   /**
    * returns the most precise superclass for argument
@@ -69,7 +72,7 @@ class SingleOntologyMapping(ontology: File, lang: String) extends OntologyMappin
     nameClass.get {
       val resourceNorm = resourceName(resource)
       nameClass
-        .keys
+        .keysIterator
         .filter(ontologyClassName => resourceNorm.matches(".*" + Pattern.quote(ontologyClassName) + "s?") && resourceNorm.length > ontologyClassName.length)
         .maxBy(_.length)
     }

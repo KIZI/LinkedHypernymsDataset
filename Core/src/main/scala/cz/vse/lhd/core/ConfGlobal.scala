@@ -45,11 +45,14 @@ trait ConfGlobal {
       config.get[String]("LHD.datasets.dir") /: Dir,
       config.get[String]("LHD.lang"),
       config.get[String]("LHD.dbpedia.version")
-    )
+      )
   }
 
   lazy val dbpediaBasicUri = "http://" + (if (lang == "en") "" else s"$lang.") + "dbpedia.org/"
-  lazy val hypernymPredicate = "http://purl.org/linguistics/gold/hypernym"
+
+  val hypernymPredicate = "http://purl.org/linguistics/gold/hypernym"
+  val dbpediaOntologyUri = "http://dbpedia.org/ontology/"
+  val dbpediaResourceUriRegexp = "http://(.+?\\.)?dbpedia.org/resource/"
 
   object Output {
     val hypoutName = "hypoutput"

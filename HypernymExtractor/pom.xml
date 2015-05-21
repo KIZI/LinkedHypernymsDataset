@@ -55,6 +55,7 @@
                             <mainClass>cz.vse.lhd.hypernymextractor.RunDefaultPipeline</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
+                                <jvmArg>-Xmx4g</jvmArg>
                             </jvmArgs>
                         </launcher>
                     </launchers>

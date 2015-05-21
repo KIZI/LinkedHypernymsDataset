@@ -2,8 +2,7 @@ package cz.vse.lhd.lhdontologycleanup.output
 
 import java.io.{File, OutputStream}
 
-import cz.vse.lhd.core.BasicFunction._
-import cz.vse.lhd.core.{NTWriter, NTReader}
+import cz.vse.lhd.core.{NTReader, NTWriter, RdfTriple}
 import cz.vse.lhd.lhdontologycleanup.LanguageMapping
 
 /**
@@ -25,7 +24,7 @@ class EnAlignedOutput(input: File) extends OutputMaker with OutputMakerHeader wi
           languageMapping.englishResource(stmtObject) match {
             case Some(englishResource) =>
               mappedCount = mappedCount + 1
-              stmt.changeObject(englishResource)
+              RdfTriple(stmt).copy(`object` = englishResource).toStatement
             case None =>
               notMappedCount = notMappedCount + 1
               stmt
