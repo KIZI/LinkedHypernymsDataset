@@ -60,8 +60,8 @@ object RunDefaultPipeline extends AppConf {
     }
     val outputFiles = new File(Conf.outputDir).listFiles
     outputFiles
-      .filter(_.getName.matches( s"""${Conf.Output.hypoutName}\.\d+-\d+.*"""))
-      .groupBy(_.getName.replaceAll( """.+\.""", ""))
+      .filter(_.getName.matches(s"${Conf.Output.hypoutName}\\.\\d+-\\d+.*"))
+      .groupBy(_.getName.replaceAll(".+\\.", ""))
       .foreach { case (fileType, files) =>
       tryClose(new BufferedOutputStream(new FileOutputStream(Conf.outputDir + s"${Conf.Output.hypoutName}.${Conf.Output.hypoutLogSuffix}.$fileType"))) { outputStream =>
         for (file <- files) {

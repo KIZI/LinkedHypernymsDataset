@@ -2,7 +2,7 @@ package cz.vse.lhd.lhdontologycleanup.output
 
 import java.io.{File, OutputStream}
 
-import cz.vse.lhd.core.{NTReader, NTWriter, RdfTriple}
+import cz.vse.lhd.core.{NTReader, NTWriter}
 import cz.vse.lhd.lhdontologycleanup.{LanguageMapping, OntologyMapping}
 
 /**
