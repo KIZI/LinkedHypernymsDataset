@@ -15,7 +15,7 @@ class ClassEquivallenceOutput(input: File, langOntologyMapping: Map[String, Onto
   def makeFile(output: OutputStream) = NTReader.fromFile(input) { it =>
     NTWriter.fromIterator(
       for {
-        hypernym <- it.map(_.getObject.asResource().getURI).toSet.toIterator
+        hypernym <- it.map(_.getObject.asResource().getURI).toSet[String].toIterator
         dbo <- langOntologyMapping(LanguageMapping.langByResource(hypernym)).mapResourceToOntology(hypernym)
       } yield {
         RdfTriple(hypernym, "http://www.w3.org/2002/07/owl#sameAs", dbo)

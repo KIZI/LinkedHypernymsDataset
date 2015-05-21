@@ -15,7 +15,7 @@ class ClassSubclassOutput(input: File, langOntologyMapping: Map[String, Ontology
   def makeFile(output: OutputStream) = NTReader.fromFile(input) { it =>
     NTWriter.fromIterator(
       for {
-        hypernym <- it.map(_.getObject.asResource().getURI).toSet.toIterator
+        hypernym <- it.map(_.getObject.asResource().getURI).toSet[String].toIterator
         dbo <- langOntologyMapping(LanguageMapping.langByResource(hypernym)).mapResourceToOntologySubclass(hypernym)
       } yield {
         RdfTriple(dbo, "http://www.w3.org/2000/01/rdf-schema#subClassOf", hypernym)
