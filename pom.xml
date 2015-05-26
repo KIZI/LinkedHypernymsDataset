@@ -11,8 +11,6 @@
         <module>LHDOntologyCleanup</module>
         <module>Core</module>
         <module>LHDTypeInferrer</module>
-        <module>LHDNormalizer</module>
-        <module>MapReduce</module>
         <module>Downloader</module>
     </modules>
     <dependencies>

@@ -7,7 +7,6 @@
         <artifactId>LHD2</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <groupId>cz.vse.lhd</groupId>
     <artifactId>LHDTypeInferrer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <name>LHDTypeInferrer</name>
@@ -17,11 +16,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>Core</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.8</version>
         </dependency>
     </dependencies>
     <properties>
@@ -38,7 +32,8 @@
                     <launchers>
                         <launcher>
                             <id>runner</id>
-                            <mainClass>cz.vse.lhd.lhdtypeinferrer.TypeInferrerInitializer</mainClass>
+                            <mainClass>cz.vse.lhd.lhdtypeinferrer.StatisticalTypeInferrer</mainClass>
+                            <mainClass>cz.vse.lhd.lhdtypeinferrer.StatisticalTypeInferrer</mainClass>
                             <jvmArgs>
                                 <jvmArg>-Dfile.encoding=UTF-8</jvmArg>
                                 <jvmArg>-Xmx4g</jvmArg>

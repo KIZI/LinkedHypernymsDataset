@@ -11,6 +11,9 @@ data/**/*.zip
 data/**/*.gz
 data/index/*
 data/output/*
+data/output_nl/*
+data/output_de/*
+data/output_en/*
 **/nb-configuration.xml
 **/nbactions.xml
 .svn

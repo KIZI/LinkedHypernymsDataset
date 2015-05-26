@@ -9,28 +9,20 @@ object Conf extends ConfGlobal {
 
   val globalPropertiesFile = AppConf.args(0)
 
-  val (
-    compressTemporaryFiles
-    ) = {
-    (
-      config.get[Boolean]("LHD.TypeInferrer.compressTemporaryFiles")
-    )
-  }
+  val indexDir = config.get[String]("LHD.TypeInferrer.index-dir")
 
   val (
     datasetInstance_typesPath,
+    datasetInstance_typesTransitivePath,
     datasetOntologyPath) = (
     s"${Conf.datasetsDir}instance_types_$lang.nt",
+    s"${Conf.datasetsDir}instance_types_transitive_$lang.nt",
     s"${Conf.datasetsDir}dbpedia_${Conf.dbpediaVersion}.owl"
   )
 
-  List(datasetInstance_typesPath, datasetOntologyPath) foreach {
+  List(datasetInstance_typesPath, datasetInstance_typesTransitivePath, datasetOntologyPath) foreach {
     case FileExtractor(_) =>
     case x => throw new IOException(s"File $x does not exist or is not writable.")
   }
 
-}
-
-object Logger extends cz.vse.lhd.core.Logger {
-  val conf = Conf
 }

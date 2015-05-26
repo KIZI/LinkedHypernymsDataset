@@ -71,6 +71,8 @@ trait ConfGlobal {
     val instancesMapped = s"$lang.instances.mapped.nt"
     val instancesNotMapped = s"$lang.instances.notmapped.nt"
     val instancesNotMappedSuperMapped = s"$lang.instances.notmapped.mappedsupertype.nt"
+    val inferredMappingsToDbpedia = s"$lang.inferredmappingstodbpedia.nt"
+    val inferredMapping = s"$lang.inferredmapping.nt"
   }
 
 }
