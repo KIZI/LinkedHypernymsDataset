@@ -24,7 +24,7 @@ object AppConf {
 
   private var _args: Array[String] = _
 
-  lazy val args = _args
+  def args = _args
 
 }
 
@@ -73,6 +73,10 @@ trait ConfGlobal {
     val instancesNotMappedSuperMapped = s"$lang.instances.notmapped.mappedsupertype.nt"
     val inferredMappingsToDbpedia = s"$lang.inferredmappingstodbpedia.nt"
     val inferredMapping = s"$lang.inferredmapping.nt"
+    val finalCore = s"$lang.lhd.core.$dbpediaVersion.nt"
+    val finalInference = s"$lang.lhd.inference.$dbpediaVersion.nt"
+    val finalExtension = s"$lang.lhd.extension.$dbpediaVersion.nt"
+    val finalRaw = s"$lang.lhd.raw.$dbpediaVersion.nt"
   }
 
 }

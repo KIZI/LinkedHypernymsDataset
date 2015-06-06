@@ -14,7 +14,7 @@ case class RdfTriple(subject: String, predicate: String, `object`: String) {
       model.createProperty(predicate),
       objectType match {
         case Resource => model.createResource(`object`)
-        case Literal => model.createLiteral(`object`)
+        case Literal(lang) => model.createLiteral(`object`, lang)
       }
     )
   }
@@ -25,7 +25,7 @@ object RdfTriple {
 
   sealed trait ObjectType
 
-  object Literal extends ObjectType
+  case class Literal(lang: String) extends ObjectType
 
   object Resource extends ObjectType
 
