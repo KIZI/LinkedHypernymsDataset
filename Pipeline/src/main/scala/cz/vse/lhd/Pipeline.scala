@@ -55,9 +55,10 @@ object Pipeline extends AppConf {
 
   logger.info("Skipped tasks: " + skipped)
 
-  if (removeAll) {
+  val outputDir = new File(Conf.outputDir)
+  if (removeAll && outputDir.isDirectory) {
     logger.info("The output directory is cleaning...")
-    FileUtils.cleanDirectory(new File(Conf.outputDir))
+    FileUtils.cleanDirectory()
   }
 
   for (task <- tasks) {
