@@ -58,7 +58,7 @@ object Pipeline extends AppConf {
   val outputDir = new File(Conf.outputDir)
   if (removeAll && outputDir.isDirectory) {
     logger.info("The output directory is cleaning...")
-    FileUtils.cleanDirectory()
+    FileUtils.cleanDirectory(outputDir)
   }
 
   for (task <- tasks) {
