@@ -1,23 +1,29 @@
 LinkedHypernymsDataset
 ======================
 
-LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpedia resources (as subjects) and types of these resources (as objects). The extraction framework returns two particular datasets LHD 1.0 (types of resources are other resources or DBpedia ontology classes) and LHD 2.0 (types of resources are DBpedia ontology classes only). The extraction process tries to find the hyperonymum for each DBpedia resource (HypernymExtractor module) which is transformed to another DBpedia resource and then is mapped to a DBpedia ontology class (LHDOntologyCleanup module and LHDTypeInferrer module). Supported languages are English, German and Dutch.
+LinkedHypernymsDataset extraction framework makes RDF dataset consisting of DBpedia resources (as subjects) and types of these resources (as objects). The extraction framework returns several datasets:
+
++ **Core** - types of resources are DBpedia ontology classes built on Extension dataset and a hypernym pattern matching (most accurate, most specific)
++ **Inference** - types of resources are DBpedia ontology classes build on the Extension dataset and a statistical type inference algorithm (less accurate, less specific)
++ **Extension** - types of resources are other resources build on the Raw dataset and the first hypernym word hit from wikipedia API (highest type specificity)
++ **Raw** - all hypernyms are string literals extracted from the first sentence of a wikipedia resource abstract.
+
+The extraction process tries to find the hyperonymum for each DBpedia resource (HypernymExtractor module) which is transformed to another DBpedia resource and then is mapped to a DBpedia ontology class (OntologyCleanup module and TypeInferrer module). Supported languages are English, German and Dutch.
 
 ## Requirements
 
-+ Gate 7.0
-+ Maven 2
-+ Java 7
++ Gate 8.0
++ Maven 2+
++ Java 8
 + Downloaded current DBpedia datasets for the set language (it is possible to use the Downloader module).
-  + Mapping-based Types (English and the set language)
-  + Titles
-  + Short Abstracts
-  + Disambiguations
-  + Inter-Language Links (only English dataset is required)
+  + Mapping-based Types (for english and the set language)
+  + Mapping-based Types transitive (for english and the set language)
+  + Short Abstracts (for the set language)
+  + Disambiguations (for the set language)
+  + Inter-Language Links (only english dataset is required)
   + DBpedia Ontology (owl)
-+ Memcached endpoint
-+ 6GB RAM or more
-+ Optionaly: local Wikipedia Search API (for faster processing)
++ Memcached endpoint (optional, recommended)
++ 4GB RAM or more
 
 ## Preparation
 
@@ -31,42 +37,42 @@ There is a recommended file structure in the root directory:
 
     * Core
     * HypernymExtractor
-    * LHDNormalizer
-    * LHDOntologyCleanup
-    * LHDTypeInferrer
-    * MapReduce
+    * OntologyCleanup
+    * TypeInferrer
     * Downloader
     * data
       * datasets
-        * dbpedia_3.9.owl                // DBpedia ontology
-        * instance_types_LANG.nt         // DBpedia Mapping-based Types dataset for the set language
-        * interlanguage_links_en.nt      // DBpedia Inter-Language Links dataset for English
-        * labels_LANG.nt                 // DBpedia Titles dataset for the set language
-        * disambiguations_LANG.nt        // DBpedia Disambiguations dataset for the set language
-        * short_abstracts_LANG.nt        // DBpedia Short Abstracts dataset for the set language
-        * exclude-types                  // Handwritten rules - excluded types (optional)
-        * override-types                 // Handwritten rules - mappings of types to another one (optional)
+        * dbpedia_2015.owl                      // DBpedia ontology
+        * instance_types_LANG.nt                // DBpedia Mapping-based Types dataset for the set language
+        * instance_types_en.nt                  // DBpedia Mapping-based Types dataset for the english language
+        * instance_types_transitive_LANG.nt     // DBpedia Mapping-based Types transitive dataset for the set language
+        * instance_types_tansitive_en.nt        // DBpedia Mapping-based Types transitive dataset for the english language
+        * interlanguage_links_en.nt             // DBpedia Inter-Language Links dataset for English
+        * disambiguations_LANG.nt               // DBpedia Disambiguations dataset for the set language
+        * short_abstracts_LANG.nt               // DBpedia Short Abstracts dataset for the set language
+        * exclude-types                         // Handwritten rules - excluded types (optional)
+        * override-types                        // Handwritten rules - mappings of types to another one (optional)
       * grammar
-        * de_hearst.jape                 // JAPE grammar for German
-        * en_hearst.jape                 // JAPE grammar for English
-        * nl_hearst.jape                 // JAPE grammar for Dutch
+        * de_hearst.jape                        // JAPE grammar for German
+        * en_hearst.jape                        // JAPE grammar for English
+        * nl_hearst.jape                        // JAPE grammar for Dutch
       * index                            
       * logs
       * output
     * utils
-      * gate-7.0                         // Gate software - binary package
-      * treetagger                       // Treetagger - POS tagger for German and Dutch
-    * application.LANG.conf              // settings of all modules for the set language
-    * run-all.sh                         // main launcher
+      * gate-8.0                                // Gate software - binary package
+      * treetagger                              // Treetagger - POS tagger for German and Dutch
+    * application.LANG.conf                     // settings of all modules for the set language
+    * run-all.sh                                // main launcher
     * pom.xml
 
-Download Gate 7 software from https://gate.ac.uk/download/ (binary-only package).
+Download Gate 8 software from https://gate.ac.uk/download/ (binary-only package).
 
 Install memcached (Debian: apt-get memcached).
 
 You can download required datasets manually or use the Downloader module (see installation steps). If you want to download datasets manually, you will find all in the DBpedia homepage:
-+ Download DBpedia **Mapping-based Types dataset**, **Titles dataset**, **Disambiguations dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads to the dataset directory. Datasets must be unzipped; having .nt suffix.
-+ Download **English Inter-Language Links dataset** and **English Mapping-based Types dataset** from http://wiki.dbpedia.org/Downloads to the dataset directory (the datasets must be unzipped).
++ Download DBpedia **Mapping-based Types dataset**, **Mapping-based Types transitive dataset**, **Disambiguations dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads to the dataset directory. Datasets must be unzipped; having .nt suffix.
++ Download **English Inter-Language Links dataset**, **English Mapping-based Types dataset** and **English Mapping-based Types transitive dataset** from http://wiki.dbpedia.org/Downloads to the dataset directory (the datasets must be unzipped).
 + Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads and unzip it to the dataset directory.
 
 For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory).
@@ -154,30 +160,33 @@ LHD {
   lang = "en"                                                              # a set language (en|de|nl)
   dbpedia.version = "2014"                                                 # DBpedia version
   HypernymExtractor {
-      index.dir = "../data/index"                                          # path to the directory where indexed datasets
-      wiki.api = "http://en.wikipedia.org/w/"                              # Wiki Search API URL. You can use your own mirror located in your localhost which is not limited, or use the original API (en: http://en.wikipedia.org/w/, de: http://de.wikipedia.org/w/, nl: http://nl.wikipedia.org/w/)
+      index-dir = "../data/index"                                          # path to the directory where indexed datasets
+      wiki-api = "http://en.wikipedia.org/w/"                              # Wiki Search API URL. You can use your own mirror located in your localhost which is not limited, or use the original API (en: http://en.wikipedia.org/w/, de: http://de.wikipedia.org/w/, nl: http://nl.wikipedia.org/w/)
       gate {                  
-          dir = "../utils/gate-7.0-build4195"                              # path to the Gate root directory (binary package)
-          plugin.lhd.dir = "../HypernymExtractor/target/gateplugin"        # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
-          jape.grammar = "../data/grammar/en_hearst.jape"                  # path to the JAPE grammar for the set language
+          dir = "../utils/gate-8.0-build4825"                              # path to the Gate root directory (binary package)
+          plugin-lhd-dir = "../HypernymExtractor/target/gateplugin"        # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
+          jape-grammar = "../data/grammar/en_hearst.jape"                  # path to the JAPE grammar for the set language
       }
       memcached {
          address = "127.0.0.1"                                             # Memcached server address
          port = 11211                                                      # Memcached server port
       }
+      parallelism-level = 2                                                # number of maximal parallel threads created during the extraction process (too many threads can cause the memory leak, default is unlimited-automatic)
+      corpus-size-per-thread = 20000                                       # number of resources which are being processed within one thread (default is 10000)
+      maven-cmd = """"C:\Program Files (x86)\JetBrains\IntelliJ IDEA\plugins\maven\lib\maven3\bin\mvn.bat""""      # a path to the maven script (dafault is "mvn")
   }
   OntologyCleanup {
+     index-dir = "../data/index"
      manualmapping {
-          overridetypes.path = "../data/datasets/override-types_en"        # path to the file where handwritten rules - excluded types are saved (this is an optional setting; only for en)
-          excludetypes.path = "../data/datasets/exclude-types"             # path to the file where handwritten rules, mappings of types to another one, are saved (this is an optional setting; only for en)
+          overridetypes-path = "../data/datasets/override-types_en"        # path to the file where handwritten rules - excluded types are saved (this is an optional setting)
+          excludetypes-path = "../data/datasets/exclude-types"             # path to the file where handwritten rules, mappings of types to another one, are saved (this is an optional setting)
       }
   }
   TypeInferrer {
-      compressTemporaryFiles = true                                        # if true then all generated temporary files will be zipped to the one file and deleted from the output directory (true|false).
+     index-dir = "../data/index"
   }
 }
 ```
-
 
 If there are no downloaded datasets in your local computer you can use the Downloader module. Go to the Downloader module folder and type this command (all required datasets will be downloaded to the datasets directory):
 
