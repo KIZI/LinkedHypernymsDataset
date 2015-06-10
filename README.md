@@ -194,7 +194,7 @@ If there are no downloaded datasets in your local computer you can use the Downl
 
 ##1. HypernymExtractor module
 
-This module only extracts hypernyms from all DBpedia resources and saves them to the temporary file. Any hypernym is derived from a first sentence of a DBpedia resource short abstract and is represented by one word. Subsequently, the hypernym word is mapped to a DBpedia resource based on the first hit returned by Wikipedia Search API. The extraction process uses following Gate plugins:
+This module extracts hypernyms from DBpedia resources with an abstract and saves them to the temporary file. Any hypernym is derived from a first sentence of a DBpedia resource short abstract and is represented by one word. Subsequently, the hypernym word is mapped to a DBpedia resource based on the first hit returned by Wikipedia Search API. The extraction process uses following Gate plugins:
 
 1. ANNIE English Tokenizer
 2. ANNIE Sentence Splitter
@@ -203,70 +203,69 @@ This module only extracts hypernyms from all DBpedia resources and saves them to
 
 Before starting the extraction process, check the HypernymExtractor section in the main config file (application.LANG.conf). After checking the properties go to the HypernymExtractor directory and start the extraction process by these commands:
 
-    mvn scala:run -Dlauncher=indexer -DaddArgs=../application.LANG.conf
-    mvn scala:run -Dlauncher=runner -DaddArgs=../application.LANG.conf
+    mvn scala:run -DaddArgs="../application.LANG.conf|index"
+    mvn scala:run -DaddArgs=../application.LANG.conf
     
-For each command you must set path to the config file as first argument of the script launcher (-DaddArgs=../application.LANG.conf). The first command indexes datasets by Lucene; the second one extracts hypernyms for all DBpedia resources and saves results to the output directory. After these steps you can continnue to the next module.
+For each command you must set path to the config file as the first argument of the script launcher (-DaddArgs=../application.LANG.conf). The first command indexes datasets by Lucene; the second one extracts hypernyms for all DBpedia resources and saves results to the output directory. After these steps you can continnue to the next module.
 
-Optionaly: The extraction process can be started in parallel. You can **map** it to more processes by specifying a start pointer and a final pointer; then you can **reduce** these pieces to the one result file.
+Note: The extraction process will be started in parallel, where each thread is just one maven command with some specific offset and limit. If you want to test this extraction process on some small part of dataset within one thread you can run it by this command
 
-    mvn scala:run -Dlauncher=runner -DaddArgs=../application.LANG.conf|10000|20000       -- this command handles all resources from 10000 to 20000
-    mvn scala:run -Dlauncher=stats -DaddArgs=../application.LANG.conf                    -- this command shows number of all resources
+    mvn scala:run -DaddArgs="../application.LANG.conf|10000|10000"       -- this command handles all resources from 10000 to 20000
 
-Optionaly: For the parallel multi-thread processing in your local computer by using a multiple core processor, you can use the MapReduce module. Go to the MapReduce directory and run the extraction proccess for multiple threads by this maven command (the first arg is a number of resources being extracted in one thread, the optionaly second arg is a path to the maven executive file):
+##2. OntologyCleanup module
 
-    mvn scala:run -Dlauncher=starter -DaddArgs=../application.LANG.conf|20000
-    OR
-    mvn scala:run -Dlauncher=starter -DaddArgs=../application.LANG.conf|20000|C:\maven\mvn.bat       -- for Windows
-    
+This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to clean and map it to a DBpedia ontology type. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match.
 
-##2. LHDOntologyCleanup module
+Before starting the mapping process, check the OntologyCleanup section in the main config file (application.LANG.conf). After checking the properties go to the OntologyCleanup directory and start the mapping process by these commands (there are required result files of the HypernymExtractor process in the output directory):
 
-This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to map it to a DBpedia ontology type. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match. The result is a set of files which are used in the final step making LHD datasets in the LHDTypeInferrer module.
+    mvn scala:run -DaddArgs="../application.LANG.conf|index"
+    mvn scala:run -DaddArgs="../application.LANG.conf" 
 
-Before starting the mapping process, check the OntologyCleanup section in the main config file (application.LANG.conf). After checking the properties go to the LHDOntologyCleanup directory and start the mapping process by these commands (there are required result files of the HypernymExtractor process in the output directory):
 
+##3. TypeInferrer module
+
+TypeInferrer module tries to infer a DBpedia ontology type from a DBpedia resource by the STI algorithm (Statistical Type Inference).
+
+Before starting the inferring process, check the TypeInferrer section in the main config file (application.LANG.conf). After checking the properties go to the TypeInferrer directory and start the inferring process by these commands (there are required result files of the OntologyCleanup process in the output directory):
+
+    mvn scala:run -DaddArgs="../application.LANG.conf|index"
     mvn scala:run -DaddArgs=../application.LANG.conf 
 
-
-##3. LHDTypeInferrer module
-
-This is the final step making LHD datasets. LHDTypeInferrer module tries to infer remaining DBpedia ontology types by the STI algorithm (Statistical Type Inference) which weren't mapped within the previous step.
-
-Before starting the inferring process, check the TypeInferrer section in the main config file (application.LANG.conf). After checking the properties go to the LHDTypeInferrer directory and start the inferring process by these commands (there are required result files of the LHDOntologyCleanup process in the output directory):
-
-    mvn scala:run -DaddArgs=../application.LANG.conf 
-    
 ##Results
 
-The LHDTypeInferrer module made two key files: **LANG.LHDv1.draft.nt**, **LANG.LHDv2.draft.nt** and **LANG.plainHyp.draft.nt**. If the property 'compressTemporaryFiles' was set to 'true', all temporary files were zipped to the **LANG.temp.draft.zip** file and deleted from the output directory; if false, temporary files still exist in the output directory.
+After the Pipeline module successfully finished its work you should see four basic datasets in the output directory: core, inference, extension and raw. Notice that the Pipeline module runs all required LHD modules sequentially for the final datasets generation.
 
-###LHD 1.0
+###Core
 
-The dataset contains types of all DBpedia resources represented by a DBpedia ontology type or another DBpedia resource. If any textual match of a DBpedia resource is found in the DBpedia ontology, this DBpedia resource will be mapped to a DBpedia ontology type. For example:
+The dataset contains types of all DBpedia resources represented by a DBpedia ontology type. If any textual match of a DBpedia resource is found in the DBpedia ontology, this DBpedia resource will be mapped to a DBpedia ontology type. This dataset contains most accurate and specific ontology types. For example:
 
-
-    # there isn't any textual match for the Republic resource in the DBpedia ontology 
-    <http://dbpedia.org/resource/Germany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/resource/Republic> .
+    <http://dbpedia.org/resource/Country> -> <http://dbpedia.org/ontology/Country>
     
     # there is some textual match for the Country resource in the DBpedia ontology. It is mapped! 
     <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
+
+###Inference (STI algorithm)
+
+In this dataset, all hypernyms which have a form as a dbpedia resource are assigned to a DBpedia ontology type by the STI algorithm. This dataset is not so accurate and specific like the Core dataset, but it is larger because it tries to map all resources with some extracted hypernym to DBpedia ontology types. For example:
+
+    <http://dbpedia.org/resource/Republic> -> <http://dbpedia.org/ontology/Country>
     
-    
-###LHD 2.0
-
-In this dataset, all unmapped types are assigned to a DBpedia ontology type by the STI algorithm. The object is never any DBpedia resource, it is always a DBpedia ontology type. For example:
-
-
     # Inferred DBpedia ontology type
     <http://dbpedia.org/resource/Germany> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Place> .
     
     <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
+    
+    
+###Extension
 
-###PlainHyp
+Resources have assigned a hypernym which was extracted from the HypernymExtractor module and mapped to some DBpedia resource.
 
-This dataset **LANG.plainHyp.draft.nt** contains hypernyms in the plain-text form. Example:
+    <http://dbpedia.org/resource/Angela_Merkel> <http://purl.org/linguistics/gold/hypernym> <http://dbpedia.org/resource/Politician> .
 
-    <http://de.dbpedia.org/resource/Angela_Salem> <http://de.dbpedia.org/property/hypernym> "Fu\u00DFballspielerin"@de .
-    <http://de.dbpedia.org/resource/Lee_Hsin-han> <http://de.dbpedia.org/property/hypernym> "Tennisspieler"@de .
+###Raw
+
+This dataset contains hypernyms in the plain-text form. Example:
+
+    <http://de.dbpedia.org/resource/Angela_Salem> <http://purl.org/linguistics/gold/hypernym> "Fu\u00DFballspielerin"@de .
+    <http://de.dbpedia.org/resource/Lee_Hsin-han> <http://purl.org/linguistics/gold/hypernym> "Tennisspieler"@de .
 
