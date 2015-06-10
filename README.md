@@ -22,7 +22,7 @@ The extraction process tries to find the hyperonymum for each DBpedia resource (
   + Disambiguations (for the set language)
   + Inter-Language Links (only english dataset is required)
   + DBpedia Ontology (owl)
-+ Memcached endpoint (optional, recommended)
++ Memcached endpoint
 + 4GB RAM or more
 
 ## Preparation
