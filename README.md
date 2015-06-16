@@ -139,8 +139,32 @@ Before starting of the extraction process, the config file should be specified, 
 It is possible to use a shell script "run-all.sh" for starting of all processes which are needed to generate LHD dataset. This script fetches the current version of LHD extraction framework by the git command, install it by the maven command, download required datasets, remove old output files and launch the extraction process. This process can take several days therefore it should be run as a background process:
 
     ./run-all.sh ../application.LANG.conf > output.log 2>&1 &
-    
-Or you can launch the extraction process step by step. See following paragraphs.
+
+Or you can use the Pipeline module where all computational processes are integrated. Go to the Pipeline directory and run all with one maven command (this module doesn't involve any datasets download step; so download datasets manually or by using the download module):
+
+    mvn scala:run -DaddArgs="../application.LANG.conf|<skipped-tasks>|<remove-all>" > output.log 2>&1 &
+
+Within this command you can use some optional parameters:
+
+  * **remove-all**: if you use "remove-all" string as a second or third parameter, then the output directory will be completely cleaned before running of the extraction process.
+```
+mvn scala:run -DaddArgs="../application.LANG.conf|remove-all"
+```
+  * **skipped-tasks**: there are special flags which can be used for skipping of some extraction tasks. Within this option you can use any combination of these flags.
+    * x: Skip the indexing task of the hypernym extraction process
+    * e: Skip the hypernym extraction process
+    * y: Skip the indexing task of the ontology cleanup
+    * c: Skip the ontology cleanup task
+    * z: Skip the indexing task of the STI algorithm
+    * y: Skip the STI processing (Statistical Type Inferrence)
+    * f: Skip the final datasets making tasks (this task aggregates outputs from all modules)
+```
+mvn scala:run -DaddArgs="../application.LANG.conf|xe"    # run all tasks except the hypernym extraction process with indexing
+```
+
+If some task fails then the process will continue where it left off after restart, unless you use "remove-all" parameter.
+
+Moreover you can launch the extraction process step by step. See following paragraphs.
 
 ##Installation
 
