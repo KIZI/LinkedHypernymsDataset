@@ -27,13 +27,13 @@ The extraction process tries to find the hyperonymum for each DBpedia resource (
 
 ## Preparation
 
-First download the current version of LHD extraction framework:
+First download the current version of the LHD extraction framework:
 
     git clone https://github.com/KIZI/LinkedHypernymsDataset.git
     cd LinkedHypernymsDataset
     git fetch
 
-There is a recommended file structure in the root directory:
+Recommended file structure in the root directory:
 
     * Core
     * HypernymExtractor
@@ -60,22 +60,22 @@ There is a recommended file structure in the root directory:
       * logs
       * output
     * utils
-      * gate-8.0                                // Gate software - binary package
+      * gate-8.0                                // GATE software - binary package
       * treetagger                              // Treetagger - POS tagger for German and Dutch
     * application.LANG.conf                     // settings of all modules for the set language
     * run-all.sh                                // main launcher
     * pom.xml
 
-Download Gate 8 software from https://gate.ac.uk/download/ (binary-only package).
+Download Gate 8 from https://gate.ac.uk/download/ (binary-only package).
 
 Install memcached (Debian: apt-get memcached).
 
-You can download required datasets manually or use the Downloader module (see installation steps). If you want to download datasets manually, you will find all in the DBpedia homepage:
+You can download the required datasets manually or using the Downloader module (see installation steps). If you want to download datasets manually, you will find them at the DBpedia homepage:
 + Download DBpedia **Mapping-based Types dataset**, **Mapping-based Types transitive dataset**, **Disambiguations dataset** and **Short Abstracts dataset** for the set language from http://wiki.dbpedia.org/Downloads to the dataset directory. Datasets must be unzipped; having .nt suffix.
 + Download **English Inter-Language Links dataset**, **English Mapping-based Types dataset** and **English Mapping-based Types transitive dataset** from http://wiki.dbpedia.org/Downloads to the dataset directory (the datasets must be unzipped).
 + Download **DBpedia Ontology (owl)** from http://wiki.dbpedia.org/Downloads and unzip it to the dataset directory.
 
-For a non-English language you have to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the gate directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and be targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory).
+For other languages than English you need to download TreeTagger from http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/ and install it. There is a special file in the GATE directory plugins/Tagger_Framework/resources/TreeTagger/tree-tagger-LANG-gate which must be specified and targeted to the installed TreeTagger application (this file is generated during the TreeTagger installation step in the cmd/ directory).
 
 + tree-tagger-german-gate (for German)
 + tree-tagger-dutch-gate (for Dutch)
@@ -134,13 +134,13 @@ $TAGGER $OPTIONS $PARFILE
 
 ##Getting started
 
-Before starting of the extraction process, the config file should be specified, see Installation and Modules paragraphs.
+Before starting the extraction process, the config file should be specified, see Installation and Modules paragraphs.
 
-It is possible to use a shell script "run-all.sh" for starting of all processes which are needed to generate LHD dataset. This script fetches the current version of LHD extraction framework by the git command, install it by the maven command, download required datasets, remove old output files and launch the extraction process. This process can take several days therefore it should be run as a background process:
+It is possible to use a shell script "run-all.sh" for starting all processes which are needed to generate the LHD dataset. This script fetches the current version of the LHD extraction framework by the git command, installs it with the maven command, downloads the required datasets, removes old output files and launches the extraction process. This process can take several days therefore it should be run as a background process:
 
     ./run-all.sh ../application.LANG.conf > output.log 2>&1 &
 
-Or you can use the Pipeline module where all computational processes are integrated. Go to the Pipeline directory and run all with one maven command (this module doesn't involve any datasets download step; so download datasets manually or by using the download module):
+Or you can use the Pipeline module where all the computational processes are integrated. Go to the Pipeline directory and run all with one maven command (this module doesn't involve the dataset download step; so download datasets manually or by using the download module):
 
     mvn scala:run -DaddArgs="../application.LANG.conf|<skipped-tasks>|<remove-all>" > output.log 2>&1 &
 
