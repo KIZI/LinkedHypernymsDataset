@@ -43,7 +43,7 @@ class DatasetDownloaderDe(version: String) extends DatasetDownloader {
 
   def datasetToUrl(targetName: String, dataset: Dataset): URL = {
     val nameWithPrefix = if (langDatasets.containsKey(targetName)) {
-      urlBaseDe + lastDump + "/" + "dewiki-" + lastDump + "-" + langDatasets(dataset.name)
+      urlBaseDe + lastDump + "/" + "dewiki-" + lastDump + "-" + dataset.name
     } else if (enDatasets.containsKey(targetName)) {
       urlBaseEn + dataset.name
     } else {
