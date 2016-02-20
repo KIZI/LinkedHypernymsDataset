@@ -1,52 +1,56 @@
 package cz.vse.lhd.downloader
 
-import java.io.File
 import java.net.URL
-import org.jsoup.Jsoup
+
 import cz.vse.lhd.core.AnyToInt
+import cz.vse.lhd.downloader.DatasetDownloader._
+import org.jsoup.Jsoup
+
+import scala.collection.JavaConversions._
 
 class DatasetDownloaderDe(version: String) extends DatasetDownloader {
 
   this: FileDownloader =>
 
-  val urlBase = s"http://data.dws.informatik.uni-mannheim.de/dbpedia/$version/"
-  val urlBaseDe = "http://de.dbpedia.org/downloads/"
-  val filePatterns = List(
-    "short-abstracts.nt.gz" -> "short_abstracts_de.nt",
-    "disambiguations.nt.gz" -> "disambiguations_de.nt",
-    "instance-types.nt.gz" -> "instance_types_de.nt")
-  val urlBaseEn = urlBase + "en/"
-  val enFiles = (Set("instance_types_en.nt.bz2", "interlanguage_links_en.nt.bz2") map (urlBaseEn + _)) + (urlBase + s"dbpedia_$version.owl.bz2")
-  val datasetsStrDir = Downloader.Conf.datasetsDir
+  def urlBaseEn = Downloader.Conf.downloadBaseUrl + "en/"
 
-  def download = {
-    import scala.collection.JavaConversions._
-    val lastDump = Jsoup
-      .connect(urlBaseDe)
-      .get
-      .select("a")
-      .map(_.attr("href").stripSuffix("/"))
-      .collect { case AnyToInt(x) if x > 0 => x }
-      .max
-    val urlBaseCurrentDe = urlBaseDe + lastDump + "/"
-    for {
-      (sFile, tFile) <- filePatterns
-      sourceFile = s"dewiki-$lastDump-$sFile"
-      targetFile = new File(datasetsStrDir + tFile)
-    } {
-      try {
-        downloadFile(new URL(urlBaseCurrentDe + sourceFile), targetFile, GZ)
-      } catch {
-        case e: java.io.FileNotFoundException => downloadFile(new URL(urlBaseDe + sourceFile), targetFile, GZ)
-      }
+  val urlBaseDe = "http://de.dbpedia.org/downloads/"
+
+  val langDatasets = Map(
+    "short_abstracts_de" -> "short-abstracts",
+    "disambiguations_de" -> "disambiguations-unredirected",
+    "instance_types_de" -> "instance-types",
+    "instance_types_transitive_de" -> "instance-types-transitive"
+  )
+
+  val enDatasets = Map(
+    "instance_types_en" -> "instance(_|-)types_en",
+    "instance_types_transitive_en" -> "instance(_|-)types(_|-)transitive_en",
+    "interlanguage_links_en" -> "interlanguage(_|-)links_en"
+  )
+
+  val ontology = s"dbpedia_$version" -> s"(dbpedia_$version|ontology)"
+
+  lazy val lastDump = Jsoup
+    .connect(urlBaseDe)
+    .get
+    .select("a")
+    .map(_.attr("href").stripSuffix("/"))
+    .collect { case AnyToInt(x) if x > 0 => x }
+    .max
+
+  def datasetPatterns: Map[String, DatasetPattern] = ((langDatasets ++ enDatasets) map (x => x._1 -> DatasetPattern(x._2, datasetFormats, compressions))) + (ontology._1 -> DatasetPattern(ontology._2, ontologyFormats, compressions))
+
+  def datasetToUrl(targetName: String, dataset: Dataset): URL = {
+    val nameWithPrefix = if (langDatasets.containsKey(targetName)) {
+      urlBaseDe + lastDump + "/" + "dewiki-" + lastDump + "-" + langDatasets(dataset.name)
+    } else if (enDatasets.containsKey(targetName)) {
+      urlBaseEn + dataset.name
+    } else {
+      Downloader.Conf.ontologyBaseUrl + dataset.name
     }
-    for {
-      file <- enFiles
-      strFile = file.replaceAll(".*/", "").stripSuffix(".bz2")
-      fileFile = new File(datasetsStrDir + strFile)
-    } {
-      downloadFile(new URL(file), fileFile, BZ2)
-    }
+    new URL(nameWithPrefix + "." + dataset.format.fileExtension + dataset.compression.map("." + _.fileExtension).getOrElse(""))
   }
+
 
 }
