@@ -22,12 +22,18 @@ object Pipeline extends AppConf {
 
   val removeAll = liftedArgs.apply(2).orElse(liftedArgs.apply(1)).exists(_ == "remove-all")
 
+  val outputDir = new File(Conf.outputDir)
+  if (removeAll && outputDir.isDirectory) {
+    logger.info("The output directory is cleaning...")
+    FileUtils.cleanDirectory(outputDir)
+  }
+
   val tasks = List(
     new HypernymExtractorIndexTask with TaskId with FileTaskCompleted {
       val id: Char = 'x'
       val taskGroup: String = "hypernym-extractor"
     },
-    new HypernymExtractorIndexTask with TaskId with FileTaskCompleted {
+    new HypernymExtractorTask with TaskId with FileTaskCompleted {
       val id: Char = 'e'
       val taskGroup: String = "hypernym-extractor"
     },
@@ -55,12 +61,6 @@ object Pipeline extends AppConf {
 
   logger.info("Skipped tasks: " + skipped)
 
-  val outputDir = new File(Conf.outputDir)
-  if (removeAll && outputDir.isDirectory) {
-    logger.info("The output directory is cleaning...")
-    FileUtils.cleanDirectory(outputDir)
-  }
-
   for (task <- tasks) {
     logger.info("This task will be performed: " + getTaskName(task))
   }
@@ -70,7 +70,6 @@ object Pipeline extends AppConf {
     task.run()
     if (!"xyz".contains(task.id))
       task.completed(true)
-
   }
 
   def getTaskName(taskId: TaskId) = taskId.id match {
