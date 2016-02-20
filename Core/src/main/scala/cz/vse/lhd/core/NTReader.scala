@@ -41,7 +41,7 @@ object NTReader {
     model.listStatements.asScala map { stmt =>
       val subject = stmt.getSubject.getURI
       model.createStatement(
-        model.createResource(Try(URLDecoder.decode(subject, "UTF-8")).getOrElse(subject)),
+        model.createResource(Try(URLDecoder.decode(subject.replace("+", "%2B"), "UTF-8")).getOrElse(subject)),
         model.createProperty(stmt.getPredicate.getURI),
         stmt.getObject
       )
