@@ -51,7 +51,7 @@ object RunDefaultPipeline extends AppConf {
     for (start <- parRange) retry(10) {
       val command = s"""-q scala:run -Dlauncher=runner -DaddArgs="${Conf.globalPropertiesFile}|$start|${Conf.corpusSizePerThread}" """.trim
       logger.info(s"Start command: $mvn $command")
-      val exitCode = Process(s"$mvn $command").!
+      val exitCode = Process(s"$mvn $command", new File("../HypernymExtractor")).!
       logger.info(s"$mvn $command: has been finished with code: $exitCode")
       if (exitCode == 1) {
         logger.warn(s"Error of command: $mvn $command ; now try to process it again")
