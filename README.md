@@ -136,7 +136,7 @@ $TAGGER $OPTIONS $PARFILE
 
 Before starting of the extraction process, the config file should be specified, see Installation and Modules paragraphs.
 
-It is possible to use a shell script "run-all.sh" for starting of all processes which are needed to generate LHD dataset. This script fetches the current version of LHD extraction framework by the git command, install it by the maven command, download required datasets, remove old output files and launch the extraction process. This process can take several days therefore it should be run as a background process:
+It is possible to use a shell script "run-all.sh" for starting of all processes which are needed to generate LHD dataset. This script fetches the current version of LHD extraction framework by the git command, installs it by the maven command, downloads required datasets, removes old output files and launches the extraction process. This process can take several days therefore it should be run as a background process:
 
     ./run-all.sh ../application.LANG.conf > output.log 2>&1 &
 
@@ -150,7 +150,7 @@ Within this command you can use some optional parameters:
 ```
 mvn scala:run -DaddArgs="../application.LANG.conf|remove-all"
 ```
-  * **skipped-tasks**: there are special flags which can be used for skipping of some extraction tasks. Within this option you can use any combination of these flags.
+  * **skipped-tasks**: there are some special flags which can be used for skipping of some extraction tasks. Within this option you can use any combination of these flags.
     * x: Skip the indexing task of the hypernym extraction process
     * e: Skip the hypernym extraction process
     * y: Skip the indexing task of the ontology cleanup
