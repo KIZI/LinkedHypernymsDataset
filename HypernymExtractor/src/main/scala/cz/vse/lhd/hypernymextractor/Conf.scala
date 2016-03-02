@@ -57,7 +57,7 @@ object Conf extends ConfGlobal {
     for (of <- List(Conf.outputDir, Conf.indexDir).map(new File(_)) if !of.isDirectory) {
       of.mkdirs
     }
-    val conn = new URL(wikiApi).openConnection.asInstanceOf[HttpURLConnection]
+    val conn = new URL(wikiApi + "api.php").openConnection.asInstanceOf[HttpURLConnection]
     try {
       conn.connect()
       if (conn.getResponseCode != HttpURLConnection.HTTP_OK)
