@@ -182,10 +182,10 @@ LHD {
   output.dir = "../data/output"                                            # the output directory where all output files will be saved
   datasets.dir = "../data/datasets"                                        # the dataset directory
   lang = "en"                                                              # a set language (en|de|nl)
-  dbpedia.version = "2014"                                                 # DBpedia version
+  dbpedia.version = "2015-10"                                              # DBpedia version
   HypernymExtractor {
       index-dir = "../data/index"                                          # path to the directory where indexed datasets
-      wiki-api = "http://en.wikipedia.org/w/"                              # Wiki Search API URL. You can use your own mirror located in your localhost which is not limited, or use the original API (en: http://en.wikipedia.org/w/, de: http://de.wikipedia.org/w/, nl: http://nl.wikipedia.org/w/)
+      wiki-api = "https://en.wikipedia.org/w/"                             # Wiki Search API URL. You can use your own mirror located in your localhost which is not limited, or use the original API (en: https://en.wikipedia.org/w/, de: https://de.wikipedia.org/w/, nl: https://nl.wikipedia.org/w/)
       gate {                  
           dir = "../utils/gate-8.0-build4825"                              # path to the Gate root directory (binary package)
           plugin-lhd-dir = "../HypernymExtractor/target/gateplugin"        # path to the compiled HypernymExtractor plugin for Gate. You needn't specify this path - don't change it!
@@ -207,12 +207,16 @@ LHD {
       }
   }
   TypeInferrer {
-     index-dir = "../data/index"
+     index-dir = "../data/index"                                           # path to the directory where datasets will be indexed
+  }
+  Downloader {
+        base-url = "http://downloads.dbpedia.org/2015-10/core-i18n/"       # base url where dbpedia datasets are placed
+        ontology-dir = "../"                                               # a relative path from the base-url to a directory where the dbpedia ontology is placed
   }
 }
 ```
 
-If there are no downloaded datasets in your local computer you can use the Downloader module. Go to the Downloader module folder and type this command (all required datasets will be downloaded to the datasets directory):
+If there are no downloaded datasets in your local computer you can use the Downloader module. Go to the Downloader module folder and type this command (all required datasets will be downloaded to the datasets directory and be normalized - we recommend to use this function instead of the manual downloading):
 
     mvn scala:run -DaddArgs=../application.LANG.conf
 
