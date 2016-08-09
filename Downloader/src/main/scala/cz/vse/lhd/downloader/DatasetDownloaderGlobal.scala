@@ -2,16 +2,16 @@ package cz.vse.lhd.downloader
 
 import java.net.URL
 
-class DatasetDownloaderGlobal(version: String) extends DatasetDownloader {
+class DatasetDownloaderGlobal(confData: Downloader.Conf.AutoConfData) extends DatasetAutoDownloader {
 
   this: FileDownloader =>
 
-  import DatasetDownloader._
+  import DatasetAutoDownloader._
   import Downloader.Conf._
 
-  def urlBaseLang = Downloader.Conf.downloadBaseUrl + Downloader.Conf.lang + "/"
+  def urlBaseLang = confData.downloadBaseUrl + Downloader.Conf.lang + "/"
 
-  def urlBaseEn = Downloader.Conf.downloadBaseUrl + "en/"
+  def urlBaseEn = confData.downloadBaseUrl + "en/"
 
   val langDatasets = Map(
     s"disambiguations_$lang" -> s"disambiguations_$lang",
@@ -26,7 +26,7 @@ class DatasetDownloaderGlobal(version: String) extends DatasetDownloader {
     "interlanguage_links_en" -> "interlanguage(_|-)links_en"
   )
 
-  val ontology = s"dbpedia_$version" -> s"(dbpedia_$version|ontology)"
+  val ontology = s"dbpedia_${confData.version}" -> s"(dbpedia_${confData.version}|ontology)"
 
   def datasetPatterns: Map[String, DatasetPattern] = ((langDatasets ++ enDatasets) map (x => x._1 -> DatasetPattern(x._2, datasetFormats, compressions))) + (ontology._1 -> DatasetPattern(ontology._2, ontologyFormats, compressions))
 
@@ -36,7 +36,7 @@ class DatasetDownloaderGlobal(version: String) extends DatasetDownloader {
     } else if (enDatasets.contains(targetName)) {
       urlBaseEn
     } else {
-      Downloader.Conf.ontologyBaseUrl
+      confData.ontologyBaseUrl
     }
     new URL(prefix + dataset.name + "." + dataset.format.fileExtension + dataset.compression.map("." + _.fileExtension).getOrElse(""))
   }

@@ -15,9 +15,37 @@ object Downloader extends AppConf {
   val logger = LoggerFactory.getLogger(getClass)
 
   object Conf extends ConfGlobal {
+
+    sealed trait ConfData
+
+    case class AutoConfData(downloadBaseUrl: String, ontologyBaseUrl: String, version: String) extends ConfData
+
+    case class ManualConfData(ontology: String,
+                              instanceTypes: String,
+                              instanceTypesEn: String,
+                              instanceTypesTransitive: String,
+                              instanceTypesTransitiveEn: String,
+                              interlanguageLinksEn: String,
+                              disambiguations: String,
+                              shortAbstracts: String) extends ConfData
+
     val globalPropertiesFile = AppConf.args(0)
-    lazy val downloadBaseUrl = config.get[String]("LHD.Downloader.base-url") /: Dir
-    lazy val ontologyBaseUrl = downloadBaseUrl + config.get[String]("LHD.Downloader.ontology-dir") /: Dir
+
+    lazy val confData = if (config.opt[Boolean]("LHD.Downloader.manual").exists(_ == true)) {
+      ManualConfData(
+        config.get[String]("LHD.Downloader.ontology-url"),
+        config.get[String]("LHD.Downloader.instance-types-url"),
+        config.get[String]("LHD.Downloader.instance-types-en-url"),
+        config.get[String]("LHD.Downloader.instance-types-transitive-url"),
+        config.get[String]("LHD.Downloader.instance-types-transitive-en-url"),
+        config.get[String]("LHD.Downloader.interlanguage-links-en-url"),
+        config.get[String]("LHD.Downloader.disambiguations-url"),
+        config.get[String]("LHD.Downloader.short-abstracts-url")
+      )
+    } else {
+      val downloadBaseUrl = config.get[String]("LHD.Downloader.base-url") /: Dir
+      AutoConfData(downloadBaseUrl, downloadBaseUrl + config.get[String]("LHD.Downloader.ontology-dir") /: Dir, dbpediaVersion)
+    }
   }
 
   val datasetDownloader = {
@@ -77,10 +105,11 @@ object Downloader extends AppConf {
       }
     }
 
-    if (Conf.lang == "de")
-      new DatasetDownloaderDe(Conf.dbpediaVersion) with FileDownloaderImpl
-    else
-      new DatasetDownloaderGlobal(Conf.dbpediaVersion) with FileDownloaderImpl
+    Conf.confData match {
+      case confData: Conf.AutoConfData => if (Conf.lang == "de") new DatasetDownloaderDe(confData) with FileDownloaderImpl else new DatasetDownloaderGlobal(confData) with FileDownloaderImpl
+      case confData: Conf.ManualConfData => new DatasetDownloaderManual(confData) with FileDownloaderImpl
+    }
+
   }
 
   datasetDownloader.download()
