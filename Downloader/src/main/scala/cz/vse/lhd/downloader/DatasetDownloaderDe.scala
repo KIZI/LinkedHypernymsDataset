@@ -3,16 +3,16 @@ package cz.vse.lhd.downloader
 import java.net.URL
 
 import cz.vse.lhd.core.AnyToInt
-import cz.vse.lhd.downloader.DatasetDownloader._
+import cz.vse.lhd.downloader.DatasetAutoDownloader._
 import org.jsoup.Jsoup
 
 import scala.collection.JavaConversions._
 
-class DatasetDownloaderDe(version: String) extends DatasetDownloader {
+class DatasetDownloaderDe(confData: Downloader.Conf.AutoConfData) extends DatasetAutoDownloader {
 
   this: FileDownloader =>
 
-  def urlBaseEn = Downloader.Conf.downloadBaseUrl + "en/"
+  def urlBaseEn = confData.downloadBaseUrl + "en/"
 
   val urlBaseDe = "http://de.dbpedia.org/downloads/"
 
@@ -29,7 +29,7 @@ class DatasetDownloaderDe(version: String) extends DatasetDownloader {
     "interlanguage_links_en" -> "interlanguage(_|-)links_en"
   )
 
-  val ontology = s"dbpedia_$version" -> s"(dbpedia_$version|ontology)"
+  val ontology = s"dbpedia_${confData.version}" -> s"(dbpedia_${confData.version}|ontology)"
 
   lazy val lastDump = Jsoup
     .connect(urlBaseDe)
@@ -47,7 +47,7 @@ class DatasetDownloaderDe(version: String) extends DatasetDownloader {
     } else if (enDatasets.containsKey(targetName)) {
       urlBaseEn + dataset.name
     } else {
-      Downloader.Conf.ontologyBaseUrl + dataset.name
+      confData.ontologyBaseUrl + dataset.name
     }
     new URL(nameWithPrefix + "." + dataset.format.fileExtension + dataset.compression.map("." + _.fileExtension).getOrElse(""))
   }

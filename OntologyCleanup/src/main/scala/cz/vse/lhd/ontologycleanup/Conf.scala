@@ -31,7 +31,7 @@ object Conf extends ConfGlobal {
     s"${Conf.datasetsDir}instance_types_transitive_$lang.nt",
     s"${Conf.datasetsDir}instance_types_en.nt",
     s"${Conf.datasetsDir}instance_types_transitive_en.nt",
-    s"${Conf.datasetsDir}dbpedia_${Conf.dbpediaVersion}.owl",
+    s"${Conf.datasetsDir}dbpedia.owl",
     s"${Conf.datasetsDir}interlanguage_links_en.nt"
     )
 
