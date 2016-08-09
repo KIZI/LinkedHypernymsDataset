@@ -23,8 +23,8 @@ class DatasetDownloaderManual(confData: Downloader.Conf.ManualConfData) extends 
   private def datasets: Map[String, Dataset] = Map(
     "short_abstracts_" + Downloader.Conf.lang -> confData.shortAbstracts,
     "disambiguations_" + Downloader.Conf.lang -> confData.disambiguations,
-    "instance_types" + Downloader.Conf.lang -> confData.instanceTypes,
-    "instance_types_transitive" + Downloader.Conf.lang -> confData.instanceTypesTransitive,
+    "instance_types_" + Downloader.Conf.lang -> confData.instanceTypes,
+    "instance_types_transitive_" + Downloader.Conf.lang -> confData.instanceTypesTransitive,
     "instance_types_en" -> confData.instanceTypesEn,
     "instance_types_transitive_en" -> confData.instanceTypesTransitiveEn,
     "interlanguage_links_en" -> confData.interlanguageLinksEn,
