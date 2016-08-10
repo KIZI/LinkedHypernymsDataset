@@ -159,7 +159,7 @@ mvn scala:run -DaddArgs="../application.LANG.conf|remove-all"
     * y: Skip the STI processing (Statistical Type Inferrence)
     * f: Skip the final datasets making tasks (this task aggregates outputs from all modules)
 ```
-mvn scala:run -DaddArgs="../application.LANG.conf|xe"    # run all tasks except the hypernym extraction process with indexing
+mvn scala:run -DaddArgs="../application.LANG.conf|-xe"    # run all tasks except the hypernym extraction process with indexing
 ```
 
 If some task fails then the process will continue where it left off after restart, unless you use "remove-all" parameter.
