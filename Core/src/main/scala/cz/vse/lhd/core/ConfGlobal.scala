@@ -32,7 +32,7 @@ trait ConfGlobal {
 
   val globalPropertiesFile: String
 
-  protected lazy val config = new EnrichTypesafeConfig(ConfigFactory.parseFile(new File(globalPropertiesFile)))
+  protected lazy val config = new EnrichTypesafeConfig(ConfigFactory.parseFile(new File(globalPropertiesFile)).resolve())
 
   lazy val (
     outputDir,
