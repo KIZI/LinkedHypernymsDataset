@@ -27,6 +27,8 @@ cd ..
 
 export LHD_DBPEDIA_VERSION=$2
 
+service memcached start
+
 (cd Downloader; mvn scala:run -DaddArgs=../application.$1.conf) || failure "Failed to download all datasets"
 
 (cd Pipeline; mvn scala:run -DaddArgs="../application.$1.conf|remove-all") || failure "LHD Generation Failed"

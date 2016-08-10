@@ -12,9 +12,9 @@ RUN echo 'deb http://http.debian.net/debian jessie-backports main' >> /etc/apt/s
 RUN git clone https://github.com/KIZI/LinkedHypernymsDataset.git && \
     mkdir LinkedHypernymsDataset/utils
     
-WORKDIR /LinkedHypernymsDataset
+WORKDIR LinkedHypernymsDataset
 
-RUN cd utils
+RUN cd utils && \
     wget http://netassist.dl.sourceforge.net/project/gate/gate/8.0/gate-8.0-build4825-BIN.zip && \
     unzip gate-8.0-build4825-BIN.zip && \
     rm gate-8.0-build4825-BIN.zip && \
@@ -29,7 +29,7 @@ RUN cd utils
     cd treetagger && \
     ./install-tagger.sh
     
-ADD tree-tagger-* utils/gate-8.0-build4825-BIN/plugins/Tagger_Framework/resources/TreeTagger
+ADD tree-tagger-* utils/gate-8.0-build4825-BIN/plugins/Tagger_Framework/resources/TreeTagger/
 ADD application.* ./
 ADD start.sh ./
 
