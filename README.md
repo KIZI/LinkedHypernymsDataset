@@ -132,6 +132,10 @@ $TOKENIZER -a $ABBR_LIST $* |
 $TAGGER $OPTIONS $PARFILE
 ```
 
+### Docker
+
+You can also use a docker build script for the creation of a docker image containing the current LHD extraction framework with all required dependencies and then to run an extraction process by one docker RUN command. See the [docker directory](docker)
+
 ##Getting started
 
 Before starting the extraction process, the config file should be specified, see Installation and Modules paragraphs.
