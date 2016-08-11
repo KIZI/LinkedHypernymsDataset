@@ -38,9 +38,9 @@ The output directory will be copied to your local disk. It contains basic LHD da
 See docs - [result section](https://github.com/KIZI/LinkedHypernymsDataset#results). With regard to this you may prefer these copying commands (*\<lang\>* is a selected language and *\<version\>* is a used dbpedia version):
 
 ```
-docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.core.<version>.nt ./<lang>.lhd.core.<version>.nt
-docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.raw.<version>.nt ./<lang>.lhd.raw.<version>.nt
-docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.extension.<version>.nt ./<lang>.lhd.extension.<version>.nt
-docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.inference.<version>.nt ./<lang>.lhd.inference.<version>.nt
+docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.core.<version>.nt ./
+docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.raw.<version>.nt ./
+docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.extension.<version>.nt ./
+docker cp lhd:/root/LinkedHypernymsDataset/data/output/<lang>.lhd.inference.<version>.nt ./
 ```
 
