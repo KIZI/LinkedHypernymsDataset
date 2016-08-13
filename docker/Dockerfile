@@ -1,5 +1,6 @@
-# docker build -t lhd https://github.com/KIZI/LinkedHypernymsDataset.git#:docker
-# docker run --name lhd --env-file <path-to-env-vars-file> lhd <language(en|de|nl)> <dbpedia-version>
+# docker build -t lhd:latest https://github.com/KIZI/LinkedHypernymsDataset.git#:docker
+# docker run --name lhd -d --env-file <path-to-env-vars-file> lhd <language(en|de|nl)> <dbpedia-version>
+# docker cp lhd:/root/LinkedHypernymsDataset/data/output ./
 
 FROM debian:jessie
 
