@@ -136,7 +136,7 @@ $TAGGER $OPTIONS $PARFILE
 
 You can also use a docker build script for the creation of a docker image containing the current LHD extraction framework with all required dependencies and then to run an extraction process by one docker RUN command. See the [docker directory](docker)
 
-##Getting started
+## Getting started
 
 Before starting the extraction process, the config file should be specified, see Installation and Modules paragraphs.
 
@@ -170,7 +170,7 @@ If some task fails then the process will continue where it left off after restar
 
 Moreover you can launch the extraction process step by step. See following paragraphs.
 
-##Installation
+## Installation
 
 Go to the root directory and type these Maven commands:
 
@@ -224,7 +224,7 @@ If there are no downloaded datasets in your local computer you can use the Downl
 
     mvn scala:run -DaddArgs=../application.LANG.conf
 
-##1. HypernymExtractor module
+## 1. HypernymExtractor module
 
 This module extracts hypernyms from DBpedia resources with an abstract and saves them to the temporary file. Any hypernym is derived from a first sentence of a DBpedia resource short abstract and is represented by one word. Subsequently, the hypernym word is mapped to a DBpedia resource based on the first hit returned by Wikipedia Search API. The extraction process uses following Gate plugins:
 
@@ -244,7 +244,7 @@ Note: The extraction process will be started in parallel, where each thread is j
 
     mvn scala:run -DaddArgs="../application.LANG.conf|10000|10000"       -- this command handles all resources from 10000 to 20000
 
-##2. OntologyCleanup module
+## 2. OntologyCleanup module
 
 This module loads results of the HypernymExtractor module where a DBpedia resource type is represented by another DBpedia resource and tries to clean and map it to a DBpedia ontology type. It is achieved by a naive ontology mapping algorithm. For each entity-linked hypernym pair, the algorithm tries to ﬁnd a DBpedia Ontology concept based on a textual match.
 
@@ -254,7 +254,7 @@ Before starting the mapping process, check the OntologyCleanup section in the ma
     mvn scala:run -DaddArgs="../application.LANG.conf" 
 
 
-##3. TypeInferrer module
+## 3. TypeInferrer module
 
 TypeInferrer module tries to infer a DBpedia ontology type from a DBpedia resource by the STI algorithm (Statistical Type Inference).
 
@@ -263,11 +263,11 @@ Before starting the inferring process, check the TypeInferrer section in the mai
     mvn scala:run -DaddArgs="../application.LANG.conf|index"
     mvn scala:run -DaddArgs=../application.LANG.conf 
 
-##Results
+## Results
 
 After the Pipeline module successfully finished its work you should see four basic datasets in the output directory: core, inference, extension and raw. Notice that the Pipeline module runs all required LHD modules sequentially for the final datasets generation.
 
-###Core
+### Core
 
 The dataset contains types of all DBpedia resources represented by a DBpedia ontology type. If any textual match of a DBpedia resource is found in the DBpedia ontology, this DBpedia resource will be mapped to a DBpedia ontology type. This dataset contains most accurate and specific ontology types. For example:
 
@@ -276,7 +276,7 @@ The dataset contains types of all DBpedia resources represented by a DBpedia ont
     # there is some textual match for the Country resource in the DBpedia ontology. It is mapped! 
     <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
 
-###Inference (STI algorithm)
+### Inference (STI algorithm)
 
 In this dataset, all hypernyms which have a form as a dbpedia resource are assigned to a DBpedia ontology type by the STI algorithm. This dataset is not so accurate and specific like the Core dataset, but it is larger because it tries to map all resources with some extracted hypernym to DBpedia ontology types. For example:
 
@@ -288,13 +288,13 @@ In this dataset, all hypernyms which have a form as a dbpedia resource are assig
     <http://dbpedia.org/resource/Chile> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Country> .
     
     
-###Extension
+### Extension
 
 Resources have assigned a hypernym which was extracted from the HypernymExtractor module and mapped to some DBpedia resource.
 
     <http://dbpedia.org/resource/Angela_Merkel> <http://purl.org/linguistics/gold/hypernym> <http://dbpedia.org/resource/Politician> .
 
-###Raw
+### Raw
 
 This dataset contains hypernyms in the plain-text form. Example:
 
