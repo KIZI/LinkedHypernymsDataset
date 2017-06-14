@@ -6,7 +6,7 @@ A docker image of the current LHD extraction framework with all required depende
 
 After the docker image has been successfully built, you can use the image for running of an extraction process by this command:
 
-```docker run --name lhd -d --env-file <path-to-env-vars-file> lhd <language(en|de|nl)> <dbpedia-version>```
+```docker run --name lhd -d [-v </path/to/host/output>:/root/LinkedHypernymsDataset/data/output] --env-file <path-to-env-vars-file> lhd <language(en|de|nl)> <dbpedia-version>```
 
 * __\<path-to-env-vars-file\>__ is a path to a file which contains required environment variables. The variables should contain URL links to DBpedia datasets that are required at the input. Supported dataset formats are N-Triples (.nt) and Turtle (.ttl) which may be compressed by GZIP (.gz) or BZIP2 (.bz2).
   * LHD_ONTOLOGY_URL=http://path/to/dbpedia.owl(.bz2|.gz)?
@@ -24,7 +24,11 @@ Example:
 
 ```docker run --name lhd -d --env-file examples/datasets_de lhd en 2016-04```
 
-After running an LHD docker container from the image, the extraction process is being in progress. It can take several hours or days - it depends on the number of available cores and the size of input datasets. After the completion of the extraction process, the docker container will contain all linked hypernym datasets for the selected language that are placed in the data/output directory. It only remains to copy datasets from the container to your local disk for other purposes:
+or
+
+```docker run --name lhd -d -v /tmp/output:/root/LinkedHypernymsDataset/data/output --env-file examples/datasets_de lhd en 2016-04```
+
+After running an LHD docker container from the image, the extraction process is being in progress. It can take several hours or days - it depends on the number of available cores and the size of input datasets. After the completion of the extraction process, the docker container will contain all linked hypernym datasets for the selected language that are placed in the data/output directory. It only remains to copy datasets from the container to your local disk for other purposes (you can specify mounting of this directory to the host by volume settings):
 
 ```docker cp lhd:/root/LinkedHypernymsDataset/data/output ./```
 
