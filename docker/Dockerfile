@@ -10,10 +10,12 @@ WORKDIR /root
 
 RUN echo 'deb http://http.debian.net/debian jessie-backports main' >> /etc/apt/sources.list && \
     apt-get update && \
-    apt-get install -y openjdk-8-jdk git curl maven wget unzip memcached && \
+    apt-get install -y -t jessie-backports openjdk-8-jdk && \
+    apt-get install -y git curl maven wget unzip memcached && \
     update-alternatives --set java /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
     
 RUN git clone https://github.com/KIZI/LinkedHypernymsDataset.git && \
+    mkdir LinkedHypernymsDataset/data/output && \
     mkdir LinkedHypernymsDataset/utils
     
 WORKDIR LinkedHypernymsDataset
@@ -40,5 +42,7 @@ ADD start.sh ./
 RUN chmod 755 utils/gate-8.0-build4825-BIN/plugins/Tagger_Framework/resources/TreeTagger/* && \
     chmod 755 start.sh && \
     mvn install
+    
+VOLUME ["/root/LinkedHypernymsDataset/data/output"]
 
 ENTRYPOINT ["./start.sh"]
