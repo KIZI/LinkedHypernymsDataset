@@ -22,11 +22,11 @@ After the docker image has been successfully built, you can use the image for ru
 
 Example:
 
-```docker run --name lhd -d --env-file examples/datasets_de lhd en 2016-04```
+```docker run --name lhd -d --env-file examples/datasets_en lhd en 2015-10```
 
 or
 
-```docker run --name lhd -d -v /tmp/output:/root/LinkedHypernymsDataset/data/output --env-file examples/datasets_de lhd en 2016-04```
+```docker run --name lhd -d -v /tmp/output:/root/LinkedHypernymsDataset/data/output --env-file examples/datasets_en lhd en 2015-10```
 
 After running an LHD docker container from the image, the extraction process is being in progress. It can take several hours or days - it depends on the number of available cores and the size of input datasets. After the completion of the extraction process, the docker container will contain all linked hypernym datasets for the selected language that are placed in the data/output directory. It only remains to copy datasets from the container to your local disk for other purposes (you can specify mounting of this directory to the host by volume settings):
 
