@@ -43,7 +43,7 @@ class CorpusBuilderPR2 extends CorpusBuilderPR {
         disambiguations.search { searcher =>
           implicit val isDisambiaguation = (resource: String) => {
             val isDisamb = searcher(resource).nonEmpty
-            if (isDisamb) logger.debug(s"Resource $resource is disambiguation page")
+            //if (isDisamb) logger.debug(s"Resource $resource is disambiguation page")
             isDisamb
           }
           val outputFilePath = Conf.outputDir + s"/${Conf.Output.hypoutName}.$start-$end.${Conf.Output.hypoutLogSuffix}"
